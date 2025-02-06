@@ -144,9 +144,14 @@ const evaluationschema = z
       .optional()
       .default([]),
 
-    Archivo: z.array(z.instanceof(File)).refine((files) => files.length > 0, {
-      message: "Debes seleccionar al menos un archivo.",
-    }),
+    // Archivo: z.array(z.instanceof(File)).refine((files) => files.length > 0, {
+    //   message: "Debes seleccionar al menos un archivo.",
+    // }),
+    Archivo: z.array(
+      z.any().refine((file) => file instanceof File, {
+        message: "Debes seleccionar al menos un archivo.",
+      })
+    ),
   })
   .refine(
     (data) => {
