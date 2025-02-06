@@ -1,0 +1,63 @@
+{
+  "ReportOptions": [
+    {
+      "title": "Reporte de polines",
+      "href": "/pages/reports/polines",
+      "description": "Inspección visual y reporte de cambio de polines."
+    },
+    {
+      "title": "Reporte de filtors",
+      "href": "/pages/reports/filtro",
+      "description": "Reporte de cambio de componentes del filtro."
+    },
+    {
+      "title": "Reporte de Backlog",
+      "href": "/pages/reports/backlog",
+      "description": "Reporte de avisos de mantenimiento hacia los supervisores de planta, para que estos puedan validar y generar la OT correspondiente."
+    },
+    {
+      "title": "Reporte de andamios",
+      "href": "/pages/reports/andamios",
+      "description": "Monitoreo control y reporte de los andamios del contrato permanente."
+    },
+    {
+      "title": "Reporte de indicadores",
+      "href": "/page/reports/indicadores",
+      "description": "Carga de información de SAP para generar los indicadores semanales de cumplimiento."
+    }
+  ],
+  "CostsOptions": [
+    {
+      "title": "Carga de datos",
+      "href": "/pages/costs/loadfile",
+      "description": "Carga de datos de costos a la nube."
+    },
+    {
+      "title": "Costos de Mantenimiento Planta",
+      "href": "/pages/costs/maintenance/plant",
+      "description": "Reporte de costos de Mantenimiento Planta."
+    },
+    {
+      "title": "Carga de provisiones",
+      "href": "/pages/costs/loadfileProvisiones",
+      "description": "Carga de información de provisiones."
+    },
+    {
+      "title": "Dashboard",
+      "href": "/pages/dashboard/costs/plant",
+      "description": "Reporte de costos."
+    }
+  ],
+  "Dashboard": [
+    {
+      "title": "Dashboard Costo Planta",
+      "href": "/pages/dashboard/costs/plant",
+      "description": "Reporte de costos."
+    },
+    {
+      "title": "Dashboard de Indicadores de Mantenimiento Planta",
+      "href": "/pages/dashboard/indicators/plant",
+      "description": "Reporte de costos de Mantenimiento Planta."
+    }
+  ]
+}
