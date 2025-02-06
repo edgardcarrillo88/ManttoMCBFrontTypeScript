@@ -358,120 +358,120 @@ type ChartLineMultipleProps = {
 //   );
 // }
 
-export function ChartLIneInteractive({
-  LineaBase,
-  LineaReal,
-}: ChartLineMultipleProps) {
-  const [activeChart, setActiveChart] =
-    React.useState<keyof typeof chartConfig>("LineaBaseReal");
-  const [LineChartActive, setLineChartActive] = useState(LineaBase);
+// export function ChartLIneInteractive({
+//   LineaBase,
+//   LineaReal,
+// }: ChartLineMultipleProps) {
+//   const [activeChart, setActiveChart] =
+//     React.useState<keyof typeof chartConfig>("LineaBaseReal");
+//   const [LineChartActive, setLineChartActive] = useState(LineaBase);
 
-  React.useEffect(() => {
-    setLineChartActive(LineaBase);
-  }, [LineaBase, LineaReal]);
+//   React.useEffect(() => {
+//     setLineChartActive(LineaBase);
+//   }, [LineaBase, LineaReal]);
 
-  const total = React.useMemo(
-    () => ({
-      LineaBaseReal: "70%",
-      LineaBaseAjustada: "80%",
-    }),
-    []
-  );
-  return (
-    <Card className="">
-      <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle>Curva S General</CardTitle>
-          <CardDescription>
-            Línea Base real y Línea base ajustada
-          </CardDescription>
-        </div>
-        <div className="flex">
-          {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
-            const chart = key as keyof typeof chartConfig;
-            return (
-              <button
-                key={chart}
-                data-active={activeChart === chart}
-                className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-                onClick={() => {
-                  if (chartConfig[chart].label === "Curva Real") {
-                    setLineChartActive(LineaBase);
-                    setActiveChart(chart);
-                  } else {
-                    setLineChartActive(LineaReal);
-                    setActiveChart(chart);
-                  }
-                }}
-              >
-                <span className="text-xs text-muted-foreground">
-                  {chartConfig[chart].label}
-                </span>
-                <span className="text-lg font-bold leading-none sm:text-3xl">
-                  {total[key as keyof typeof total].toLocaleString()}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </CardHeader>
-      <CardContent className="px-2 sm:p-6">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
-        >
-          <LineChart
-            accessibilityLayer
-            data={LineChartActive}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="Ejex"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                });
-              }}
-            />
-            <ChartTooltip
-              content={
-                <ChartTooltipContent
-                  className="w-[150px]"
-                  nameKey="Ejex"
-                  labelFormatter={(value) => {
-                    console.log(value);
-                    const date = new Date(value);
-                    return date.toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    });
-                  }}
-                />
-              }
-            />
-            <Line
-              dataKey={"hh"}
-              type="monotone"
-              stroke={`var(--color-${activeChart})`}
-              strokeWidth={2}
-              dot={true}
-            />
-          </LineChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  );
-}
+//   const total = React.useMemo(
+//     () => ({
+//       LineaBaseReal: "70%",
+//       LineaBaseAjustada: "80%",
+//     }),
+//     []
+//   );
+//   return (
+//     <Card className="">
+//       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
+//         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
+//           <CardTitle>Curva S General</CardTitle>
+//           <CardDescription>
+//             Línea Base real y Línea base ajustada
+//           </CardDescription>
+//         </div>
+//         <div className="flex">
+//           {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
+//             const chart = key as keyof typeof chartConfig;
+//             return (
+//               <button
+//                 key={chart}
+//                 data-active={activeChart === chart}
+//                 className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+//                 onClick={() => {
+//                   if (chartConfig[chart].label === "Curva Real") {
+//                     setLineChartActive(LineaBase);
+//                     setActiveChart(chart);
+//                   } else {
+//                     setLineChartActive(LineaReal);
+//                     setActiveChart(chart);
+//                   }
+//                 }}
+//               >
+//                 <span className="text-xs text-muted-foreground">
+//                   {chartConfig[chart].label}
+//                 </span>
+//                 <span className="text-lg font-bold leading-none sm:text-3xl">
+//                   {total[key as keyof typeof total].toLocaleString()}
+//                 </span>
+//               </button>
+//             );
+//           })}
+//         </div>
+//       </CardHeader>
+//       <CardContent className="px-2 sm:p-6">
+//         <ChartContainer
+//           config={chartConfig}
+//           className="aspect-auto h-[250px] w-full"
+//         >
+//           <LineChart
+//             accessibilityLayer
+//             data={LineChartActive}
+//             margin={{
+//               left: 12,
+//               right: 12,
+//             }}
+//           >
+//             <CartesianGrid vertical={false} />
+//             <XAxis
+//               dataKey="Ejex"
+//               tickLine={false}
+//               axisLine={false}
+//               tickMargin={8}
+//               minTickGap={32}
+//               tickFormatter={(value) => {
+//                 const date = new Date(value);
+//                 return date.toLocaleDateString("en-US", {
+//                   month: "short",
+//                   day: "numeric",
+//                 });
+//               }}
+//             />
+//             <ChartTooltip
+//               content={
+//                 <ChartTooltipContent
+//                   className="w-[150px]"
+//                   nameKey="Ejex"
+//                   labelFormatter={(value) => {
+//                     console.log(value);
+//                     const date = new Date(value);
+//                     return date.toLocaleDateString("en-US", {
+//                       month: "short",
+//                       day: "numeric",
+//                     });
+//                   }}
+//                 />
+//               }
+//             />
+//             <Line
+//               dataKey={"hh"}
+//               type="monotone"
+//               stroke={`var(--color-${activeChart})`}
+//               strokeWidth={2}
+//               dot={true}
+//             />
+//           </LineChart>
+//         </ChartContainer>
+//       </CardContent>
+//     </Card>
+//   );
+// }
 
 // export function ChartDobleLine({ data }: ChartLineCombinadaProps) {
 //   return (
@@ -583,275 +583,275 @@ export function ChartLIneInteractive({
 //   );
 // }
 
-export function ChartPie() {
-  const id = "pie-interactive";
-  const [activeMonth, setActiveMonth] = React.useState(desktopData[0].month);
-  const activeIndex = React.useMemo(
-    () => desktopData.findIndex((item) => item.month === activeMonth),
-    [activeMonth]
-  );
-  const months = React.useMemo(() => desktopData.map((item) => item.month), []);
-  return (
-    <Card data-chart={id} className="flex flex-col">
-      <ChartStyle id={id} config={chartConfig} />
-      <CardHeader className="flex-row items-start space-y-0 pb-0">
-        <div className="grid gap-1">
-          <CardTitle>Pie Chart - Interactive</CardTitle>
-          <CardDescription>January - June 2024</CardDescription>
-        </div>
-        <Select value={activeMonth} onValueChange={setActiveMonth}>
-          <SelectTrigger
-            className="ml-auto h-7 w-[130px] rounded-lg pl-2.5"
-            aria-label="Select a value"
-          >
-            <SelectValue placeholder="Select month" />
-          </SelectTrigger>
-          <SelectContent align="end" className="rounded-xl">
-            {months.map((key) => {
-              const config = chartConfig[key as keyof typeof chartConfig];
-              if (!config) {
-                return null;
-              }
-              return (
-                <SelectItem
-                  key={key}
-                  value={key}
-                  className="rounded-lg [&_span]:flex"
-                >
-                  <div className="flex items-center gap-2 text-xs">
-                    <span
-                      className="flex h-3 w-3 shrink-0 rounded-sm"
-                      style={{
-                        backgroundColor: `var(--color-${key})`,
-                      }}
-                    />
-                    {config?.label}
-                  </div>
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-      </CardHeader>
-      <CardContent className="flex flex-1 justify-center pb-0">
-        <ChartContainer
-          id={id}
-          config={chartConfig}
-          className="mx-auto aspect-square w-full max-w-[300px]"
-        >
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
-              data={desktopData}
-              dataKey="desktop"
-              nameKey="month"
-              innerRadius={60}
-              strokeWidth={5}
-              activeIndex={activeIndex}
-              activeShape={({
-                outerRadius = 0,
-                ...props
-              }: PieSectorDataItem) => (
-                <g>
-                  <Sector {...props} outerRadius={outerRadius + 10} />
-                  <Sector
-                    {...props}
-                    outerRadius={outerRadius + 25}
-                    innerRadius={outerRadius + 12}
-                  />
-                </g>
-              )}
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
-                        >
-                          {desktopData[activeIndex].desktop.toLocaleString()}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
-                        >
-                          Visitors
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
-              />
-            </Pie>
-          </PieChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  );
-}
+// export function ChartPie() {
+//   const id = "pie-interactive";
+//   const [activeMonth, setActiveMonth] = React.useState(desktopData[0].month);
+//   const activeIndex = React.useMemo(
+//     () => desktopData.findIndex((item) => item.month === activeMonth),
+//     [activeMonth]
+//   );
+//   const months = React.useMemo(() => desktopData.map((item) => item.month), []);
+//   return (
+//     <Card data-chart={id} className="flex flex-col">
+//       <ChartStyle id={id} config={chartConfig} />
+//       <CardHeader className="flex-row items-start space-y-0 pb-0">
+//         <div className="grid gap-1">
+//           <CardTitle>Pie Chart - Interactive</CardTitle>
+//           <CardDescription>January - June 2024</CardDescription>
+//         </div>
+//         <Select value={activeMonth} onValueChange={setActiveMonth}>
+//           <SelectTrigger
+//             className="ml-auto h-7 w-[130px] rounded-lg pl-2.5"
+//             aria-label="Select a value"
+//           >
+//             <SelectValue placeholder="Select month" />
+//           </SelectTrigger>
+//           <SelectContent align="end" className="rounded-xl">
+//             {months.map((key) => {
+//               const config = chartConfig[key as keyof typeof chartConfig];
+//               if (!config) {
+//                 return null;
+//               }
+//               return (
+//                 <SelectItem
+//                   key={key}
+//                   value={key}
+//                   className="rounded-lg [&_span]:flex"
+//                 >
+//                   <div className="flex items-center gap-2 text-xs">
+//                     <span
+//                       className="flex h-3 w-3 shrink-0 rounded-sm"
+//                       style={{
+//                         backgroundColor: `var(--color-${key})`,
+//                       }}
+//                     />
+//                     {config?.label}
+//                   </div>
+//                 </SelectItem>
+//               );
+//             })}
+//           </SelectContent>
+//         </Select>
+//       </CardHeader>
+//       <CardContent className="flex flex-1 justify-center pb-0">
+//         <ChartContainer
+//           id={id}
+//           config={chartConfig}
+//           className="mx-auto aspect-square w-full max-w-[300px]"
+//         >
+//           <PieChart>
+//             <ChartTooltip
+//               cursor={false}
+//               content={<ChartTooltipContent hideLabel />}
+//             />
+//             <Pie
+//               data={desktopData}
+//               dataKey="desktop"
+//               nameKey="month"
+//               innerRadius={60}
+//               strokeWidth={5}
+//               activeIndex={activeIndex}
+//               activeShape={({
+//                 outerRadius = 0,
+//                 ...props
+//               }: PieSectorDataItem) => (
+//                 <g>
+//                   <Sector {...props} outerRadius={outerRadius + 10} />
+//                   <Sector
+//                     {...props}
+//                     outerRadius={outerRadius + 25}
+//                     innerRadius={outerRadius + 12}
+//                   />
+//                 </g>
+//               )}
+//             >
+//               <Label
+//                 content={({ viewBox }) => {
+//                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+//                     return (
+//                       <text
+//                         x={viewBox.cx}
+//                         y={viewBox.cy}
+//                         textAnchor="middle"
+//                         dominantBaseline="middle"
+//                       >
+//                         <tspan
+//                           x={viewBox.cx}
+//                           y={viewBox.cy}
+//                           className="fill-foreground text-3xl font-bold"
+//                         >
+//                           {desktopData[activeIndex].desktop.toLocaleString()}
+//                         </tspan>
+//                         <tspan
+//                           x={viewBox.cx}
+//                           y={(viewBox.cy || 0) + 24}
+//                           className="fill-muted-foreground"
+//                         >
+//                           Visitors
+//                         </tspan>
+//                       </text>
+//                     );
+//                   }
+//                 }}
+//               />
+//             </Pie>
+//           </PieChart>
+//         </ChartContainer>
+//       </CardContent>
+//     </Card>
+//   );
+// }
 
-export function ChartRadar() {
-  return (
-    <Card className="">
-      <CardHeader className="items-center pb-4">
-        <CardTitle>Radar Chart - Grid Circle</CardTitle>
-        <CardDescription>
-          Showing total visitors for the last 6 months
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
-          <RadarChart data={chartData}>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <PolarGrid gridType="circle" />
-            <PolarAngleAxis dataKey="month" />
-            <Radar
-              dataKey="desktop"
-              fill="var(--color-desktop)"
-              fillOpacity={0.6}
-              dot={{
-                r: 4,
-                fillOpacity: 1,
-              }}
-            />
-          </RadarChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="flex items-center gap-2 leading-none text-muted-foreground">
-          January - June 2024
-        </div>
-      </CardFooter>
-    </Card>
-  );
-}
+// export function ChartRadar() {
+//   return (
+//     <Card className="">
+//       <CardHeader className="items-center pb-4">
+//         <CardTitle>Radar Chart - Grid Circle</CardTitle>
+//         <CardDescription>
+//           Showing total visitors for the last 6 months
+//         </CardDescription>
+//       </CardHeader>
+//       <CardContent className="pb-0">
+//         <ChartContainer
+//           config={chartConfig}
+//           className="mx-auto aspect-square max-h-[250px]"
+//         >
+//           <RadarChart data={chartData}>
+//             <ChartTooltip
+//               cursor={false}
+//               content={<ChartTooltipContent hideLabel />}
+//             />
+//             <PolarGrid gridType="circle" />
+//             <PolarAngleAxis dataKey="month" />
+//             <Radar
+//               dataKey="desktop"
+//               fill="var(--color-desktop)"
+//               fillOpacity={0.6}
+//               dot={{
+//                 r: 4,
+//                 fillOpacity: 1,
+//               }}
+//             />
+//           </RadarChart>
+//         </ChartContainer>
+//       </CardContent>
+//       <CardFooter className="flex-col gap-2 text-sm">
+//         <div className="flex items-center gap-2 font-medium leading-none">
+//           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+//         </div>
+//         <div className="flex items-center gap-2 leading-none text-muted-foreground">
+//           January - June 2024
+//         </div>
+//       </CardFooter>
+//     </Card>
+//   );
+// }
 
-export function ChartRadialGrid() {
-  return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Radial Chart - Grid</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
-          <RadialBarChart data={chartData2} innerRadius={30} outerRadius={100}>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel nameKey="browser" />}
-            />
-            <PolarGrid gridType="circle" />
-            <RadialBar dataKey="visitors" />
-          </RadialBarChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter>
-    </Card>
-  );
-}
+// export function ChartRadialGrid() {
+//   return (
+//     <Card className="flex flex-col">
+//       <CardHeader className="items-center pb-0">
+//         <CardTitle>Radial Chart - Grid</CardTitle>
+//         <CardDescription>January - June 2024</CardDescription>
+//       </CardHeader>
+//       <CardContent className="flex-1 pb-0">
+//         <ChartContainer
+//           config={chartConfig}
+//           className="mx-auto aspect-square max-h-[250px]"
+//         >
+//           <RadialBarChart data={chartData2} innerRadius={30} outerRadius={100}>
+//             <ChartTooltip
+//               cursor={false}
+//               content={<ChartTooltipContent hideLabel nameKey="browser" />}
+//             />
+//             <PolarGrid gridType="circle" />
+//             <RadialBar dataKey="visitors" />
+//           </RadialBarChart>
+//         </ChartContainer>
+//       </CardContent>
+//       <CardFooter className="flex-col gap-2 text-sm">
+//         <div className="flex items-center gap-2 font-medium leading-none">
+//           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+//         </div>
+//         <div className="leading-none text-muted-foreground">
+//           Showing total visitors for the last 6 months
+//         </div>
+//       </CardFooter>
+//     </Card>
+//   );
+// }
 
-export function ChartRadialShape() {
-  return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Radial Chart - Shape</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
-          <RadialBarChart
-            data={chartData3}
-            endAngle={100}
-            innerRadius={80}
-            outerRadius={140}
-          >
-            <PolarGrid
-              gridType="circle"
-              radialLines={false}
-              stroke="none"
-              className="first:fill-muted last:fill-background"
-              polarRadius={[86, 74]}
-            />
-            <RadialBar dataKey="visitors" background />
-            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-4xl font-bold"
-                        >
-                          {chartData3[0].visitors.toLocaleString()}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
-                        >
-                          Visitors
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
-              />
-            </PolarRadiusAxis>
-          </RadialBarChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter>
-    </Card>
-  );
-}
+// export function ChartRadialShape() {
+//   return (
+//     <Card className="flex flex-col">
+//       <CardHeader className="items-center pb-0">
+//         <CardTitle>Radial Chart - Shape</CardTitle>
+//         <CardDescription>January - June 2024</CardDescription>
+//       </CardHeader>
+//       <CardContent className="flex-1 pb-0">
+//         <ChartContainer
+//           config={chartConfig}
+//           className="mx-auto aspect-square max-h-[250px]"
+//         >
+//           <RadialBarChart
+//             data={chartData3}
+//             endAngle={100}
+//             innerRadius={80}
+//             outerRadius={140}
+//           >
+//             <PolarGrid
+//               gridType="circle"
+//               radialLines={false}
+//               stroke="none"
+//               className="first:fill-muted last:fill-background"
+//               polarRadius={[86, 74]}
+//             />
+//             <RadialBar dataKey="visitors" background />
+//             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+//               <Label
+//                 content={({ viewBox }) => {
+//                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+//                     return (
+//                       <text
+//                         x={viewBox.cx}
+//                         y={viewBox.cy}
+//                         textAnchor="middle"
+//                         dominantBaseline="middle"
+//                       >
+//                         <tspan
+//                           x={viewBox.cx}
+//                           y={viewBox.cy}
+//                           className="fill-foreground text-4xl font-bold"
+//                         >
+//                           {chartData3[0].visitors.toLocaleString()}
+//                         </tspan>
+//                         <tspan
+//                           x={viewBox.cx}
+//                           y={(viewBox.cy || 0) + 24}
+//                           className="fill-muted-foreground"
+//                         >
+//                           Visitors
+//                         </tspan>
+//                       </text>
+//                     );
+//                   }
+//                 }}
+//               />
+//             </PolarRadiusAxis>
+//           </RadialBarChart>
+//         </ChartContainer>
+//       </CardContent>
+//       <CardFooter className="flex-col gap-2 text-sm">
+//         <div className="flex items-center gap-2 font-medium leading-none">
+//           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+//         </div>
+//         <div className="leading-none text-muted-foreground">
+//           Showing total visitors for the last 6 months
+//         </div>
+//       </CardFooter>
+//     </Card>
+//   );
+// }
 
 // export function CombinedChart({ LineaCombinada }: ChartLineCombinadaProps) {
 //   return (
@@ -937,37 +937,37 @@ export function ChartRadialShape() {
 //   );
 // }
 
-export function TableDemo() {
-  return (
-    <Table>
-      <TableCaption>A list of your recent invoices.</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[100px]">Invoice</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Method</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {invoices.map((invoice) => (
-          <TableRow key={invoice.invoice}>
-            <TableCell className="font-medium">{invoice.invoice}</TableCell>
-            <TableCell>{invoice.paymentStatus}</TableCell>
-            <TableCell>{invoice.paymentMethod}</TableCell>
-            <TableCell className="text-right">{invoice.totalAmount}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-      <TableFooter>
-        <TableRow>
-          <TableCell colSpan={3}>Total</TableCell>
-          <TableCell className="text-right">$2,500.00</TableCell>
-        </TableRow>
-      </TableFooter>
-    </Table>
-  );
-}
+// export function TableDemo() {
+//   return (
+//     <Table>
+//       <TableCaption>A list of your recent invoices.</TableCaption>
+//       <TableHeader>
+//         <TableRow>
+//           <TableHead className="w-[100px]">Invoice</TableHead>
+//           <TableHead>Status</TableHead>
+//           <TableHead>Method</TableHead>
+//           <TableHead className="text-right">Amount</TableHead>
+//         </TableRow>
+//       </TableHeader>
+//       <TableBody>
+//         {invoices.map((invoice) => (
+//           <TableRow key={invoice.invoice}>
+//             <TableCell className="font-medium">{invoice.invoice}</TableCell>
+//             <TableCell>{invoice.paymentStatus}</TableCell>
+//             <TableCell>{invoice.paymentMethod}</TableCell>
+//             <TableCell className="text-right">{invoice.totalAmount}</TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//       <TableFooter>
+//         <TableRow>
+//           <TableCell colSpan={3}>Total</TableCell>
+//           <TableCell className="text-right">$2,500.00</TableCell>
+//         </TableRow>
+//       </TableFooter>
+//     </Table>
+//   );
+// }
 
 export function ChartInteractivoCombinado({ data }: ChartLineCombinadaProps) {
   console.log(data);
