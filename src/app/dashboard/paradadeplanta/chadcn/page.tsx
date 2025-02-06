@@ -1075,7 +1075,7 @@ export function ChartInteractivoCombinado({ data }: ChartLineCombinadaProps) {
   );
 }
 
-export default function page() {
+export default function Page() {
   // const [LineaBase, setLineaBase] = useState<TypeLineaBase>([]);
   // const [LineaReal, setLineaReal] = useState<TypeLineaBase>([]);
   const [LineaCombinada, setLineaCombinada] = useState<TypeLineaCombinada>([]);
@@ -1130,9 +1130,10 @@ export default function page() {
           <ChartRadialShape />
         </div> */}
         {/* <CombinedChart data={LineaCombinada} /> */}
-        <ChartInteractivoCombinado
+        {/* <ChartInteractivoCombinado
           data={{ LineaCombinada, LineaCombinadaAjustada }}
-        />
+        /> */}
+        <h1>Dashboard</h1>
       </div>
 
       {/* <div className="w-full md:w-4/5 grid mx-auto p-8">
