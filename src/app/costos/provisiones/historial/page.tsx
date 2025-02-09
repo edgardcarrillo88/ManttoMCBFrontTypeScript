@@ -35,6 +35,7 @@ import { capitalize } from "@/components/table/utils/utils";
 
 import { useRouter } from "next/navigation";
 import { StringToBoolean } from "class-variance-authority/types";
+import {ProtectedRouteComponentemail} from "@/components/protected-route-email"
 
 const columns = [
   { name: "GLOSA", uid: "Glosa", sortable: true },
@@ -600,6 +601,7 @@ export default function page(params: any) {
   }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
 
   return (
+    <ProtectedRouteComponentemail>
     <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
       <div className="text-white text-2xl mt-8 flex items-start">
         Listado de provisiones
@@ -645,5 +647,6 @@ export default function page(params: any) {
         </Table>
       </div>
     </div>
+    </ProtectedRouteComponentemail>
   );
 }

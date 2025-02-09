@@ -55,6 +55,7 @@ import { format } from "date-fns";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Link from "next/link";
+import {ProtectedRouteComponentemail} from "@/components/protected-route-email"
 
 const evaluationschema = z
   .object({
@@ -631,6 +632,7 @@ export default function page({ params }: PageProps) {
   console.log(form.formState.errors)
 
   return (
+    <ProtectedRouteComponentemail>
     <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center justify-center">
       <Card className="w-11/12 md:w-2/3 lg:w-1/2 space-y-6 bg-gray-800 rounded-2xl p-10 shadow-2xl mt-10 mb-10 backdrop-blur-lg">
         <CardHeader className="text-center">
@@ -1736,5 +1738,6 @@ export default function page({ params }: PageProps) {
         </div>
       )}
     </div>
+    </ProtectedRouteComponentemail>
   );
 }

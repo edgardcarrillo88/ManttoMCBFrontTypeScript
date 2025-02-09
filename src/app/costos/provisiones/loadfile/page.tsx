@@ -4,6 +4,7 @@ import LoadFile from "@/components/loadfile/page";
 import { useState } from "react";
 import { Spinner } from "@nextui-org/spinner";
 import axios from "axios";
+import {ProtectedRouteComponentemail} from "@/components/protected-route-email"
 
 interface UploadedFile {}
 
@@ -91,6 +92,7 @@ export default function page() {
   };
 
   return (
+    <ProtectedRouteComponentemail>
     <>
       <LoadFile
         title={"Carga de Provisiones"}
@@ -126,5 +128,6 @@ export default function page() {
         </div>
       )}
     </>
+    </ProtectedRouteComponentemail>
   );
 }

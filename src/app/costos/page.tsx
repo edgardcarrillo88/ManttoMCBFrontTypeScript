@@ -5,6 +5,7 @@ import { Image } from "@nextui-org/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {ProtectedRouteComponent} from "@/components/protected-route"
+import {ProtectedRouteComponentemail} from "@/components/protected-route-email"
 
 interface Option {
   title: string;
@@ -59,7 +60,7 @@ const Options: Option[] = [
 export default function page() {
 
   return (
-    <ProtectedRouteComponent password={process.env.NEXT_PUBLIC_PASSWORD_PAGES!}>
+ <ProtectedRouteComponentemail>
     <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
       <div className="mt-8">
         {/* <h1 className="text-6xl font-bold text-rose-700">Marcobre</h1> */}
@@ -98,6 +99,6 @@ export default function page() {
         })}
       </div>
     </div>
-    </ProtectedRouteComponent>
+    </ProtectedRouteComponentemail>
   );
 }
