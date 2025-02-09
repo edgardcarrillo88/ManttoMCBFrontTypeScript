@@ -18,7 +18,20 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Mantenimiento Marcobre",
-  description: "Plataforma de Gestión de Mantenimiento",
+  description: "Gestión de Mantenimiento Planta y Mina de Marcobre",
+  keywords:
+    "Mantenimiento, Maintenance, getión de mantenimiento, Gestion de mantenimiento, gestion mantenimiento, gestión de activos, gestion de activos, gestion activos, planta, mina, marcobre, mantenimiento marcobre, Mantenimiento Marcobre",
+  authors: { name: "Edgard Andre Carrillo Iparraguirre" },
+  robots: "index, follow",
+  metadataBase: new URL("https://mantenimientomarcobre.com"),
+  alternates: {
+    canonical: "/",
+  },
+  icons: {
+    icon: ["/favicon.ico"],
+    apple: ["/apple-touch-icon.png"],
+    shortcut: ["/apple-touch-icon.png"],
+  },
 };
 
 export default function RootLayout({
