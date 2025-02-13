@@ -289,6 +289,7 @@ export default function page() {
     );
     if (response.status === 200) {
       setModalLoader(false);
+      
       alert(`Formulario enviado con exito, tu nota es ${PuntajeTotal}`);
       console.log(`Formulario enviado con exito, tu nota es ${PuntajeTotal}`);
       form.reset();
@@ -309,12 +310,12 @@ export default function page() {
             {modalLoader && (
               <div>
                 <h2 className="text-lg font-bold">
-                  Cargando datos a base de datos
+                  Procesando la informacion
                 </h2>
                 <Spinner size="md" color="primary" labelColor="primary" />
               </div>
             )}
-            {!modalLoader && <p className="mt-2">Datos Cargados</p>}
+            {!modalLoader && <p className="mt-2">Datos procesados</p>}
             <div className="mt-4 flex justify-end">
               <button
                 onClick={() => {
