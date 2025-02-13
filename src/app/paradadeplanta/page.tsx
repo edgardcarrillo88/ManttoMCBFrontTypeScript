@@ -37,9 +37,9 @@ const Options: Option[] = [
     path: "/dashboard/paradadeplanta/chadcn",
   },
   {
-    title: "Inducción",
+    title: "Curso Lienamiento Seg. PdP",
     subtitle: "Mantto Planta",
-    description: "Examen de indcción PdP",
+    description: "Examen de lineamientos seg.",
     image:
       "https://images.pexels.com/photos/7092540/pexels-photo-7092540.jpeg?auto=compress&cs=tinysrgb&w=400",
     path: "/paradadeplanta/induccion",

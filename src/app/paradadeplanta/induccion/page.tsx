@@ -22,9 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { json } from "stream/consumers";
+import { Spinner } from "@nextui-org/spinner";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const Preguntas = [
   {
@@ -168,16 +169,18 @@ const evaluationSchema = z.object({
     message: "Debes seleccionar un cargo.",
   }),
   respuesta: z.record(
-    z.string().regex(/^respuesta_\d+$/, { message: "clave invalida"}),
+    z.string().regex(/^respuesta_\d+$/, { message: "clave invalida" }),
     z.string().min(1, { message: "Debes seleccionar una respuesta." })
-)
+  ),
 });
 
 type EvaluationSchema = z.infer<typeof evaluationSchema>;
 
 export default function page() {
+  const router = useRouter();
 
-const router = useRouter()
+  const [modalLoader, setModalLoader] = useState(true);
+  const [modal, setModal] = useState(false);
 
   const Empresas = [
     "Prodise",
@@ -204,13 +207,15 @@ const router = useRouter()
     "Planner",
   ];
 
-  const dynamicDefaults = Preguntas.reduce<Record<string, string>>((acc, pregunta) => {
-    acc[`respuesta_${pregunta.id}`] = "";
-    return acc;
-  }, {});
+  const dynamicDefaults = Preguntas.reduce<Record<string, string>>(
+    (acc, pregunta) => {
+      acc[`respuesta_${pregunta.id}`] = "";
+      return acc;
+    },
+    {}
+  );
 
   console.log(dynamicDefaults);
-
 
   const form = useForm<EvaluationSchema>({
     resolver: zodResolver(evaluationSchema),
@@ -220,231 +225,288 @@ const router = useRouter()
       dni: "",
       company: "",
       position: "",
-      respuesta: dynamicDefaults, 
+      respuesta: dynamicDefaults,
     },
   });
 
-
-
- 
   const onSubmit = form.handleSubmit(async (values) => {
+    setModal(true);
     console.log(values);
 
-   const ArrayRespuestas = []
+    const ArrayRespuestas = [];
 
-   for (const [key, value] of Object.entries(values.respuesta)) {
-    let Puntaje = 0
-    const FilterPregunta = Preguntas.find((pregunta) => pregunta.id == parseInt(key.split("_")[1]));
-    if (FilterPregunta?.Respuesta === value) {
-      Puntaje = 2
-    }else{
-      Puntaje = 0
+    for (const [key, value] of Object.entries(values.respuesta)) {
+      let Puntaje = 0;
+      const FilterPregunta = Preguntas.find(
+        (pregunta) => pregunta.id == parseInt(key.split("_")[1])
+      );
+      if (FilterPregunta?.Respuesta === value) {
+        Puntaje = 2;
+      } else {
+        Puntaje = 0;
+      }
+      const objectRespuesta = {
+        id: parseInt(key.split("_")[1]),
+        respuesta: value,
+        Puntaje: Puntaje,
+      };
+      ArrayRespuestas.push(objectRespuesta);
     }
-    const objectRespuesta = {id: parseInt(key.split("_")[1]),respuesta: value, Puntaje: Puntaje} 
-    ArrayRespuestas.push(objectRespuesta)
-  }
-    const PuntajeTotal = ArrayRespuestas.reduce((acc, pregunta) => acc + pregunta.Puntaje, 0);
+    const PuntajeTotal = ArrayRespuestas.reduce(
+      (acc, pregunta) => acc + pregunta.Puntaje,
+      0
+    );
 
-    const objeto = ArrayRespuestas.reduce<Record<string, string>>((acc, item) => {
-      acc[item.id.toString()] = item.respuesta;
-      return acc;
-    }, {});
+    const objeto = ArrayRespuestas.reduce<Record<string, string>>(
+      (acc, item) => {
+        acc[item.id.toString()] = item.respuesta;
+        return acc;
+      },
+      {}
+    );
 
-    objeto.DNI = values.dni
-    objeto.Fecha = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric',timeZone: 'America/Lima' });
-    objeto.Nombre = values.name + ", " + values.lastname
-    objeto.Cargo = values.position
-    objeto.Empresa = values.company
+    objeto.DNI = values.dni;
+    objeto.Fecha = new Date().toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "America/Lima",
+    });
+    objeto.Nombre = values.name + ", " + values.lastname;
+    objeto.Cargo = values.position;
+    objeto.Empresa = values.company;
 
     const data = {
       Nota: PuntajeTotal,
-      answer: objeto
-    }
+      answer: objeto,
+    };
 
     console.log(data);
 
- 
-
-    const response  = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/data/evaluacionpdp`,{data})
-    if(response.status === 200){
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/data/evaluacionpdp`,
+      { data }
+    );
+    if (response.status === 200) {
+      setModalLoader(false);
       alert(`Formulario enviado con exito, tu nota es ${PuntajeTotal}`);
       console.log(`Formulario enviado con exito, tu nota es ${PuntajeTotal}`);
-      form.reset()
-      router.push("/paradadeplanta")
-    }
-    else{
+      form.reset();
+      router.push("/paradadeplanta");
+    } else {
+      setModalLoader(false);
       alert("Error al enviar el formulario");
       console.log("Error al enviar el formulario");
     }
   });
 
   return (
-    <Card className="w-4/5 md:w-1/2 mt-8 mb-8 border-1 border-gray-200 rounded-lg shadow-lg mx-auto text-black">
-      <CardHeader>
-        <CardTitle className="text-center mx-auto">Datos personales</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={onSubmit}>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombres</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" />
-                  </FormControl>
-                  {form.formState.errors.dni?.message && (
-                    <p className="text-sm text-red-600">
-                      {form.formState.errors.name?.message}
-                    </p>
-                  )}
-                  {/* <FormDescription>ingresa tus nombres</FormDescription> */}
-                </FormItem>
-              )}
-            />
+    <>
+      {/* Modal */}
+      {modal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 max-w-sm w-full rounded-xl">
+            {modalLoader && (
+              <div>
+                <h2 className="text-lg font-bold">
+                  Cargando datos a base de datos
+                </h2>
+                <Spinner size="md" color="primary" labelColor="primary" />
+              </div>
+            )}
+            {!modalLoader && <p className="mt-2">Datos Cargados</p>}
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => {
+                  setModal(false);
+                  setModalLoader(false);
+                }}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-            <FormField
-              control={form.control} //Controlado por
-              name="lastname" //captura la informacion en este nombre
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Apellidos</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" />
-                  </FormControl>
-                  {form.formState.errors.dni?.message && (
-                    <p className="text-sm text-red-600">
-                      {form.formState.errors.lastname?.message}
-                    </p>
-                  )}
-                  {/* <FormDescription>ingresa tus apellidos</FormDescription> */}
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control} //Controlado por
-              name="dni" //captura la informacion en este nombre
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>DNI</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" />
-                  </FormControl>
-                  {form.formState.errors.dni?.message && (
-                    <p className="text-sm text-red-600">
-                      {form.formState.errors.dni?.message}
-                    </p>
-                  )}
-                  {/* <FormDescription>ingresa tu DNI</FormDescription> */}
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control} //Controlado por
-              name="company" //captura la informacion en este nombre
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Empresa</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una empresa" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Empresas.map((empresa) => (
-                        <SelectItem key={empresa} value={empresa}>
-                          {empresa}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {/* <FormDescription>Selecciona tu empresa</FormDescription> */}
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control} //Controlado por
-              name="position" //captura la informacion en este nombre
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Puesto trabajo</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un puesto de trabajo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Puestos.map((puesto) => (
-                        <SelectItem key={puesto} value={puesto}>
-                          {puesto}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {/* <FormDescription>
-                    Selecciona tu puesto de trabajo
-                  </FormDescription> */}
-                </FormItem>
-              )}
-            />
-
-            <CardTitle className="text-center mx-auto mt-8">
-              Preguntas de Evaluación
-            </CardTitle>
-
-            {/* Preguntas */}
-
-            {Preguntas.map((pregunta) => (
+      <Card className="w-4/5 md:w-1/2 mt-8 mb-8 border-1 border-gray-200 rounded-lg shadow-lg mx-auto text-black">
+        <CardHeader>
+          <CardTitle className="text-center mx-auto">
+            Datos personales
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={onSubmit}>
               <FormField
-                key={pregunta.id}
-                control={form.control} //Controlado por
-                name={`respuesta.respuesta_${pregunta.id}`} // el primer "respuesta" viene de la key de defaultValues
+                control={form.control}
+                name="name"
                 render={({ field }) => (
-                  <FormItem className="mt-8 mb-8">
-                    <FormLabel>{pregunta.id}. {pregunta.Pregunta}</FormLabel>
-                    <Select onValueChange={field.onChange}>
+                  <FormItem>
+                    <FormLabel>Nombres</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="text" />
+                    </FormControl>
+                    {form.formState.errors.dni?.message && (
+                      <p className="text-sm text-red-600">
+                        {form.formState.errors.name?.message}
+                      </p>
+                    )}
+                    {/* <FormDescription>ingresa tus nombres</FormDescription> */}
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control} //Controlado por
+                name="lastname" //captura la informacion en este nombre
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Apellidos</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="text" />
+                    </FormControl>
+                    {form.formState.errors.dni?.message && (
+                      <p className="text-sm text-red-600">
+                        {form.formState.errors.lastname?.message}
+                      </p>
+                    )}
+                    {/* <FormDescription>ingresa tus apellidos</FormDescription> */}
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control} //Controlado por
+                name="dni" //captura la informacion en este nombre
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>DNI</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="text" />
+                    </FormControl>
+                    {form.formState.errors.dni?.message && (
+                      <p className="text-sm text-red-600">
+                        {form.formState.errors.dni?.message}
+                      </p>
+                    )}
+                    {/* <FormDescription>ingresa tu DNI</FormDescription> */}
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control} //Controlado por
+                name="company" //captura la informacion en este nombre
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Empresa</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una respuesta" />
+                          <SelectValue placeholder="Selecciona una empresa" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {pregunta.Opciones.map((opcion) => (
-                          <SelectItem key={opcion} value={opcion}>
-                            {opcion}
+                        {Empresas.map((empresa) => (
+                          <SelectItem key={empresa} value={empresa}>
+                            {empresa}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {/* <FormDescription>Selecciona tu empresa</FormDescription> */}
                   </FormItem>
                 )}
               />
-            ))}
 
-            <CardContent>
+              <FormField
+                control={form.control} //Controlado por
+                name="position" //captura la informacion en este nombre
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Puesto trabajo</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un puesto de trabajo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Puestos.map((puesto) => (
+                          <SelectItem key={puesto} value={puesto}>
+                            {puesto}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {/* <FormDescription>
+                    Selecciona tu puesto de trabajo
+                  </FormDescription> */}
+                  </FormItem>
+                )}
+              />
+
               <CardTitle className="text-center mx-auto mt-8">
-                Imagenes de pregunta 4
+                Preguntas de Evaluación
               </CardTitle>
-              <img className="mx-auto" src="https://i.postimg.cc/zX284Q2J/Pregunta4.png" alt="imagen1" />
-            </CardContent>
 
-            <Button className="mt-8 bg-red-500 hover:bg-red-800">Enviar</Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+              {/* Preguntas */}
+
+              {Preguntas.map((pregunta) => (
+                <FormField
+                  key={pregunta.id}
+                  control={form.control} //Controlado por
+                  name={`respuesta.respuesta_${pregunta.id}`} // el primer "respuesta" viene de la key de defaultValues
+                  render={({ field }) => (
+                    <FormItem className="mt-8 mb-8">
+                      <FormLabel>
+                        {pregunta.id}. {pregunta.Pregunta}
+                      </FormLabel>
+                      <Select onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona una respuesta" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {pregunta.Opciones.map((opcion) => (
+                            <SelectItem key={opcion} value={opcion}>
+                              {opcion}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              ))}
+
+              <CardContent>
+                <CardTitle className="text-center mx-auto mt-8">
+                  Imagenes de pregunta 4
+                </CardTitle>
+                <img
+                  className="mx-auto"
+                  src="https://i.postimg.cc/zX284Q2J/Pregunta4.png"
+                  alt="imagen1"
+                />
+              </CardContent>
+
+              <Button className="mt-8 bg-red-500 hover:bg-red-800">
+                Enviar
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </>
   );
 }
