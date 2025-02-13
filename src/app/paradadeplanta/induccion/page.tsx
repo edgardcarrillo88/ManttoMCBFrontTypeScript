@@ -267,11 +267,11 @@ export default function page() {
 
     objeto.DNI = values.dni;
     objeto.Fecha = new Date().toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "long",
       year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
       timeZone: "America/Lima",
-    });
+    }).replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$2-$1");
     objeto.Nombre = values.name + ", " + values.lastname;
     objeto.Cargo = values.position;
     objeto.Empresa = values.company;
