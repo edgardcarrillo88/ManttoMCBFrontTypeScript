@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { json } from "stream/consumers";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const Preguntas = [
   {
@@ -144,8 +146,6 @@ const Preguntas = [
   },
 ];
 
-
-
 const evaluationSchema = z.object({
   name: z.string().min(2, {
     message: "Debes escribir por lo menos 2 caracteres.",
@@ -177,7 +177,7 @@ type EvaluationSchema = z.infer<typeof evaluationSchema>;
 
 export default function page() {
 
-
+const router = useRouter()
 
   const Empresas = [
     "Prodise",
@@ -227,11 +227,55 @@ export default function page() {
 
 
  
-  const onSubmit = form.handleSubmit((values) => {
+  const onSubmit = form.handleSubmit(async (values) => {
     console.log(values);
-    console.log(values.respuesta);
-    alert("Formulario Enviado");
-    form.reset()
+
+   const ArrayRespuestas = []
+
+   for (const [key, value] of Object.entries(values.respuesta)) {
+    let Puntaje = 0
+    const FilterPregunta = Preguntas.find((pregunta) => pregunta.id == parseInt(key.split("_")[1]));
+    if (FilterPregunta?.Respuesta === value) {
+      Puntaje = 2
+    }else{
+      Puntaje = 0
+    }
+    let objectRespuesta = {id: parseInt(key.split("_")[1]),respuesta: value, Puntaje: Puntaje} 
+    ArrayRespuestas.push(objectRespuesta)
+  }
+    const PuntajeTotal = ArrayRespuestas.reduce((acc, pregunta) => acc + pregunta.Puntaje, 0);
+
+    const objeto = ArrayRespuestas.reduce<Record<string, string>>((acc, item) => {
+      acc[item.id.toString()] = item.respuesta;
+      return acc;
+    }, {});
+
+    objeto.DNI = values.dni
+    objeto.Fecha = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric',timeZone: 'America/Lima' });
+    objeto.Nombre = values.name + ", " + values.lastname
+    objeto.Cargo = values.position
+    objeto.Empresa = values.company
+
+    const data = {
+      Nota: PuntajeTotal,
+      answer: objeto
+    }
+
+    console.log(data);
+
+ 
+
+    const response  = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/data/evaluacionpdp`,{data})
+    if(response.status === 200){
+      alert(`Formulario enviado con exito, tu nota es ${PuntajeTotal}`);
+      console.log(`Formulario enviado con exito, tu nota es ${PuntajeTotal}`);
+      form.reset()
+      router.push("/paradadeplanta")
+    }
+    else{
+      alert("Error al enviar el formulario");
+      console.log("Error al enviar el formulario");
+    }
   });
 
   return (

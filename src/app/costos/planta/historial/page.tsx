@@ -38,6 +38,7 @@ import { ClearFiltersIcon } from "@/components/table/utils/ClearFiltersIcon";
 import { SearchIcon } from "@/components/table/utils/SearchIcon";
 import { capitalize } from "@/components/table/utils/utils";
 import { set } from "date-fns";
+import {ProtectedRouteComponentemail} from "@/components/protected-route-email"
 
 interface FormEditProps {
   activities: Partial<TypeActual>;
@@ -823,378 +824,390 @@ export default function page(params: any) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
-      {/* Modal */}
-      {ModalVisible && (
-        <div>
-          <div className="fixed inset-0 flex items-center justify-center bg-slate-200 bg-opacity-50 z-50">
-            {/* <FormEdit /> */}
-            <div className="h-[77vh] from-gray-900 via-gray-800 to-black flex flex-col items-center bg-white p-6 rounded-xl">
-              <div className="w-full max-w-4xl p-8 bg-gray-800 rounded-lg shadow-xl mt-2 mb-2 rounded-xl">
-                <div className="flex justify-between items-center mb-4">
-                  <h1 className="text-3xl font-bold text-white">
-                    Actualizar Datos
-                  </h1>
-                  <CircleX
-                    className="h-10 w-10 text-white"
-                    onClick={() => setModalVisible(false)}
-                  />
-                </div>
-
-                <form onSubmit={HandleSubmitForm} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Categoria */}
-                    <div className="space-y-2 flex flex-col w-40">
-                      <Label className="text-white">Categoria</Label>
-                      <Dropdown>
-                        <DropdownTrigger className="w-40">
-                          <Button
-                            endContent={
-                              <ChevronDownIcon className="text-small" />
-                            }
-                            variant="faded"
-                          >
-                            {formData.Categoria === "" ||
-                            formData.Categoria === undefined
-                              ? "Categoria"
-                              : formData.Categoria}
-                          </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                          disallowEmptySelection
-                          aria-label="Table Columns"
-                          closeOnSelect={true}
-                          selectedKeys={
-                            new Set([String(formData.Categoria)]) || "all"
-                          }
-                          selectionMode="single"
-                          onSelectionChange={(e) => {
-                            HandleChangeForm("Categoria", String(e.anchorKey));
-                          }}
-                        >
-                          {Categorias.map((categoria) => (
-                            <DropdownItem
-                              key={categoria.uid}
-                              className="capitalize"
-                            >
-                              {capitalize(categoria.name)}
-                            </DropdownItem>
-                          ))}
-                        </DropdownMenu>
-                      </Dropdown>
-                    </div>
-
-                    {/* Especialidad */}
-                    <div className="space-y-2 flex flex-col w-40">
-                      <Label className="text-white">Especialidad</Label>
-                      <Dropdown>
-                        <DropdownTrigger className="w-40">
-                          <Button
-                            endContent={
-                              <ChevronDownIcon className="text-small" />
-                            }
-                            variant="faded"
-                            className="w-full"
-                          >
-                            {formData.Especialidad === "" ||
-                            formData.Especialidad === undefined
-                              ? "Especialidad"
-                              : formData.Especialidad}
-                          </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                          disallowEmptySelection
-                          aria-label="Table Columns"
-                          closeOnSelect={true}
-                          selectedKeys={
-                            new Set([String(formData.Especialidad) || "all"])
-                          }
-                          selectionMode="single"
-                          onSelectionChange={(e) => {
-                            HandleChangeForm(
-                              "Especialidad",
-                              String(e.anchorKey)
-                            );
-                          }}
-                        >
-                          {Especialidad.map((especialidad) => (
-                            <DropdownItem
-                              key={especialidad.uid}
-                              className="capitalize"
-                            >
-                              {capitalize(especialidad.name)}
-                            </DropdownItem>
-                          ))}
-                        </DropdownMenu>
-                      </Dropdown>
-                    </div>
-
-                    {/* Responsable */}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">Responsable</Label>
-                      <Input
-                        type={"text"}
-                        name="Responsable"
-                        value={formData.Responsable as string}
-                        onChange={(e) => {
-                          HandleChangeForm("Responsable", e.target.value);
-                        }}
-                        className="w-40 bg-gray-700 text-white border-gray-600"
-                      />
-                    </div>
-
-                    {/* TAG */}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">TAG</Label>
-                      <Input
-                        type={"text"}
-                        name="TAG"
-                        value={formData.TAG as string}
-                        onChange={(e) => {
-                          HandleChangeForm("TAG", e.target.value);
-                        }}
-                        className="w-40 bg-gray-700 text-white border-gray-600"
-                      />
-                    </div>
-
-                    {/* Partida */}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">Partida</Label>
-                      <Input
-                        type={"text"}
-                        name="Partida"
-                        value={formData.Partida as string}
-                        onChange={(e) => {
-                          HandleChangeForm("Partida", e.target.value);
-                        }}
-                        className="w-40 bg-gray-700 text-white border-gray-600"
-                      />
-                    </div>
-
-                    {/* Mes */}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">Mes</Label>
-                      <Dropdown>
-                        <DropdownTrigger className="w-40">
-                          <Button
-                            endContent={
-                              <ChevronDownIcon className="text-small" />
-                            }
-                            variant="faded"
-                          >
-                            {formData.Mes === 0 ||
-                            formData.Mes === undefined ||
-                            formData.Mes === null
-                              ? "Mes"
-                              : months.filter(
-                                  (item) => item.uid === formData.Mes
-                                )[0].name}
-                          </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                          disallowEmptySelection
-                          aria-label="Table Columns"
-                          closeOnSelect={true}
-                          selectedKeys={
-                            new Set([String(formData.Mes) || "all"])
-                          }
-                          selectionMode="single"
-                          onSelectionChange={(e) => {
-                            HandleChangeForm("Mes", Number(e.anchorKey));
-                          }}
-                        >
-                          {months.map((item) => (
-                            <DropdownItem key={item.uid} className="capitalize">
-                              {item.name}
-                            </DropdownItem>
-                          ))}
-                        </DropdownMenu>
-                      </Dropdown>
-                    </div>
-
-                    {/* Monto */}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">Monto</Label>
-                      <Input
-                        type={"number"}
-                        id={"Monto"}
-                        name={"Monto"}
-                        value={String(formData.Monto) as string}
-                        onChange={(e) => {
-                          HandleChangeForm("Monto", e.target.value);
-                        }}
-                        className="w-40 bg-gray-700 text-white border-gray-600"
-                      />
-                    </div>
-
-                    {/* Proveedor */}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">Proovedor</Label>
-                      <Input
-                        type={"text"}
-                        name="Proveedor"
-                        value={formData.Proveedor as string}
-                        onChange={(e) => {
-                          HandleChangeForm("Proveedor", e.target.value);
-                        }}
-                        className="w-40 bg-gray-700 text-white border-gray-600"
-                      />
-                    </div>
-
-                    {/* OC/SP/OT */}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">OC/SP/OT</Label>
-                      <Input
-                        type={"text"}
-                        name="OC"
-                        value={formData.OC as string}
-                        onChange={(e) => {
-                          HandleChangeForm("OC", e.target.value);
-                        }}
-                        className="w-40 bg-gray-700 text-white border-gray-600"
-                      />
-                    </div>
-
-                    {/* Posicion */}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">Posicion</Label>
-                      <Input
-                        type={"text"}
-                        name="Posicion"
-                        value={formData.Posicion as string}
-                        onChange={(e) => {
-                          HandleChangeForm("Posicion", e.target.value);
-                        }}
-                        className="w-40 bg-gray-700 text-white border-gray-600"
-                      />
-                    </div>
-
-                    {/* Fecha OC/SP*/}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">Fecha OC/SP</Label>
-                      <Input
-                        type={"text"}
-                        name="Fecha"
-                        value={formData.Fecha as string}
-                        onChange={(e) => {
-                          HandleChangeForm("Fecha", e.target.value);
-                        }}
-                        className="w-40 bg-gray-700 text-white border-gray-600"
-                      />
-                    </div>
-
-                    {/* Clasificacion */}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">Clasificación</Label>
-                      <Dropdown>
-                        <DropdownTrigger className="w-40">
-                          <Button
-                            endContent={
-                              <ChevronDownIcon className="text-small" />
-                            }
-                            variant="faded"
-                          >
-                            {formData.Clasificacion === undefined ||
-                            formData.Clasificacion === null
-                              ? "Clasificacion"
-                              : Clasificacion.filter(
-                                  (item) => item.uid === formData.Clasificacion
-                                )[0].name}
-                          </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu
-                          disallowEmptySelection
-                          aria-label="Table Columns"
-                          closeOnSelect={true}
-                          selectedKeys={
-                            new Set([String(formData.Clasificacion) || "all"])
-                          }
-                          selectionMode="single"
-                          onSelectionChange={(e) => {
-                            HandleChangeForm(
-                              "Clasificacion",
-                              String(e.anchorKey)
-                            );
-                          }}
-                        >
-                          {Clasificacion.map((item) => (
-                            <DropdownItem key={item.uid} className="capitalize">
-                              {item.name}
-                            </DropdownItem>
-                          ))}
-                        </DropdownMenu>
-                      </Dropdown>
-                    </div>
-
-                    {/* Descripcion Pedido */}
-                    <div className="space-y-2  flex flex-col">
-                      <Label className="text-white">Descripcion Pedido</Label>
-                      <Textarea
-                        className="w-40 h-40 bg-gray-700 text-white border-gray-600"
-                        id="TxtPedido"
-                        name="TxtPedido"
-                        value={formData.TxtPedido as string}
-                        onChange={(e) => {
-                          HandleChangeForm("TxtPedido", e.target.value);
-                        }}
-                      />
-                    </div>
+    <ProtectedRouteComponentemail>
+      <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
+        {/* Modal */}
+        {ModalVisible && (
+          <div>
+            <div className="fixed inset-0 flex items-center justify-center bg-slate-200 bg-opacity-50 z-50">
+              {/* <FormEdit /> */}
+              <div className="h-[77vh] from-gray-900 via-gray-800 to-black flex flex-col items-center bg-white p-6 rounded-xl">
+                <div className="w-full max-w-4xl p-8 bg-gray-800 rounded-lg shadow-xl mt-2 mb-2 rounded-xl">
+                  <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-3xl font-bold text-white">
+                      Actualizar Datos
+                    </h1>
+                    <CircleX
+                      className="h-10 w-10 text-white"
+                      onClick={() => setModalVisible(false)}
+                    />
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Actualizar Fila
-                  </Button>
-                </form>
+                  <form onSubmit={HandleSubmitForm} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Categoria */}
+                      <div className="space-y-2 flex flex-col w-40">
+                        <Label className="text-white">Categoria</Label>
+                        <Dropdown>
+                          <DropdownTrigger className="w-40">
+                            <Button
+                              endContent={
+                                <ChevronDownIcon className="text-small" />
+                              }
+                              variant="faded"
+                            >
+                              {formData.Categoria === "" ||
+                              formData.Categoria === undefined
+                                ? "Categoria"
+                                : formData.Categoria}
+                            </Button>
+                          </DropdownTrigger>
+                          <DropdownMenu
+                            disallowEmptySelection
+                            aria-label="Table Columns"
+                            closeOnSelect={true}
+                            selectedKeys={
+                              new Set([String(formData.Categoria)]) || "all"
+                            }
+                            selectionMode="single"
+                            onSelectionChange={(e) => {
+                              HandleChangeForm(
+                                "Categoria",
+                                String(e.anchorKey)
+                              );
+                            }}
+                          >
+                            {Categorias.map((categoria) => (
+                              <DropdownItem
+                                key={categoria.uid}
+                                className="capitalize"
+                              >
+                                {capitalize(categoria.name)}
+                              </DropdownItem>
+                            ))}
+                          </DropdownMenu>
+                        </Dropdown>
+                      </div>
+
+                      {/* Especialidad */}
+                      <div className="space-y-2 flex flex-col w-40">
+                        <Label className="text-white">Especialidad</Label>
+                        <Dropdown>
+                          <DropdownTrigger className="w-40">
+                            <Button
+                              endContent={
+                                <ChevronDownIcon className="text-small" />
+                              }
+                              variant="faded"
+                              className="w-full"
+                            >
+                              {formData.Especialidad === "" ||
+                              formData.Especialidad === undefined
+                                ? "Especialidad"
+                                : formData.Especialidad}
+                            </Button>
+                          </DropdownTrigger>
+                          <DropdownMenu
+                            disallowEmptySelection
+                            aria-label="Table Columns"
+                            closeOnSelect={true}
+                            selectedKeys={
+                              new Set([String(formData.Especialidad) || "all"])
+                            }
+                            selectionMode="single"
+                            onSelectionChange={(e) => {
+                              HandleChangeForm(
+                                "Especialidad",
+                                String(e.anchorKey)
+                              );
+                            }}
+                          >
+                            {Especialidad.map((especialidad) => (
+                              <DropdownItem
+                                key={especialidad.uid}
+                                className="capitalize"
+                              >
+                                {capitalize(especialidad.name)}
+                              </DropdownItem>
+                            ))}
+                          </DropdownMenu>
+                        </Dropdown>
+                      </div>
+
+                      {/* Responsable */}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">Responsable</Label>
+                        <Input
+                          type={"text"}
+                          name="Responsable"
+                          value={formData.Responsable as string}
+                          onChange={(e) => {
+                            HandleChangeForm("Responsable", e.target.value);
+                          }}
+                          className="w-40 bg-gray-700 text-white border-gray-600"
+                        />
+                      </div>
+
+                      {/* TAG */}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">TAG</Label>
+                        <Input
+                          type={"text"}
+                          name="TAG"
+                          value={formData.TAG as string}
+                          onChange={(e) => {
+                            HandleChangeForm("TAG", e.target.value);
+                          }}
+                          className="w-40 bg-gray-700 text-white border-gray-600"
+                        />
+                      </div>
+
+                      {/* Partida */}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">Partida</Label>
+                        <Input
+                          type={"text"}
+                          name="Partida"
+                          value={formData.Partida as string}
+                          onChange={(e) => {
+                            HandleChangeForm("Partida", e.target.value);
+                          }}
+                          className="w-40 bg-gray-700 text-white border-gray-600"
+                        />
+                      </div>
+
+                      {/* Mes */}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">Mes</Label>
+                        <Dropdown>
+                          <DropdownTrigger className="w-40">
+                            <Button
+                              endContent={
+                                <ChevronDownIcon className="text-small" />
+                              }
+                              variant="faded"
+                            >
+                              {formData.Mes === 0 ||
+                              formData.Mes === undefined ||
+                              formData.Mes === null
+                                ? "Mes"
+                                : months.filter(
+                                    (item) => item.uid === formData.Mes
+                                  )[0].name}
+                            </Button>
+                          </DropdownTrigger>
+                          <DropdownMenu
+                            disallowEmptySelection
+                            aria-label="Table Columns"
+                            closeOnSelect={true}
+                            selectedKeys={
+                              new Set([String(formData.Mes) || "all"])
+                            }
+                            selectionMode="single"
+                            onSelectionChange={(e) => {
+                              HandleChangeForm("Mes", Number(e.anchorKey));
+                            }}
+                          >
+                            {months.map((item) => (
+                              <DropdownItem
+                                key={item.uid}
+                                className="capitalize"
+                              >
+                                {item.name}
+                              </DropdownItem>
+                            ))}
+                          </DropdownMenu>
+                        </Dropdown>
+                      </div>
+
+                      {/* Monto */}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">Monto</Label>
+                        <Input
+                          type={"number"}
+                          id={"Monto"}
+                          name={"Monto"}
+                          value={String(formData.Monto) as string}
+                          onChange={(e) => {
+                            HandleChangeForm("Monto", e.target.value);
+                          }}
+                          className="w-40 bg-gray-700 text-white border-gray-600"
+                        />
+                      </div>
+
+                      {/* Proveedor */}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">Proovedor</Label>
+                        <Input
+                          type={"text"}
+                          name="Proveedor"
+                          value={formData.Proveedor as string}
+                          onChange={(e) => {
+                            HandleChangeForm("Proveedor", e.target.value);
+                          }}
+                          className="w-40 bg-gray-700 text-white border-gray-600"
+                        />
+                      </div>
+
+                      {/* OC/SP/OT */}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">OC/SP/OT</Label>
+                        <Input
+                          type={"text"}
+                          name="OC"
+                          value={formData.OC as string}
+                          onChange={(e) => {
+                            HandleChangeForm("OC", e.target.value);
+                          }}
+                          className="w-40 bg-gray-700 text-white border-gray-600"
+                        />
+                      </div>
+
+                      {/* Posicion */}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">Posicion</Label>
+                        <Input
+                          type={"text"}
+                          name="Posicion"
+                          value={formData.Posicion as string}
+                          onChange={(e) => {
+                            HandleChangeForm("Posicion", e.target.value);
+                          }}
+                          className="w-40 bg-gray-700 text-white border-gray-600"
+                        />
+                      </div>
+
+                      {/* Fecha OC/SP*/}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">Fecha OC/SP</Label>
+                        <Input
+                          type={"text"}
+                          name="Fecha"
+                          value={formData.Fecha as string}
+                          onChange={(e) => {
+                            HandleChangeForm("Fecha", e.target.value);
+                          }}
+                          className="w-40 bg-gray-700 text-white border-gray-600"
+                        />
+                      </div>
+
+                      {/* Clasificacion */}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">Clasificación</Label>
+                        <Dropdown>
+                          <DropdownTrigger className="w-40">
+                            <Button
+                              endContent={
+                                <ChevronDownIcon className="text-small" />
+                              }
+                              variant="faded"
+                            >
+                              {formData.Clasificacion === undefined ||
+                              formData.Clasificacion === null
+                                ? "Clasificacion"
+                                : Clasificacion.filter(
+                                    (item) =>
+                                      item.uid === formData.Clasificacion
+                                  )[0].name}
+                            </Button>
+                          </DropdownTrigger>
+                          <DropdownMenu
+                            disallowEmptySelection
+                            aria-label="Table Columns"
+                            closeOnSelect={true}
+                            selectedKeys={
+                              new Set([String(formData.Clasificacion) || "all"])
+                            }
+                            selectionMode="single"
+                            onSelectionChange={(e) => {
+                              HandleChangeForm(
+                                "Clasificacion",
+                                String(e.anchorKey)
+                              );
+                            }}
+                          >
+                            {Clasificacion.map((item) => (
+                              <DropdownItem
+                                key={item.uid}
+                                className="capitalize"
+                              >
+                                {item.name}
+                              </DropdownItem>
+                            ))}
+                          </DropdownMenu>
+                        </Dropdown>
+                      </div>
+
+                      {/* Descripcion Pedido */}
+                      <div className="space-y-2  flex flex-col">
+                        <Label className="text-white">Descripcion Pedido</Label>
+                        <Textarea
+                          className="w-40 h-40 bg-gray-700 text-white border-gray-600"
+                          id="TxtPedido"
+                          name="TxtPedido"
+                          value={formData.TxtPedido as string}
+                          onChange={(e) => {
+                            HandleChangeForm("TxtPedido", e.target.value);
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Actualizar Fila
+                    </Button>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
+        )}
+        <div className="text-white text-2xl mt-8 flex items-start">
+          Detalle Costos Mantto Planta
         </div>
-      )}
-      <div className="text-white text-2xl mt-8 flex items-start">
-        Detalle Costos Mantto Planta
+        <div className="w-5/6 mt-8">
+          <Table
+            aria-label="Example table with custom cells, pagination and sorting"
+            isHeaderSticky
+            bottomContent={bottomContent}
+            bottomContentPlacement="outside"
+            classNames={{
+              wrapper: "max-h-[600px]",
+            }}
+            selectedKeys={selectedKeys}
+            // selectionMode="multiple"
+            sortDescriptor={sortDescriptor}
+            topContent={topContent}
+            topContentPlacement="outside"
+            onSelectionChange={setSelectedKeys}
+            onSortChange={setSortDescriptor}
+          >
+            <TableHeader columns={headerColumns}>
+              {(column) => (
+                <TableColumn
+                  key={column.uid}
+                  align={column.uid === "actions" ? "center" : "start"}
+                  allowsSorting={column.sortable}
+                >
+                  {column.name}
+                </TableColumn>
+              )}
+            </TableHeader>
+            <TableBody emptyContent={"No activities found"} items={sortedItems}>
+              {(item) => (
+                <TableRow key={item._id}>
+                  {(columnKey) => (
+                    <TableCell>{renderCell(item, columnKey)}</TableCell>
+                  )}
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-      <div className="w-5/6 mt-8">
-        <Table
-          aria-label="Example table with custom cells, pagination and sorting"
-          isHeaderSticky
-          bottomContent={bottomContent}
-          bottomContentPlacement="outside"
-          classNames={{
-            wrapper: "max-h-[600px]",
-          }}
-          selectedKeys={selectedKeys}
-          // selectionMode="multiple"
-          sortDescriptor={sortDescriptor}
-          topContent={topContent}
-          topContentPlacement="outside"
-          onSelectionChange={setSelectedKeys}
-          onSortChange={setSortDescriptor}
-        >
-          <TableHeader columns={headerColumns}>
-            {(column) => (
-              <TableColumn
-                key={column.uid}
-                align={column.uid === "actions" ? "center" : "start"}
-                allowsSorting={column.sortable}
-              >
-                {column.name}
-              </TableColumn>
-            )}
-          </TableHeader>
-          <TableBody emptyContent={"No activities found"} items={sortedItems}>
-            {(item) => (
-              <TableRow key={item._id}>
-                {(columnKey) => (
-                  <TableCell>{renderCell(item, columnKey)}</TableCell>
-                )}
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+    </ProtectedRouteComponentemail>
   );
 }
