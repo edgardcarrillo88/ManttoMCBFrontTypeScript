@@ -240,7 +240,7 @@ const router = useRouter()
     }else{
       Puntaje = 0
     }
-    let objectRespuesta = {id: parseInt(key.split("_")[1]),respuesta: value, Puntaje: Puntaje} 
+    const objectRespuesta = {id: parseInt(key.split("_")[1]),respuesta: value, Puntaje: Puntaje} 
     ArrayRespuestas.push(objectRespuesta)
   }
     const PuntajeTotal = ArrayRespuestas.reduce((acc, pregunta) => acc + pregunta.Puntaje, 0);
