@@ -32,8 +32,8 @@ const Options: Option[] = [
   },
   {
     title: "Costos",
-    subtitle: "PdP Sulfuros",
-    description: "Actualización de actividades",
+    subtitle: "Mantto Planta",
+    description: "Actualización y revisión de costos",
     image:
       "https://images.pexels.com/photos/210600/pexels-photo-210600.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     path: "/costos",
