@@ -36,14 +36,25 @@ import { ProtectedRouteComponentemail } from "@/components/protected-route-email
 
 import { useRouter } from "next/navigation";
 import { Pen } from "lucide-react";
+import {
+  Table as TableCdn,
+  TableBody as TableBodyCdn,
+  TableCaption,
+  TableCell as TableCellCdn,
+  TableFooter,
+  TableHead,
+  TableHeader as TableHeaderCdn,
+  TableRow as TableRowCdn,
+} from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
+import { set } from "date-fns";
+
+
 
 const columns = [
   { name: "PARTIDA", uid: "partida", sortable: true },
   { name: "DESCRIPCION", uid: "descripcion" },
   { name: "CATEGORIA", uid: "categoria" },
-  //   { name: "FECHA REQ.", uid: "fecharequerida", sortable: true },
-  //   { name: "TIPO AVISO", uid: "tipoaviso", sortable: true },
-  //   { name: "STATUS", uid: "status", sortable: true },
   { name: "MONTO SP", uid: "montosp" },
   { name: "MONTO OC", uid: "montooc" },
   { name: "TOTAL COMPR", uid: "totalcompromiso" },
@@ -74,16 +85,7 @@ const INITIAL_VISIBLE_COLUMNS = [
   "saldo",
 ];
 
-interface FormData {
-  codSAP: string;
-  noParte: string;
-  descripcion: string;
-  cantidad: string;
-  um: string;
-  caracteristicas: string;
-}
-
-type TypePreAvisos = {
+type TypeCompromisos = {
   monto: number;
   totalSP: number;
   totalOC: number;
@@ -94,17 +96,49 @@ type TypePreAvisos = {
   especialidad: string;
 };
 
-type TypeTAG = {
-  TAG: string;
-};
-
-type TypePlanta = {
-  name: string;
-  uid: string;
-};
-
 type TypeEspecialidad = {
   especialidad: string;
+};
+
+type TypeSPs = {
+  _id: string;
+  SP: string;
+  PosSP: string;
+  Partida: string;
+  TextoBreve: string;
+  FechaSolicitud: Date;
+  IndicadorBorrado?: string;
+  Concluida?: string;
+  Periodo: number;
+  Monto: number;
+  Forecast: string;
+  deleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+};
+
+type TypeOCs = {
+  _id: string;
+  OC: string;
+  OCPos: string;
+  Fecha: Date;
+  Proveedor: string;
+  TextoBreve: string;
+  IndicadorBorrado?: string;
+  ValorOC: number;
+  PorEntregar: number;
+  Moneda: string;
+  CarryOverUSD: number;
+  TipoCompromiso: string;
+  Monto: number;
+  Partida: string;
+  Periodo: number;
+  Forecast: string;
+  deleted: false;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
 };
 
 export default function page(params: any) {
@@ -117,6 +151,12 @@ export default function page(params: any) {
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
+
+  const [compromisoSPs, setCompromisoSPs] = useState<TypeSPs[]>([]);
+  const [compromisoOCs, setCompromisoOCs] = useState<TypeOCs[]>([]);
+
+  const [filtercompromisoSPs, setFilterCompromisoSPs] = useState<TypeSPs[]>([]);
+  const [filtercompromisoOCs, setFilterCompromisoOCs] = useState<TypeOCs[]>([]);
 
   const [thirdparty, setThirdparty] = useState<TypeEspecialidad[]>([
     { especialidad: "E&I" },
@@ -134,7 +174,7 @@ export default function page(params: any) {
     direction: "ascending",
   });
   const [compromisosPartidas, setCompromisosPartidas] = useState<
-    TypePreAvisos[]
+    TypeCompromisos[]
   >([]);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(1);
@@ -146,7 +186,31 @@ export default function page(params: any) {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/cost/getprocesscompromisosdata`
       );
-      console.log(response.data.data);
+      console.log(response.data.dataSP);
+
+      response.data.dataSP = response.data.dataSP.map((item: TypeSPs) => ({
+        ...item,
+        FechaSolicitud: new Date(item.FechaSolicitud),
+        createdAt: new Date(item.createdAt),
+        updatedAt: new Date(item.updatedAt),
+      }));
+
+      setCompromisoSPs(response.data.dataSP);
+      setFilterCompromisoSPs(response.data.dataSP);
+
+      console.log(response.data.dataOC.filter((item: any)=> item.Partida === "MPLT-207"));
+
+      response.data.dataOC = response.data.dataOC.map((item: TypeOCs) => ({
+        ...item,
+        Fecha: new Date(item.Fecha),
+        createdAt: new Date(item.createdAt),
+        updatedAt: new Date(item.updatedAt),
+      }));
+
+      setCompromisoOCs(response.data.dataOC);
+      setFilterCompromisoOCs(response.data.dataOC);
+
+      console.log(response.data.data.filter);
       setCompromisosPartidas(response.data.data);
     };
     fetchData();
@@ -165,6 +229,8 @@ export default function page(params: any) {
 
   const filteredItems = React.useMemo(() => {
     let filteredPreAvisos = [...compromisosPartidas];
+    let filteredSPs = [...compromisoSPs];
+    let filteredOCs = [...compromisoOCs];
 
     if (hasSearchFilter) {
       filteredPreAvisos = filteredPreAvisos.filter((preaviso) =>
@@ -172,12 +238,24 @@ export default function page(params: any) {
           .toLowerCase()
           .includes(filterValue.toLowerCase())
       );
+
+      
     }
 
     if (hasSearchFilterTAG) {
       filteredPreAvisos = filteredPreAvisos.filter((preaviso) =>
         preaviso.partida.toLowerCase().includes(filterValueTAG.toLowerCase())
       );
+
+      filteredSPs = filteredSPs.filter((item) =>
+        item.Partida.toLowerCase().includes(filterValueTAG.toLowerCase())
+      );
+      setFilterCompromisoSPs(filteredSPs);
+
+      filteredOCs = filteredOCs.filter((item) =>
+        item.Partida.toLowerCase().includes(filterValueTAG.toLowerCase())
+      );
+      setFilterCompromisoOCs(filteredOCs);
     }
 
     if (
@@ -200,7 +278,7 @@ export default function page(params: any) {
 
     setPage(1);
 
-    return filteredPreAvisos;
+    return {filteredPreAvisos, filteredSPs, filteredOCs};
   }, [
     compromisosPartidas,
     filterValue,
@@ -209,19 +287,21 @@ export default function page(params: any) {
     thirdPartyFilter,
   ]);
 
-  const pages = Math.ceil(filteredItems.length / rowsPerPage);
+  const pages = Math.ceil(filteredItems.filteredPreAvisos.length / rowsPerPage);
 
   const items = React.useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    return filteredItems.slice(start, end);
+    return filteredItems.filteredPreAvisos.slice(start, end);
   }, [page, filteredItems, rowsPerPage]);
 
   const sortedItems = React.useMemo(() => {
-    return [...items].sort((a: TypePreAvisos, b: TypePreAvisos) => {
-      const first = a[sortDescriptor.column as keyof TypePreAvisos] as number;
-      const second = b[sortDescriptor.column as keyof TypePreAvisos] as number;
+    return [...items].sort((a: TypeCompromisos, b: TypeCompromisos) => {
+      const first = a[sortDescriptor.column as keyof TypeCompromisos] as number;
+      const second = b[
+        sortDescriptor.column as keyof TypeCompromisos
+      ] as number;
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
@@ -229,8 +309,8 @@ export default function page(params: any) {
   }, [sortDescriptor, items]);
 
   const renderCell = React.useCallback(
-    (partidas: TypePreAvisos, columnKey: React.Key) => {
-      const cellValue = partidas[columnKey as keyof TypePreAvisos];
+    (partidas: TypeCompromisos, columnKey: React.Key) => {
+      const cellValue = partidas[columnKey as keyof TypeCompromisos];
 
       switch (columnKey) {
         case "descripcion":
@@ -368,7 +448,7 @@ export default function page(params: any) {
               placeholder="Buscar por Partida..."
               startContent={<SearchIcon />}
               value={filterValueTAG}
-              onClear={() => onClearTAG()}
+              onClear={() => {onClearTAG();setFilterCompromisoOCs(compromisoOCs);setFilterCompromisoSPs(compromisoSPs);}}
               onValueChange={onSearchChangeTAG}
             />
           </div>
@@ -379,7 +459,10 @@ export default function page(params: any) {
               endContent={<ClearFiltersIcon className="text-small" />}
               variant="faded"
               onClick={() => {
-                onClearTAG(), onClear(); setthirdPartyFilter(new Set([]));
+                onClearTAG(), onClear();
+                setthirdPartyFilter(new Set([]));
+                setFilterCompromisoOCs(compromisoOCs);
+                setFilterCompromisoSPs(compromisoSPs);
               }}
             >
               Reset Filters
@@ -453,7 +536,7 @@ export default function page(params: any) {
         <span className="hidden sm:w-[30%] text-small text-default-400">
           {selectedKeys === "all"
             ? "All items selected"
-            : `${selectedKeys.size} of ${filteredItems.length} selected`}
+            : `${selectedKeys.size} of ${filteredItems.filteredPreAvisos.length} selected`}
         </span>
         <Pagination
           isCompact
@@ -530,6 +613,95 @@ export default function page(params: any) {
               )}
             </TableBody>
           </Table>
+        </div>
+
+        <div className="w-full flex flex-col items-center">
+          <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+            <Label className="text-2xl font-bold">Listado de SP</Label>
+            <TableCdn className="rounded-lg">
+              <TableCaption>
+                Solamente se muestran las SPs aprobadas (todos los montos estan
+                en USD)
+              </TableCaption>
+              <TableHeaderCdn>
+                <TableRowCdn>
+                  <TableHead className="w-[100px]">SP</TableHead>
+                  <TableHead>Pos</TableHead>
+                  <TableHead>Partida</TableHead>
+                  <TableHead>Texto Breve</TableHead>
+                  <TableHead className="text-right">Monto</TableHead>
+                </TableRowCdn>
+              </TableHeaderCdn>
+              <TableBodyCdn>
+                {filtercompromisoSPs.map((item) => (
+                  <TableRowCdn key={item._id}>
+                    <TableCellCdn className="font-medium">
+                      {item.SP}
+                    </TableCellCdn>
+                    <TableCellCdn>{item.PosSP}</TableCellCdn>
+                    <TableCellCdn>{item.Partida}</TableCellCdn>
+                    <TableCellCdn>{item.TextoBreve}</TableCellCdn>
+                    <TableCellCdn className="text-right">
+                      <div className="text-bold text-xs md:text-small capitalize text-right">
+                        {new Intl.NumberFormat("es-US", {
+                          maximumFractionDigits: 2,
+                        }).format(item.Monto)}
+                      </div>
+                    </TableCellCdn>
+                  </TableRowCdn>
+                ))}
+              </TableBodyCdn>
+              {/* <TableFooter>
+              <TableRowCdn>
+                <TableCellCdn colSpan={3}>Total</TableCellCdn>
+                <TableCellCdn className="text-right">$2,500.00</TableCellCdn>
+              </TableRowCdn>
+            </TableFooter> */}
+            </TableCdn>
+          </div>
+
+          <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+            <Label className="text-2xl font-bold">Listado de OC</Label>
+            <TableCdn className="rounded-lg">
+              <TableCaption>(todos los montos estan en USD)</TableCaption>
+              <TableHeaderCdn>
+                <TableRowCdn>
+                  <TableHead className="w-[100px]">OC</TableHead>
+                  <TableHead>Pos</TableHead>
+                  <TableHead>Partida</TableHead>
+                  <TableHead>Texto Breve</TableHead>
+                  <TableHead>Proveedor</TableHead>
+                  <TableHead className="text-right">Monto</TableHead>
+                </TableRowCdn>
+              </TableHeaderCdn>
+              <TableBodyCdn>
+                {filtercompromisoOCs.map((item) => (
+                  <TableRowCdn key={item._id}>
+                    <TableCellCdn className="font-medium">
+                      {item.OC}
+                    </TableCellCdn>
+                    <TableCellCdn>{item.OCPos}</TableCellCdn>
+                    <TableCellCdn>{item.Partida}</TableCellCdn>
+                    <TableCellCdn>{item.TextoBreve}</TableCellCdn>
+                    <TableCellCdn>{item.Proveedor}</TableCellCdn>
+                    <TableCellCdn className="text-right">
+                      <div className="text-bold text-xs md:text-small capitalize text-right">
+                        {new Intl.NumberFormat("es-US", {
+                          maximumFractionDigits: 2,
+                        }).format(item.Monto)}
+                      </div>
+                    </TableCellCdn>
+                  </TableRowCdn>
+                ))}
+              </TableBodyCdn>
+              {/* <TableFooter>
+              <TableRowCdn>
+                <TableCellCdn colSpan={3}>Total</TableCellCdn>
+                <TableCellCdn className="text-right">$2,500.00</TableCellCdn>
+              </TableRowCdn>
+            </TableFooter> */}
+            </TableCdn>
+          </div>
         </div>
       </div>
     </ProtectedRouteComponentemail>
