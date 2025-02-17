@@ -152,7 +152,6 @@ export default function page(params: any) {
       // console.log(response2.data.Contratistas);
       // console.log(response2.data.Contratistas.length);
       setThirdparty(response2.data.Contratistas);
-      console.log("Holi");
     };
     fetchData();
   }, [UpdateStatusCount]);
@@ -341,7 +340,7 @@ export default function page(params: any) {
             <div className="flex flex-col">
               <p className="text-bold  text-xs  capitalize">
                 {new Date(activities.FechaEnvio).toLocaleDateString("es-ES", {
-                  timeZone: "America/Lima",
+                  timeZone: "UTC",
                   day: "2-digit",
                   month: "short",
                   year: "2-digit",
