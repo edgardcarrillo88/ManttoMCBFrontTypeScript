@@ -341,7 +341,6 @@ export default function page(params: any) {
               <p className="text-bold  text-xs  capitalize">
                 {new Date(activities.FechaEnvio).toLocaleDateString("es-ES", {
                   timeZone: "UTC",
-                  day: "2-digit",
                   month: "short",
                   year: "2-digit",
                 })}
