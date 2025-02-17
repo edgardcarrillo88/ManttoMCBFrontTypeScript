@@ -49,8 +49,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { set } from "date-fns";
 
-
-
 const columns = [
   { name: "PARTIDA", uid: "partida", sortable: true },
   { name: "DESCRIPCION", uid: "descripcion" },
@@ -116,6 +114,8 @@ type TypeSPs = {
   createdAt: Date;
   updatedAt: Date;
   __v: number;
+  Especialidad: string;
+  DescripcionPartida: string;
 };
 
 type TypeOCs = {
@@ -139,6 +139,8 @@ type TypeOCs = {
   createdAt: Date;
   updatedAt: Date;
   __v: number;
+  Especialidad: string;
+  DescripcionPartida: string;
 };
 
 export default function page(params: any) {
@@ -198,7 +200,9 @@ export default function page(params: any) {
       setCompromisoSPs(response.data.dataSP);
       setFilterCompromisoSPs(response.data.dataSP);
 
-      console.log(response.data.dataOC.filter((item: any)=> item.Partida === "MPLT-207"));
+      console.log(
+        response.data.dataOC.filter((item: any) => item.Partida === "MPLT-207")
+      );
 
       response.data.dataOC = response.data.dataOC.map((item: TypeOCs) => ({
         ...item,
@@ -239,7 +243,23 @@ export default function page(params: any) {
           .includes(filterValue.toLowerCase())
       );
 
-      
+      console.log(filteredSPs);
+      console.log(filterValue);
+
+      filteredSPs = filteredSPs.filter((item) =>
+        (item.DescripcionPartida || "")
+          .toLowerCase()
+          .includes(filterValue.toLowerCase())
+      );
+
+      setFilterCompromisoSPs(filteredSPs);
+
+      filteredOCs = filteredOCs.filter((item) =>
+        (item.DescripcionPartida || "")
+        .toLowerCase().
+        includes(filterValue.toLowerCase())
+      );
+      setFilterCompromisoOCs(filteredOCs);
     }
 
     if (hasSearchFilterTAG) {
@@ -265,6 +285,16 @@ export default function page(params: any) {
       filteredPreAvisos = filteredPreAvisos.filter((item) =>
         Array.from(thirdPartyFilter).includes(item.especialidad)
       );
+
+      filteredSPs = filteredSPs.filter((item) =>
+        Array.from(thirdPartyFilter).includes(item.Especialidad)
+      );
+      setFilterCompromisoSPs(filteredSPs);
+
+      filteredOCs = filteredOCs.filter((item) =>
+        Array.from(thirdPartyFilter).includes(item.Especialidad)
+      );
+      setFilterCompromisoOCs(filteredOCs);
     }
 
     // if (
@@ -278,7 +308,7 @@ export default function page(params: any) {
 
     setPage(1);
 
-    return {filteredPreAvisos, filteredSPs, filteredOCs};
+    return { filteredPreAvisos, filteredSPs, filteredOCs };
   }, [
     compromisosPartidas,
     filterValue,
@@ -437,7 +467,11 @@ export default function page(params: any) {
               placeholder="Buscar por descripción..."
               startContent={<SearchIcon />}
               value={filterValue}
-              onClear={() => onClear()}
+              onClear={() => {
+                onClear();
+                setFilterCompromisoOCs(compromisoOCs);
+                setFilterCompromisoSPs(compromisoSPs);
+              }}
               onValueChange={onSearchChange}
             />
 
@@ -448,7 +482,11 @@ export default function page(params: any) {
               placeholder="Buscar por Partida..."
               startContent={<SearchIcon />}
               value={filterValueTAG}
-              onClear={() => {onClearTAG();setFilterCompromisoOCs(compromisoOCs);setFilterCompromisoSPs(compromisoSPs);}}
+              onClear={() => {
+                onClearTAG();
+                setFilterCompromisoOCs(compromisoOCs);
+                setFilterCompromisoSPs(compromisoSPs);
+              }}
               onValueChange={onSearchChangeTAG}
             />
           </div>
