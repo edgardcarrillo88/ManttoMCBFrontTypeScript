@@ -35,7 +35,7 @@ import { capitalize } from "@/components/table/utils/utils";
 import { ProtectedRouteComponentemail } from "@/components/protected-route-email";
 
 import { useRouter } from "next/navigation";
-import { Pen } from "lucide-react";
+import { Pen, FileSpreadsheet } from "lucide-react";
 import {
   Table as TableCdn,
   TableBody as TableBodyCdn,
@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
 import { set } from "date-fns";
+import * as XLSX from "xlsx";
 
 const columns = [
   { name: "PARTIDA", uid: "partida", sortable: true },
@@ -256,8 +257,8 @@ export default function page(params: any) {
 
       filteredOCs = filteredOCs.filter((item) =>
         (item.DescripcionPartida || "")
-        .toLowerCase().
-        includes(filterValue.toLowerCase())
+          .toLowerCase()
+          .includes(filterValue.toLowerCase())
       );
       setFilterCompromisoOCs(filteredOCs);
     }
@@ -607,11 +608,37 @@ export default function page(params: any) {
     );
   }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
 
+  const exportToExcel = () => {
+    const compromisos = filteredItems.filteredPreAvisos;
+    const sps = filtercompromisoSPs;
+    const ocs = filtercompromisoOCs;
+  
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(compromisos), "Compromisos");
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(sps), "SPs");
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(ocs), "OCs");
+  
+    XLSX.writeFile(workbook, "Reporte.xlsx");
+  };
+
   return (
     <ProtectedRouteComponentemail>
       <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
-        <div className="text-white text-2xl mt-8 flex items-start">
-          Control de Compromisos
+        <div className="text-white text-2xl mt-8 flex flex-col items-center w-4/5 px-4 py-2">
+          <div className="flex justify-center">
+            <Label className="text-2xl font-bold">Control de Compromisos</Label>
+          </div>
+          <div className="w-full flex justify-end">
+          <button 
+          onClick={() => exportToExcel()}
+          className="flex border-2 border-blue-600 items-center text-sm gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all">
+            <FileSpreadsheet size={20} />
+            <span>Exportar a Excel</span>
+          </button>
+          </div>
+          
+
+       
         </div>
         <div className="w-5/6 mt-8">
           <Table
