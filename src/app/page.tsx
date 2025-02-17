@@ -40,7 +40,7 @@ const Options: Option[] = [
   },
   {
     title: "Dashboard",
-    subtitle: "PdP",
+    subtitle: "Gestión de Mantenimiento",
     description: "Dashboard",
     image:
       "https://media.istockphoto.com/id/1488294044/es/foto/el-empresario-trabaja-en-una-computadora-port%C3%A1til-mostrando-un-panel-de-an%C3%A1lisis-de-negocios.jpg?b=1&s=612x612&w=0&k=20&c=KqRI6iHb1zI9OjWEGkRx5Skq--TNSzSy3HqNMeC_Rps=",
