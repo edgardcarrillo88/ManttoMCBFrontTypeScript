@@ -969,111 +969,111 @@ type ChartLineMultipleProps = {
 //   );
 // }
 
-export function ChartInteractivoCombinado({ data }: ChartLineCombinadaProps) {
-  console.log(data);
-  const [activeChart, setActiveChart] =
-    React.useState<keyof typeof chartConfig>("LineaBaseReal");
-  const [lineChartActive, setLineChartActive] = useState(data.LineaCombinada);
+// export function ChartInteractivoCombinado({ data }: ChartLineCombinadaProps) {
+//   console.log(data);
+//   const [activeChart, setActiveChart] =
+//     React.useState<keyof typeof chartConfig>("LineaBaseReal");
+//   const [lineChartActive, setLineChartActive] = useState(data.LineaCombinada);
 
-  React.useEffect(() => {
-    setLineChartActive(data.LineaCombinada);
-  }, [data.LineaCombinada, data.LineaCombinadaAjustada]);
+//   React.useEffect(() => {
+//     setLineChartActive(data.LineaCombinada);
+//   }, [data.LineaCombinada, data.LineaCombinadaAjustada]);
 
-  const total = React.useMemo(
-    () => ({
-      LineaBaseReal: "70%",
-      LineaBaseAjustada: "80%",
-    }),
-    []
-  );
+//   const total = React.useMemo(
+//     () => ({
+//       LineaBaseReal: "70%",
+//       LineaBaseAjustada: "80%",
+//     }),
+//     []
+//   );
 
-  return (
-    <Card className=" w-full">
-      <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle>Curva S con Barras</CardTitle>
-          <CardDescription>Comparación entre línea base y real</CardDescription>
-        </div>
-        <div className="flex">
-          {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
-            const chart = key as keyof typeof chartConfig;
-            return (
-              <button
-                key={chart}
-                data-active={activeChart === chart}
-                className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-                onClick={() => {
-                  setLineChartActive(
-                    chartConfig[chart].label === "Curva Real"
-                      ? data.LineaCombinada
-                      : data.LineaCombinadaAjustada
-                  );
-                  setActiveChart(chart);
-                }}
-              >
-                <span className="text-xs text-muted-foreground">
-                  {chartConfig[chart].label}
-                </span>
-                <span className="text-lg font-bold leading-none sm:text-3xl">
-                  {total[key as keyof typeof total].toLocaleString()}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </CardHeader>
-      <CardContent className="px-2 sm:p-6">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
-        >
-          <ComposedChart
-            data={lineChartActive}
-            margin={{ left: 12, right: 12 }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="Ejex"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                });
-              }}
-            />
-            <ChartTooltipRecharts
-              cursor={false}
-              content={<ChartTooltipContent indicator="dot" />}
-            />
-            {/* Barras */}
-            <Bar dataKey="hh_lb" fill="var(--color-desktop)" radius={4} />
-            <Bar dataKey="hh_real" fill="var(--color-mobile)" radius={4} />
-            {/* Línea */}
-            <Line
-              dataKey="hh_lb_cum"
-              type="monotone"
-              stroke={`var(--color-${activeChart})`}
-              strokeWidth={2}
-              dot={true}
-            />
-            <Line
-              dataKey="hh_real_cum"
-              type="monotone"
-              stroke="var(--color-secondary)"
-              strokeWidth={2}
-              dot={true}
-            />
-          </ComposedChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  );
-}
+//   return (
+//     <Card className=" w-full">
+//       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
+//         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
+//           <CardTitle>Curva S con Barras</CardTitle>
+//           <CardDescription>Comparación entre línea base y real</CardDescription>
+//         </div>
+//         <div className="flex">
+//           {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
+//             const chart = key as keyof typeof chartConfig;
+//             return (
+//               <button
+//                 key={chart}
+//                 data-active={activeChart === chart}
+//                 className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+//                 onClick={() => {
+//                   setLineChartActive(
+//                     chartConfig[chart].label === "Curva Real"
+//                       ? data.LineaCombinada
+//                       : data.LineaCombinadaAjustada
+//                   );
+//                   setActiveChart(chart);
+//                 }}
+//               >
+//                 <span className="text-xs text-muted-foreground">
+//                   {chartConfig[chart].label}
+//                 </span>
+//                 <span className="text-lg font-bold leading-none sm:text-3xl">
+//                   {total[key as keyof typeof total].toLocaleString()}
+//                 </span>
+//               </button>
+//             );
+//           })}
+//         </div>
+//       </CardHeader>
+//       <CardContent className="px-2 sm:p-6">
+//         <ChartContainer
+//           config={chartConfig}
+//           className="aspect-auto h-[250px] w-full"
+//         >
+//           <ComposedChart
+//             data={lineChartActive}
+//             margin={{ left: 12, right: 12 }}
+//           >
+//             <CartesianGrid vertical={false} />
+//             <XAxis
+//               dataKey="Ejex"
+//               tickLine={false}
+//               axisLine={false}
+//               tickMargin={8}
+//               minTickGap={32}
+//               tickFormatter={(value) => {
+//                 const date = new Date(value);
+//                 return date.toLocaleDateString("en-US", {
+//                   month: "short",
+//                   day: "numeric",
+//                 });
+//               }}
+//             />
+//             <ChartTooltipRecharts
+//               cursor={false}
+//               content={<ChartTooltipContent indicator="dot" />}
+//             />
+//             {/* Barras */}
+//             <Bar dataKey="hh_lb" fill="var(--color-desktop)" radius={4} />
+//             <Bar dataKey="hh_real" fill="var(--color-mobile)" radius={4} />
+//             {/* Línea */}
+//             <Line
+//               dataKey="hh_lb_cum"
+//               type="monotone"
+//               stroke={`var(--color-${activeChart})`}
+//               strokeWidth={2}
+//               dot={true}
+//             />
+//             <Line
+//               dataKey="hh_real_cum"
+//               type="monotone"
+//               stroke="var(--color-secondary)"
+//               strokeWidth={2}
+//               dot={true}
+//             />
+//           </ComposedChart>
+//         </ChartContainer>
+//       </CardContent>
+//     </Card>
+//   );
+// }
 
 export default function Page() {
   // const [LineaBase, setLineaBase] = useState<TypeLineaBase>([]);
@@ -1117,11 +1117,12 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
-      <div className="mt-8 w-5/6">
+      <h1>Dashboard PdP</h1>
+      {/* <div className="mt-8 w-5/6">
         <ChartInteractivoCombinado
           data={{ LineaCombinada, LineaCombinadaAjustada }}
         />
-      </div>
+      </div> */}
 
       {/* <div className="w-4/5 grid gap-4 grid-cols-1 p-8 rounded-lg border-2 border-slate-300 mr-auto ml-auto md:grid-cols-2"> */}
       <div>
