@@ -99,8 +99,17 @@ const evaluationschema = z
 
     ToggleAndamios: z.boolean().default(false),
     ToggleCamionGrua: z.boolean().default(false),
+    ToggleManlift: z.boolean().default(false),
+    ToggleMontacarga: z.boolean().default(false),
     ToggleTelescopica: z.boolean().default(false),
     ToggleServicioEspecializado: z.boolean().default(false),
+
+    TiempoParadaEquipo: z
+      .string()
+      .regex(/^\d+$/, {
+        message: "debe ingresar un número",
+      })
+      .optional(),
 
     CantidadAndamios: z
       .string()
@@ -109,6 +118,18 @@ const evaluationschema = z
       })
       .optional(),
     CantidadCamionGrua: z
+      .string()
+      .regex(/^\d+$/, {
+        message: "debe ingresar un número",
+      })
+      .optional(),
+      CantidadManlift: z
+      .string()
+      .regex(/^\d+$/, {
+        message: "debe ingresar un número",
+      })
+      .optional(),
+      CantidadMontacarga: z
       .string()
       .regex(/^\d+$/, {
         message: "debe ingresar un número",
@@ -151,11 +172,13 @@ const evaluationschema = z
     // Archivo: z.array(z.instanceof(File)).refine((files) => files.length > 0, {
     //   message: "Debes seleccionar al menos un archivo.",
     // }),
-    Archivo: z.array(
-      z.any().refine((file) => file instanceof File, {
-        message: "Debes seleccionar al menos un archivo.",
-      })
-    ),
+    Archivo: z
+      .array(
+        z.any().refine((file) => file instanceof File, {
+          message: "Debes seleccionar al menos un archivo.",
+        })
+      )
+      .min(1, { message: "Debes seleccionar al menos un archivo." }),
   })
   .refine(
     (data) => {
@@ -195,6 +218,34 @@ const evaluationschema = z
     {
       message: "Campo obligatorio",
       path: ["CantidadCamionGrua"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.ToggleManlift) {
+        return (
+          data.CantidadManlift !== "" && data.CantidadManlift !== "0"
+        );
+      }
+      return true;
+    },
+    {
+      message: "Campo obligatorio",
+      path: ["CantidadManlift"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.ToggleMontacarga) {
+        return (
+          data.CantidadMontacarga !== "" && data.CantidadMontacarga !== "0"
+        );
+      }
+      return true;
+    },
+    {
+      message: "Campo obligatorio",
+      path: ["CantidadMontacarga"],
     }
   )
   .refine(
@@ -269,6 +320,20 @@ const evaluationschema = z
     {
       message: "El archivo no debe superar los 5MB.",
     }
+  )
+  .refine(
+    (data) => {
+      if (data.ToggleParadaProceso || data.ToggleParadaPlanta) {
+        return (
+          data.TiempoParadaEquipo !== "" && data.TiempoParadaEquipo !== "0"
+        );
+      }
+      return true;
+    },
+    {
+      message: "Debe agregar un tiempo de parada",
+      path: ["TiempoParadaEquipo"],
+    }
   );
 
 const TipoAviso = [
@@ -293,7 +358,10 @@ const toggleFields = [
     name: "ToggleParadaNoAplica",
     label: "Se ejecuta con equipo en funcionamiento?",
   },
-  { name: "ToggleParadaProceso", label: "Requiere parar el proceso?" },
+  {
+    name: "ToggleParadaProceso",
+    label: "Requiere parar el proceso (sectorial)?",
+  },
   { name: "ToggleParadaPlanta", label: "Requiere Parada de Planta?" },
 ] as const;
 
@@ -351,6 +419,10 @@ export default function page() {
       CantidadTelescopica: "0",
       ToggleCamionGrua: false,
       CantidadCamionGrua: "0",
+      ToggleManlift: false,
+      CantidadManlift: "0",
+      ToggleMontacarga: false,
+      CantidadMontacarga: "0",
       ToggleServicioEspecializado: false,
       ServicioEspecializado: "",
 
@@ -358,6 +430,8 @@ export default function page() {
       ToggleParadaNoAplica: false,
       ToggleParadaProceso: false,
       ToggleParadaPlanta: false,
+
+      TiempoParadaEquipo: "0",
 
       LaborMecanicos: "0",
       LaborSoldadores: "0",
@@ -456,6 +530,8 @@ export default function page() {
       .filter((file: File) => file.name !== fileName);
     form.setValue("Archivo", updatedFiles);
   };
+
+  console.log(form.formState.errors);
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
@@ -1138,6 +1214,134 @@ export default function page() {
                     )}
                   </div>
 
+                  {/* Manlift */}
+                  <div className="border-2 border-white p-4 rounded-2xl">
+                    <FormField
+                      control={form.control}
+                      name="ToggleManlift"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>Requiere Manlift?</FormLabel>
+                            {/* <FormDescription>
+                          Receive emails about new products, features, and more.
+                        </FormDescription> */}
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {form.watch("ToggleManlift") && (
+                      <FormField
+                        control={form.control}
+                        name="CantidadManlift"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg shadow-sm">
+                            <FormLabel className="text-gray-300 text-sm font-medium">
+                              Cantidad Manlift
+                              {form.formState.errors.CantidadManlift
+                                ?.message && (
+                                <p className="text-sm text-red-600">
+                                  {
+                                    form.formState.errors.CantidadManlift
+                                      ?.message
+                                  }
+                                </p>
+                              )}
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                autoComplete="off"
+                                onInput={(e) => {
+                                  e.currentTarget.value =
+                                    e.currentTarget.value.replace(
+                                      /[^0-9]/g,
+                                      ""
+                                    );
+                                }}
+                                className="border-2 w-16 text-center border-gray-600 focus:border-blue-400 focus:ring focus:ring-blue-300 bg-gray-700 text-white rounded-2xl px-4 py-2 transition-all duration-200"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
+
+                  {/* MontaCarga */}
+                  <div className="border-2 border-white p-4 rounded-2xl">
+                    <FormField
+                      control={form.control}
+                      name="ToggleMontacarga"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>Requiere Montacarga?</FormLabel>
+                            {/* <FormDescription>
+                          Receive emails about new products, features, and more.
+                        </FormDescription> */}
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {form.watch("ToggleMontacarga") && (
+                      <FormField
+                        control={form.control}
+                        name="CantidadMontacarga"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg shadow-sm">
+                            <FormLabel className="text-gray-300 text-sm font-medium">
+                              Cantidad Montacarga
+                              {form.formState.errors.CantidadMontacarga
+                                ?.message && (
+                                <p className="text-sm text-red-600">
+                                  {
+                                    form.formState.errors.CantidadMontacarga
+                                      ?.message
+                                  }
+                                </p>
+                              )}
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                autoComplete="off"
+                                onInput={(e) => {
+                                  e.currentTarget.value =
+                                    e.currentTarget.value.replace(
+                                      /[^0-9]/g,
+                                      ""
+                                    );
+                                }}
+                                className="border-2 w-16 text-center border-gray-600 focus:border-blue-400 focus:ring focus:ring-blue-300 bg-gray-700 text-white rounded-2xl px-4 py-2 transition-all duration-200"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
+
                   {/* Parada de Planta */}
                   <div className="border-2 border-white p-4 rounded-2xl">
                     {toggleFields.map(({ name, label }) => (
@@ -1174,6 +1378,56 @@ export default function page() {
                           Debe seleccionar un tipo de parada
                         </p>
                       )}
+                    {(form.watch("ToggleParadaProceso") ||
+                      form.watch("ToggleParadaPlanta")) && (
+                      <FormField
+                        control={form.control}
+                        name="TiempoParadaEquipo"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300 text-sm font-medium">
+                              Tiempo total de parada (Horas)
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                autoComplete="off"
+                                onChange={(e) => {
+                                  let value = e.currentTarget.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                  );
+
+                                  if (value.length > 2) {
+                                    value = value.slice(0, 2);
+                                  }
+
+                                  const numValue = parseInt(value);
+                                  if (numValue > 99) {
+                                    value = "99";
+                                  }
+
+                                  field.onChange(value);
+                                }}
+                                className="border-2 w-24 text-center border-gray-600 focus:border-blue-400 focus:ring focus:ring-blue-300 bg-gray-700 text-white rounded-2xl px-4 py-2 transition-all duration-200"
+                              />
+                            </FormControl>
+                            {form.formState.errors.TiempoParadaEquipo
+                              ?.message && (
+                              <p className="text-sm text-red-600">
+                                {
+                                  form.formState.errors.TiempoParadaEquipo
+                                    ?.message
+                                }
+                              </p>
+                            )}
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </div>
 
                   {/* Servicios especializados */}

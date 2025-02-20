@@ -267,29 +267,29 @@ export default function page(params: any) {
       switch (columnKey) {
         case "descripcion":
           return (
-            <div className="text-bold text-xs md:text-small capitalize">
+            <div className="text-bold text-black text-xs md:text-small capitalize">
               {preavisos.DescripcionBreve}
             </div>
           );
         case "planta":
           return (
-            <div className="text-bold text-xs md:text-small capitalize">
+            <div className="text-bold text-black text-xs md:text-small capitalize">
               {preavisos.TipoPlanta}
             </div>
           );
         case "tag":
           return (
-            <div className="text-bold text-xs md:text-small capitalize">
+            <div className="text-bold text-black text-xs md:text-small capitalize">
               {preavisos.Equipo}
             </div>
           );
         case "tipoaviso":
           return (
             <div className="flex flex-col">
-              <p className="text-bold  text-xs md:text-small  capitalize">
+              <p className="text-bold text-black  text-xs md:text-small  capitalize">
                 {preavisos.TipoAviso}
               </p>
-              {/* <p className="text-bold text-tiny capitalize text-default-400">
+              {/* <p className="text-bold text-black text-tiny capitalize text-default-400">
                 {preavisos.TipoPlanta}
               </p> */}
             </div>
@@ -308,7 +308,7 @@ export default function page(params: any) {
         case "fecharequerida":
           return (
             <div className="flex flex-col">
-              <p className="text-bold text-xs md:text-small capitalize">
+              <p className="text-bold text-black text-xs md:text-small capitalize">
                 {new Date(preavisos.FechaRequerida).toLocaleString("es-ES", {
                   timeZone: "UTC",
                   day: "2-digit",
