@@ -237,6 +237,7 @@ export default function page(params: any) {
     let filteredSPs = [...compromisoSPs];
     let filteredOCs = [...compromisoOCs];
 
+
     if (hasSearchFilter) {
       filteredPreAvisos = filteredPreAvisos.filter((preaviso) =>
         preaviso.descripcionPartida
@@ -268,15 +269,15 @@ export default function page(params: any) {
         preaviso.partida.toLowerCase().includes(filterValueTAG.toLowerCase())
       );
 
-      filteredSPs = filteredSPs.filter((item) =>
-        item.Partida.toLowerCase().includes(filterValueTAG.toLowerCase())
-      );
-      setFilterCompromisoSPs(filteredSPs);
+      // filteredSPs = filteredSPs.filter((item) =>
+      //   item.Partida.toLowerCase().includes(filterValueTAG.toLowerCase())
+      // );
+      // setFilterCompromisoSPs(filteredSPs);
 
-      filteredOCs = filteredOCs.filter((item) =>
-        item.Partida.toLowerCase().includes(filterValueTAG.toLowerCase())
-      );
-      setFilterCompromisoOCs(filteredOCs);
+      // filteredOCs = filteredOCs.filter((item) =>
+      //   item.Partida.toLowerCase().includes(filterValueTAG.toLowerCase())
+      // );
+      // setFilterCompromisoOCs(filteredOCs);
     }
 
     if (
@@ -346,25 +347,25 @@ export default function page(params: any) {
       switch (columnKey) {
         case "descripcion":
           return (
-            <div className="text-bold text-xs md:text-small capitalize">
+            <div className="text-bold text-black text-xs md:text-small capitalize">
               {partidas.descripcionPartida}
             </div>
           );
         case "partida":
           return (
-            <div className="text-bold text-xs md:text-small capitalize">
+            <div className="text-bold text-black text-xs md:text-small capitalize">
               {partidas.partida}
             </div>
           );
         case "categoria":
           return (
-            <div className="text-bold text-xs md:text-small capitalize">
+            <div className="text-bold text-black text-xs md:text-small capitalize">
               {partidas.especialidad}
             </div>
           );
         case "montosp":
           return (
-            <div className="text-bold text-xs md:text-small capitalize text-right">
+            <div className="text-bold text-xs text-black md:text-small capitalize text-right">
               {new Intl.NumberFormat("es-US", {
                 maximumFractionDigits: 2,
               }).format(partidas.totalSP)}
@@ -372,7 +373,7 @@ export default function page(params: any) {
           );
         case "montooc":
           return (
-            <div className="text-bold text-xs md:text-small capitalize text-right">
+            <div className="text-bold text-black text-xs md:text-small capitalize text-right">
               {new Intl.NumberFormat("es-US", {
                 maximumFractionDigits: 2,
               }).format(partidas.totalOC)}
@@ -380,7 +381,7 @@ export default function page(params: any) {
           );
         case "totalcompromiso":
           return (
-            <div className="text-bold text-xs md:text-small capitalize text-right">
+            <div className="text-bold text-xs text-black md:text-small capitalize text-right">
               {new Intl.NumberFormat("es-US", {
                 maximumFractionDigits: 2,
               }).format(partidas.totalCompromiso)}
@@ -389,7 +390,7 @@ export default function page(params: any) {
 
         case "forecast":
           return (
-            <div className="text-bold text-xs md:text-small capitalize text-right">
+            <div className="text-bold text-xs text-black md:text-small capitalize text-right">
               {new Intl.NumberFormat("es-US", {
                 maximumFractionDigits: 2,
               }).format(partidas.monto)}
@@ -397,7 +398,7 @@ export default function page(params: any) {
           );
         case "saldo":
           return (
-            <div className="text-bold text-xs md:text-small capitalize text-right">
+            <div className="text-bold text-xs text-black md:text-small capitalize text-right">
               {new Intl.NumberFormat("es-US", {
                 maximumFractionDigits: 2,
               }).format(partidas.saldo)}
@@ -681,7 +682,7 @@ export default function page(params: any) {
         </div>
 
         <div className="w-full flex flex-col items-center">
-          <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+          <div className="bg-white p-4 text-black mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
             <Label className="text-2xl font-bold">Listado de SP</Label>
             <TableCdn className="rounded-lg">
               <TableCaption>
@@ -725,7 +726,7 @@ export default function page(params: any) {
             </TableCdn>
           </div>
 
-          <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+          <div className="bg-white p-4 text-black mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
             <Label className="text-2xl font-bold">Listado de OC</Label>
             <TableCdn className="rounded-lg">
               <TableCaption>(todos los montos estan en USD)</TableCaption>

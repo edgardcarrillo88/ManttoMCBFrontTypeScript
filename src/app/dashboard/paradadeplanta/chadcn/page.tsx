@@ -968,7 +968,7 @@ type ChartLineMultipleProps = {
 //     </Table>
 //   );
 // }
- function ChartInteractivoCombinado({ data }: ChartLineCombinadaProps) {
+function ChartInteractivoCombinado({ data }: ChartLineCombinadaProps) {
   console.log(data);
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>("LineaBaseReal");
@@ -1045,13 +1045,41 @@ type ChartLineMultipleProps = {
                 });
               }}
             />
+
+            {/* Eje Y para las Barras */}
+            <YAxis
+              yAxisId="left"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+            />
+
+            {/* Eje Y para las Líneas */}
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+            />
+
             <ChartTooltipRecharts
               cursor={false}
               content={<ChartTooltipContent indicator="dot" />}
             />
             {/* Barras */}
-            <Bar dataKey="hh_lb" fill="var(--color-desktop)" radius={4} />
-            <Bar dataKey="hh_real" fill="var(--color-mobile)" radius={4} />
+            <Bar
+              dataKey="hh_lb"
+              fill="var(--color-desktop)"
+              radius={4}
+              yAxisId="left"
+            />
+            <Bar
+              dataKey="hh_real"
+              fill="var(--color-mobile)"
+              radius={4}
+              yAxisId="left"
+            />
             {/* Línea */}
             <Line
               dataKey="hh_lb_cum"
@@ -1059,6 +1087,7 @@ type ChartLineMultipleProps = {
               stroke={`var(--color-${activeChart})`}
               strokeWidth={2}
               dot={true}
+              yAxisId="right"
             />
             <Line
               dataKey="hh_real_cum"
@@ -1066,6 +1095,7 @@ type ChartLineMultipleProps = {
               stroke="var(--color-secondary)"
               strokeWidth={2}
               dot={true}
+              yAxisId="right"
             />
           </ComposedChart>
         </ChartContainer>
@@ -1116,11 +1146,80 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
-      <h1 className="text-4xl font-bold text-white text-center mt-8">Dashboard PdP</h1>
+      <h1 className="text-4xl font-bold text-white text-center mt-8">
+        Dashboard PdP
+      </h1>
       <div className="mt-8 w-5/6">
         <ChartInteractivoCombinado
           data={{ LineaCombinada, LineaCombinadaAjustada }}
         />
+      </div>
+
+      <div className="w-5/6 flex flex-row items-center gap-4">
+        <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+          <Label className="text-2xl font-bold text-white">Listado de SP</Label>
+          <Table className="rounded-lg">
+            <TableCaption>
+              Solamente se muestran las SPs aprobadas (todos los montos estan en
+              USD)
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Pos</TableHead>
+                <TableHead>Partida</TableHead>
+                <TableHead>Texto Breve</TableHead>
+                <TableHead className="text-right">Monto</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {invoices.map((item) => (
+                <TableRow key={item.invoice}>
+                  <TableCell className="font-medium">{item.invoice}</TableCell>
+                  <TableCell>{item.paymentMethod}</TableCell>
+                  <TableCell>{item.invoice}</TableCell>
+                  <TableCell>{item.paymentStatus}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            {/* <TableFooter>
+              <TableRowCdn>
+                <TableCellCdn colSpan={3}>Total</TableCellCdn>
+                <TableCellCdn className="text-right">$2,500.00</TableCellCdn>
+              </TableRowCdn>
+            </TableFooter> */}
+          </Table>
+        </div>
+
+        <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+          <Label className="text-2xl font-bold text-white">Listado de OC</Label>
+          <Table className="rounded-lg">
+            <TableCaption>(todos los montos estan en USD)</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Pos</TableHead>
+                <TableHead>Partida</TableHead>
+                <TableHead>Texto Breve</TableHead>
+                <TableHead>Proveedor</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {invoices.map((item) => (
+                <TableRow key={item.invoice}>
+                  <TableCell className="font-medium">{item.invoice}</TableCell>
+                  <TableCell>{item.paymentMethod}</TableCell>
+                  <TableCell>{item.invoice}</TableCell>
+                  <TableCell>{item.paymentStatus}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            {/* <TableFooter>
+              <TableRowCdn>
+                <TableCellCdn colSpan={3}>Total</TableCellCdn>
+                <TableCellCdn className="text-right">$2,500.00</TableCellCdn>
+              </TableRowCdn>
+            </TableFooter> */}
+          </Table>
+        </div>
       </div>
 
       {/* <div className="w-4/5 grid gap-4 grid-cols-1 p-8 rounded-lg border-2 border-slate-300 mr-auto ml-auto md:grid-cols-2"> */}
