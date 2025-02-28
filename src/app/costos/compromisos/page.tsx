@@ -237,6 +237,8 @@ export default function page(params: any) {
     let filteredSPs = [...compromisoSPs];
     let filteredOCs = [...compromisoOCs];
 
+ 
+
 
     if (hasSearchFilter) {
       filteredPreAvisos = filteredPreAvisos.filter((preaviso) =>
@@ -246,6 +248,7 @@ export default function page(params: any) {
       );
 
       console.log(filteredSPs);
+      console.log("holi");
       console.log(filterValue);
 
       filteredSPs = filteredSPs.filter((item) =>
@@ -269,15 +272,15 @@ export default function page(params: any) {
         preaviso.partida.toLowerCase().includes(filterValueTAG.toLowerCase())
       );
 
-      // filteredSPs = filteredSPs.filter((item) =>
-      //   item.Partida.toLowerCase().includes(filterValueTAG.toLowerCase())
-      // );
-      // setFilterCompromisoSPs(filteredSPs);
+      filteredSPs = filteredSPs.filter((item) =>
+        item.Partida?.toLowerCase().includes(filterValueTAG.toLowerCase())
+      );
+      setFilterCompromisoSPs(filteredSPs);
 
-      // filteredOCs = filteredOCs.filter((item) =>
-      //   item.Partida.toLowerCase().includes(filterValueTAG.toLowerCase())
-      // );
-      // setFilterCompromisoOCs(filteredOCs);
+      filteredOCs = filteredOCs.filter((item) =>
+        item.Partida?.toLowerCase().includes(filterValueTAG.toLowerCase())
+      );
+      setFilterCompromisoOCs(filteredOCs);
     }
 
     if (
