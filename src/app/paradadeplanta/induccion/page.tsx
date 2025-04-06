@@ -184,6 +184,8 @@ export default function page() {
 
   const Empresas = [
     "Prodise",
+    "Vibrotechnology",
+    "Esermin",
     "IngePeru",
     "Confipetrol",
     "Emensa",
@@ -218,16 +220,34 @@ export default function page() {
     "Sandvik",
     "Schneider",
     "V&C Corporate SAC",
-    "Yale"
+    "Yale",
+    "Tega",
+    "Atlantica",
+    "ABB",
+    "Morken",
+    "Pack Energy",
+    "Hitachi",
+    "Energia Peruana",
+    "Makyl",
   ];
 
   const Puestos = [
     "Técnico Mecánico",
     "Técnico Electricista",
     "Técnico Instrumentista",
+    "Técnico Andamiero",
+    "Técnico Lubricador",
     "Técnico Soldador",
+    "Operador de equipo",
+    "Inspector",
     "Ingeniero seguridad",
-    "Supervisor",
+    "Supervisor Operaciones",
+    "Supervisor SSO",
+    "Residente",
+    "Lider",
+    "Jefe SSO",
+    "Jefe Operaciones",
+    "Gerente",
     "Planner",
   ];
 
