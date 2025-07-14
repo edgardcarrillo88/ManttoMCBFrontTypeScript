@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { TrendingUp } from "lucide-react";
+import { Bold, TrendingUp } from "lucide-react";
 import {
   CartesianGrid,
   Line,
@@ -17,6 +17,7 @@ import {
   RadialBarChart,
   RadialBar,
   PolarRadiusAxis,
+  Legend,
   ComposedChart,
   Tooltip as ChartTooltipRecharts,
 } from "recharts";
@@ -1256,7 +1257,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
           >
             <ComposedChart
               data={lineChartActive}
-              margin={{ left: 12, right: 12 }}
+              margin={{ left: 12, right: 30, bottom: 24 }}
             >
               <CartesianGrid vertical={false} />
               <XAxis
@@ -1270,7 +1271,14 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                   return date.toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
+                    hour: "2-digit",
                   });
+                }}
+                label={{
+                  value: "Fechas",
+                  position: "insideBottom",
+                  offset: -10,
+                  style: { fontWeight: "bold", fontSize: 12, fill: "#333" },
                 }}
               />
 
@@ -1280,6 +1288,8 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
+                tickFormatter={(value) => `${value} hh`}
+                label={{ value: "HH", angle: -90, position: "insideLeft" }}
               />
 
               {/* Eje Y para las Líneas */}
@@ -1289,12 +1299,67 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
+                tickFormatter={(value) => `${value} hh`}
+                label={{
+                  value: "HH Acumuladas",
+                  angle: 90,
+                  position: "insideRight",
+                  offset: -20,
+                }}
               />
 
               <ChartTooltipRecharts
-                cursor={false}
+                cursor={true}
                 content={<ChartTooltipContent indicator="dot" />}
               />
+
+              {/* <Legend
+                verticalAlign="middle"
+                align="right"
+                layout="vertical"
+                iconType="circle"
+                wrapperStyle={{
+                  paddingLeft: 40,
+                  paddingRight: -20,
+                  lineHeight: "24px",
+                }}
+              /> */}
+
+              <Legend
+                verticalAlign="middle"
+                align="right"
+                layout="vertical"
+                content={({ payload }) => (
+                  <ul className="list-none m-0 p-0">
+                    {payload?.map((entry, index) => {
+                      const isCum = String(entry.dataKey).includes("cum");
+                      return (
+                        <li
+                          key={`item-${index}`}
+                          className="flex items-center mb-1"
+                        >
+                          <div
+                            style={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: isCum ? "50%" : "2px", // círculo para reales, cuadrado para plan
+                              backgroundColor: entry.color,
+                              marginRight: 8,
+                            }}
+                          />
+                          <span className="text-sm">{entry.value}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                 wrapperStyle={{
+                  paddingLeft: 40,
+                  paddingRight: -20,
+                  lineHeight: "24px",
+                }}
+              />
+
               {/* Barras */}
               <Bar
                 dataKey="hh_lb"
@@ -1347,17 +1412,26 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
   const [ContratistaSeleccionado, setContratistaSeleccionado] =
     React.useState<Selection>(new Set([]));
 
-    
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>("LineaBaseReal");
-  const [lineChartActive, setLineChartActive] = useState(data.General.filter((item)=> item.Ejex ));
+  const [lineChartActive, setLineChartActive] = useState(
+    data.General.filter((item) => item.Ejex)
+  );
 
   const uniqueAreas = Array.from(
-    new Set(data.General.map((item) => item.Filtro02).filter((date)=>date && date.trim() !== ""))
+    new Set(
+      data.General.map((item) => item.Filtro02).filter(
+        (date) => date && date.trim() !== ""
+      )
+    )
     //new Set(data.General.map((item) => item.Filtro02))
   );
   const uniqueContratista = Array.from(
-    new Set(data.General.map((item) => item.Filtro01).filter((date)=>date && date.trim() !== ""))
+    new Set(
+      data.General.map((item) => item.Filtro01).filter(
+        (date) => date && date.trim() !== ""
+      )
+    )
     //new Set(data.General.map((item) => item.Filtro01))
   );
 
@@ -1385,17 +1459,23 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
   // }, [ArrayAreas, ArrayContratista]);
 
   React.useEffect(() => {
-  const allUids = ArrayAreas.map((a) => a.uid).filter((uid): uid is string => !!uid);
-  const allContratistaUids = ArrayContratista.map((c) => c.uid).filter((uid): uid is string => !!uid);
+    const allUids = ArrayAreas.map((a) => a.uid).filter(
+      (uid): uid is string => !!uid
+    );
+    const allContratistaUids = ArrayContratista.map((c) => c.uid).filter(
+      (uid): uid is string => !!uid
+    );
 
-  if (ArrayAreas.length > 0 && Array.from(AreaSeleccionada).length === 0) {
-    setAreaSeleccionada(new Set(allUids));
-  }
-  if (ArrayContratista.length > 0 && Array.from(ContratistaSeleccionado).length === 0) {
-    setContratistaSeleccionado(new Set(allContratistaUids));
-  }
-
-}, [ArrayAreas,ArrayContratista]);
+    if (ArrayAreas.length > 0 && Array.from(AreaSeleccionada).length === 0) {
+      setAreaSeleccionada(new Set(allUids));
+    }
+    if (
+      ArrayContratista.length > 0 &&
+      Array.from(ContratistaSeleccionado).length === 0
+    ) {
+      setContratistaSeleccionado(new Set(allContratistaUids));
+    }
+  }, [ArrayAreas, ArrayContratista]);
 
   const UpdateCurvaS = async () => {
     console.log("Actualizando curva S con WhatIf");
@@ -1426,23 +1506,27 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
     if (response.status === 200) {
       // aca debo setear la nueva curva
       console.log(response.data);
-      setLineChartActive((response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter((item) => item.Ejex)); //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
+      setLineChartActive(
+        (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter(
+          (item) => item.Ejex
+        )
+      ); //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
       setLineChartActive(
         chartConfig[activeChart].label === "Curva Real"
-          ? (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter((item) => item.Ejex)//Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
-          : (response.data.CurvaWhatIf.Ajustada as TypeCurvaSGeneral).filter((item) => item.Ejex)//Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
+          ? (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter(
+              (item) => item.Ejex
+            ) //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
+          : (response.data.CurvaWhatIf.Ajustada as TypeCurvaSGeneral).filter(
+              (item) => item.Ejex
+            ) //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
       );
-      console.log("Datos actualizados")
+      console.log("Datos actualizados");
     } else {
       console.error("Error al obtener los datos:");
     }
   };
 
   //---------------------------------------------
-
-
-
-
 
   React.useEffect(() => {
     const selectedArea = Array.from(AreaSeleccionada)[0];
@@ -1999,7 +2083,7 @@ export default function Page() {
         {WhatIfMemo}
       </div> */}
 
-      <div className="w-5/6 flex flex-row items-center gap-4">
+      <div className="w-5/6 flex flex-col md:flex-row items-center gap-4">
         <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
           <Label className="text-2xl font-bold text-white">Listado de SP</Label>
           <Table className="rounded-lg">
