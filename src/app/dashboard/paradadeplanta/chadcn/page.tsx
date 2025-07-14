@@ -37,13 +37,7 @@ import {
   ChartTooltipContent,
   ChartStyle,
 } from "@/components/ui/chart";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Label, Pie, PieChart, Sector } from "recharts";
 import {
   Table,
@@ -56,7 +50,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { TableColumn, Selection, SortDescriptor } from "@nextui-org/table";
+
 import axios from "axios";
+
+import {
+  DropdownTrigger,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+} from "@nextui-org/dropdown";
+
+import { ChevronDownIcon } from "@/components/table/utils/ChevronDownIcon";
+import { Button } from "@nextui-org/button";
+import { set } from "date-fns";
+import { useMemo } from "react";
 
 // export const description = "A line chart with dots";
 
@@ -200,163 +208,175 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-type TypeLineaBase = {
+type TypeCurvaSGeneral = {
   Ejex: Date;
-  hh: number;
-  "hh cum": number;
-}[];
+  Filtro01?: string;
+  Filtro02?: string;
 
-type TypeLineaCombinada = {
-  Ejex: Date;
   hh_lb: number;
   hh_lb_cum: number;
   hh_real: number;
   hh_real_cum: number;
 }[];
 
+type TypeChartData = {
+  LineaCombinada: TypeCurvaSGeneral;
+  LineaCombinadaAjustada: TypeCurvaSGeneral;
+};
+
+type TypeValoresTotales = {
+  AvanceReal: number;
+  AvanceRealAjustado: number;
+};
+
 type ChartLineCombinadaProps = {
-  data: {
-    LineaCombinada: TypeLineaCombinada;
-    LineaCombinadaAjustada: TypeLineaCombinada;
-  };
+  data: TypeChartData;
+  totales: TypeValoresTotales;
+};
+
+type TypeChartDataArea = {
+  General: TypeCurvaSGeneral;
+  Ajustada: TypeCurvaSGeneral;
+};
+
+type ChartLineCombinadaPropsArea = {
+  name: string;
+  data: TypeChartDataArea;
+  totales: TypeValoresTotales;
 };
 
 type ChartLineProps = {
-  data: TypeLineaBase;
+  data: TypeCurvaSGeneral;
 };
 
-type ChartLineMultipleProps = {
-  LineaBase: TypeLineaBase;
-  LineaReal: TypeLineaBase;
-};
+export function ChartLine({ data }: ChartLineProps) {
+  return (
+    <>
+      <Card className="">
+        <CardHeader>
+          <CardTitle>Linea Base General</CardTitle>
+          <CardDescription>PdP Enero 2025</CardDescription>
+        </CardHeader>
 
-// export function ChartLine({ data }: ChartLineProps) {
-//   return (
-//     <>
-//       <Card className="">
-//         <CardHeader>
-//           <CardTitle>Linea Base General</CardTitle>
-//           <CardDescription>PdP Enero 2025</CardDescription>
-//         </CardHeader>
-//         <CardContent>
-//           <ChartContainer config={chartConfig}>
-//             <LineChart
-//               accessibilityLayer
-//               // data={chartData}
-//               data={data}
-//               margin={{
-//                 left: 12,
-//                 right: 12,
-//               }}
-//             >
-//               <CartesianGrid vertical={false} />
-//               <XAxis
-//                 // dataKey="month"
-//                 dataKey="Ejex"
-//                 tickLine={false}
-//                 axisLine={false}
-//                 tickMargin={8}
-//                 // tickFormatter={(value: any) => value.slice(0, 3)}
-//                 tickFormatter={(value) => {
-//                   const date = new Date(value);
-//                   return date.toLocaleDateString("en-US", {
-//                     month: "short",
-//                     day: "numeric",
-//                   });
-//                 }}
-//               />
-//               <ChartTooltip
-//                 cursor={false}
-//                 content={<ChartTooltipContent hideLabel />}
-//               />
-//               <Line
-//                 // dataKey="desktop"
-//                 dataKey="hh cum"
-//                 type="monotone"
-//                 stroke="var(--color-desktop)"
-//                 strokeWidth={2}
-//                 dot={{
-//                   fill: "var(--color-desktop)",
-//                 }}
-//                 activeDot={{
-//                   r: 6,
-//                 }}
-//               />
-//               <ChartLegend
-//                 content={
-//                   <ChartLegendContent
-//                     //  nameKey="desktop"
-//                     nameKey="hh cum"
-//                   />
-//                 }
-//               />
-//             </LineChart>
-//           </ChartContainer>
-//         </CardContent>
-//         <CardFooter className="flex-col items-start gap-2 text-sm">
-//           <div className="flex gap-2 font-medium leading-none">
-//             Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//           </div>
-//           <div className="leading-none text-muted-foreground">
-//             Showing total visitors for the last 6 months
-//           </div>
-//         </CardFooter>
-//       </Card>
+        <CardContent>
+          <ChartContainer config={chartConfig}>
+            <LineChart
+              accessibilityLayer
+              // data={chartData}
+              data={data}
+              margin={{
+                left: 12,
+                right: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                // dataKey="month"
+                dataKey="Ejex"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                // tickFormatter={(value: any) => value.slice(0, 3)}
+                tickFormatter={(value) => {
+                  const date = new Date(value);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                }}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Line
+                // dataKey="desktop"
+                dataKey="hh_lb_cum"
+                type="monotone"
+                stroke="var(--color-desktop)"
+                strokeWidth={2}
+                dot={{
+                  fill: "var(--color-desktop)",
+                }}
+                activeDot={{
+                  r: 6,
+                }}
+              />
+              <ChartLegend
+                content={
+                  <ChartLegendContent
+                    //  nameKey="desktop"
+                    nameKey="hh_lb_cum"
+                  />
+                }
+              />
+            </LineChart>
+          </ChartContainer>
+        </CardContent>
+        <CardFooter className="flex-col items-start gap-2 text-sm">
+          <div className="flex gap-2 font-medium leading-none">
+            Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          </div>
+          <div className="leading-none text-muted-foreground">
+            Showing total visitors for the last 6 months
+          </div>
+        </CardFooter>
+      </Card>
 
-//       <Card className="">
-//         <CardHeader>
-//           <CardTitle>Line Chart - Dots</CardTitle>
-//           <CardDescription>January - June 2024</CardDescription>
-//         </CardHeader>
-//         <CardContent>
-//           <ChartContainer config={chartConfig}>
-//             <LineChart
-//               accessibilityLayer
-//               data={chartData}
-//               margin={{
-//                 left: 12,
-//                 right: 12,
-//               }}
-//             >
-//               <CartesianGrid vertical={false} />
-//               <XAxis
-//                 dataKey="month"
-//                 tickLine={false}
-//                 axisLine={false}
-//                 tickMargin={8}
-//                 tickFormatter={(value: any) => value.slice(0, 3)}
-//               />
-//               <ChartTooltip
-//                 cursor={false}
-//                 content={<ChartTooltipContent hideLabel />}
-//               />
-//               <Line
-//                 dataKey="mobile"
-//                 type="natural"
-//                 stroke="var(--color-desktop)"
-//                 strokeWidth={2}
-//                 dot={{
-//                   fill: "var(--color-desktop)",
-//                 }}
-//                 activeDot={{
-//                   r: 6,
-//                 }}
-//               />
-//             </LineChart>
-//           </ChartContainer>
-//         </CardContent>
-//         <CardFooter className="flex-col items-start gap-2 text-sm">
-//           <div className="flex gap-2 font-medium leading-none">
-//             Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//           </div>
-//           <div className="leading-none text-muted-foreground">
-//             Showing total visitors for the last 6 months
-//           </div>
-//         </CardFooter>
-//       </Card>
-//     </>
-//   );
-// }
+      <Card className="">
+        <CardHeader>
+          <CardTitle>Line Chart - Dots</CardTitle>
+          <CardDescription>January - June 2024</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={chartConfig}>
+            <LineChart
+              accessibilityLayer
+              data={chartData}
+              margin={{
+                left: 12,
+                right: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value: any) => value.slice(0, 3)}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Line
+                dataKey="mobile"
+                type="natural"
+                stroke="var(--color-desktop)"
+                strokeWidth={2}
+                dot={{
+                  fill: "var(--color-desktop)",
+                }}
+                activeDot={{
+                  r: 6,
+                }}
+              />
+            </LineChart>
+          </ChartContainer>
+        </CardContent>
+        <CardFooter className="flex-col items-start gap-2 text-sm">
+          <div className="flex gap-2 font-medium leading-none">
+            Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          </div>
+          <div className="leading-none text-muted-foreground">
+            Showing total visitors for the last 6 months
+          </div>
+        </CardFooter>
+      </Card>
+    </>
+  );
+}
 
 // export function ChartLIneInteractive({
 //   LineaBase,
@@ -968,174 +988,854 @@ type ChartLineMultipleProps = {
 //     </Table>
 //   );
 // }
-function ChartInteractivoCombinado({ data }: ChartLineCombinadaProps) {
-  console.log(data);
+
+// const ChartInteractivoCombinado = React.memo(
+//   function ChartInteractivoCombinado({
+//     data,
+//     totales,
+//   }: ChartLineCombinadaProps) {
+//     console.log("Curva general");
+//     const [activeChart, setActiveChart] =
+//       React.useState<keyof typeof chartConfig>("LineaBaseReal");
+//     const [lineChartActive, setLineChartActive] = useState(data.LineaCombinada);
+
+//     React.useEffect(() => {
+//       setLineChartActive(data.LineaCombinada);
+//     }, [data.LineaCombinada, data.LineaCombinadaAjustada]);
+
+//     const total = {
+//       LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
+//       LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
+//     };
+
+//     return (
+//       <Card className=" w-full">
+//         <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
+//           <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
+//             <CardTitle>Curva S con Barras</CardTitle>
+//             <CardDescription>
+//               Comparación entre línea base y real
+//             </CardDescription>
+//           </div>
+//           <div className="flex">
+//             {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
+//               const chart = key as keyof typeof chartConfig;
+//               return (
+//                 <button
+//                   key={chart}
+//                   data-active={activeChart === chart}
+//                   className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+//                   onClick={() => {
+//                     setLineChartActive(
+//                       chartConfig[chart].label === "Curva Real"
+//                         ? data.LineaCombinada
+//                         : data.LineaCombinadaAjustada
+//                     );
+//                     setActiveChart(chart);
+//                   }}
+//                 >
+//                   <span className="text-xs text-muted-foreground">
+//                     {chartConfig[chart].label}
+//                   </span>
+//                   <span className="text-lg font-bold leading-none sm:text-3xl">
+//                     {total[key as keyof typeof total].toLocaleString()}
+//                   </span>
+//                 </button>
+//               );
+//             })}
+//           </div>
+//         </CardHeader>
+//         <CardContent className="px-2 sm:p-6">
+//           <ChartContainer
+//             config={chartConfig}
+//             className="aspect-auto h-[250px] w-full"
+//           >
+//             <ComposedChart
+//               data={lineChartActive}
+//               margin={{ left: 12, right: 12 }}
+//             >
+//               <CartesianGrid vertical={false} />
+//               <XAxis
+//                 dataKey="Ejex"
+//                 tickLine={false}
+//                 axisLine={false}
+//                 tickMargin={8}
+//                 minTickGap={32}
+//                 tickFormatter={(value) => {
+//                   const date = new Date(value);
+//                   return date.toLocaleDateString("en-US", {
+//                     month: "short",
+//                     day: "numeric",
+//                   });
+//                 }}
+//               />
+
+//               {/* Eje Y para las Barras */}
+//               <YAxis
+//                 yAxisId="left"
+//                 tickLine={false}
+//                 axisLine={false}
+//                 tickMargin={8}
+//               />
+
+//               {/* Eje Y para las Líneas */}
+//               <YAxis
+//                 yAxisId="right"
+//                 orientation="right"
+//                 tickLine={false}
+//                 axisLine={false}
+//                 tickMargin={8}
+//               />
+
+//               <ChartTooltipRecharts
+//                 cursor={false}
+//                 content={<ChartTooltipContent indicator="dot" />}
+//               />
+//               {/* Barras */}
+//               <Bar
+//                 dataKey="hh_lb"
+//                 fill="var(--color-desktop)"
+//                 radius={4}
+//                 yAxisId="left"
+//               />
+//               <Bar
+//                 dataKey="hh_real"
+//                 fill="var(--color-mobile)"
+//                 radius={4}
+//                 yAxisId="left"
+//               />
+//               {/* Línea */}
+//               <Line
+//                 dataKey="hh_lb_cum"
+//                 type="monotone"
+//                 // stroke={`var(--color-${activeChart})`}
+//                 stroke={`var(--color-desktop)`}
+//                 strokeWidth={2}
+//                 dot={true}
+//                 yAxisId="right"
+//               />
+//               <Line
+//                 dataKey="hh_real_cum"
+//                 type="monotone"
+//                 // stroke="var(--color-secondary)"
+//                 stroke={`var(--color-mobile)`}
+//                 strokeWidth={2}
+//                 dot={true}
+//                 yAxisId="right"
+//               />
+//             </ComposedChart>
+//           </ChartContainer>
+//         </CardContent>
+//       </Card>
+//     );
+//   }
+// );
+
+const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
+  name,
+  data,
+  totales,
+}: ChartLineCombinadaPropsArea) {
+  const uniqueAreas = Array.from(
+    new Set(data.General.map((item) => item.Filtro01))
+  );
+
+  const ArrayAreas = useMemo(() => {
+    return uniqueAreas.map((area) => ({
+      uid: area,
+      name: area,
+    }));
+  }, [data.General]);
+
+  const [AreaSeleccionada, setAreaSeleccionada] = React.useState<Selection>(
+    new Set()
+  );
+
+  useEffect(() => {
+    const defaultUid = ArrayAreas[0]?.uid;
+    setAreaSeleccionada(defaultUid ? new Set([defaultUid]) : new Set());
+  }, [ArrayAreas]);
+
+  //---------------------------------------------
+
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>("LineaBaseReal");
-  const [lineChartActive, setLineChartActive] = useState(data.LineaCombinada);
+  const [lineChartActive, setLineChartActive] = useState(data.General);
 
   React.useEffect(() => {
-    setLineChartActive(data.LineaCombinada);
-  }, [data.LineaCombinada, data.LineaCombinadaAjustada]);
+    const fuenteDatos =
+      chartConfig[activeChart].label === "Curva Real"
+        ? data.General
+        : data.Ajustada;
 
-  const total = React.useMemo(
-    () => ({
-      LineaBaseReal: "70%",
-      LineaBaseAjustada: "80%",
-    }),
+    const selected = Array.from(AreaSeleccionada)[0];
+    if (selected) {
+      const filtrado = fuenteDatos.filter((item) => item.Filtro01 === selected);
+      setLineChartActive(filtrado);
+    } else {
+      setLineChartActive(data.General); // Si no hay selección, mostrar todo
+    }
+  }, [AreaSeleccionada, activeChart, data.General, data.Ajustada]);
+
+  const total = {
+    LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
+    LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
+  };
+
+  return (
+    <div key={name}>
+      <div className={`mb-2 ${name === "CurvaGeneral" ? "hidden" : "block"}`}>
+        <Dropdown>
+          <DropdownTrigger className="">
+            <Button
+              endContent={<ChevronDownIcon className="text-small" />}
+              variant="faded"
+            >
+              {Array.from(AreaSeleccionada).length === 0
+                ? "Areas"
+                : AreaSeleccionada}
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu
+            disallowEmptySelection
+            aria-label="Table Columns"
+            closeOnSelect={false}
+            selectedKeys={AreaSeleccionada}
+            selectionMode="single"
+            onSelectionChange={setAreaSeleccionada}
+          >
+            {ArrayAreas.map((status) => (
+              <DropdownItem key={status.uid} className="capitalize">
+                {status.name}
+              </DropdownItem>
+            ))}
+          </DropdownMenu>
+        </Dropdown>
+      </div>
+
+      <Card className=" w-full">
+        <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
+          <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
+            <CardTitle>Curva S con Barras</CardTitle>
+            <CardDescription>
+              Comparación entre línea base y real
+            </CardDescription>
+          </div>
+          <div className="flex">
+            {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
+              const chart = key as keyof typeof chartConfig;
+              return (
+                <button
+                  key={chart}
+                  data-active={activeChart === chart}
+                  className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                  onClick={() => {
+                    setLineChartActive(
+                      chartConfig[chart].label === "Curva Real"
+                        ? data.General
+                        : data.Ajustada
+                    );
+                    setActiveChart(chart);
+                  }}
+                >
+                  <span className="text-xs text-muted-foreground">
+                    {chartConfig[chart].label}
+                  </span>
+                  <span className="text-lg font-bold leading-none sm:text-3xl">
+                    {total[key as keyof typeof total].toLocaleString()}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </CardHeader>
+        <CardContent className="px-2 sm:p-6">
+          <ChartContainer
+            config={chartConfig}
+            className="aspect-auto h-[250px] w-full"
+          >
+            <ComposedChart
+              data={lineChartActive}
+              margin={{ left: 12, right: 12 }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="Ejex"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={32}
+                tickFormatter={(value) => {
+                  const date = new Date(value);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                }}
+              />
+
+              {/* Eje Y para las Barras */}
+              <YAxis
+                yAxisId="left"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+
+              {/* Eje Y para las Líneas */}
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+
+              <ChartTooltipRecharts
+                cursor={false}
+                content={<ChartTooltipContent indicator="dot" />}
+              />
+              {/* Barras */}
+              <Bar
+                dataKey="hh_lb"
+                fill="var(--color-desktop)"
+                radius={4}
+                yAxisId="left"
+              />
+              <Bar
+                dataKey="hh_real"
+                fill="var(--color-mobile)"
+                radius={4}
+                yAxisId="left"
+              />
+              {/* Línea */}
+              <Line
+                dataKey="hh_lb_cum"
+                type="monotone"
+                // stroke={`var(--color-${activeChart})`}
+                stroke={`var(--color-desktop)`}
+                strokeWidth={2}
+                dot={true}
+                yAxisId="right"
+              />
+              <Line
+                dataKey="hh_real_cum"
+                type="monotone"
+                // stroke="var(--color-secondary)"
+                stroke={`var(--color-mobile)`}
+                strokeWidth={2}
+                dot={true}
+                yAxisId="right"
+              />
+            </ComposedChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+    </div>
+  );
+});
+
+const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
+  name,
+  data,
+  totales,
+}: ChartLineCombinadaPropsArea) {
+  //---------------------------------------------
+  const [AreaSeleccionada, setAreaSeleccionada] = React.useState<Selection>(
+    new Set([])
+  );
+  const [ContratistaSeleccionado, setContratistaSeleccionado] =
+    React.useState<Selection>(new Set([]));
+
+    
+  const [activeChart, setActiveChart] =
+    React.useState<keyof typeof chartConfig>("LineaBaseReal");
+  const [lineChartActive, setLineChartActive] = useState(data.General.filter((item)=> item.Ejex ));
+
+  const uniqueAreas = Array.from(
+    new Set(data.General.map((item) => item.Filtro02).filter((date)=>date && date.trim() !== ""))
+    //new Set(data.General.map((item) => item.Filtro02))
+  );
+  const uniqueContratista = Array.from(
+    new Set(data.General.map((item) => item.Filtro01).filter((date)=>date && date.trim() !== ""))
+    //new Set(data.General.map((item) => item.Filtro01))
+  );
+
+  const ArrayAreas = useMemo(() => {
+    return uniqueAreas.map((area) => ({
+      uid: area,
+      name: area,
+    }));
+  }, [data.General]);
+
+  const ArrayContratista = useMemo(() => {
+    return uniqueContratista.map((contratista) => ({
+      uid: contratista,
+      name: contratista,
+    }));
+  }, [data.General]);
+
+  // useEffect(() => {
+  //   const defaultUidArea = ArrayAreas[0]?.uid;
+  //   const defaultUidContratista = ArrayContratista[0]?.uid;
+  //   setAreaSeleccionada(defaultUidArea ? new Set([defaultUidArea]) : new Set());
+  //   setContratistaSeleccionado(
+  //     defaultUidContratista ? new Set([defaultUidContratista]) : new Set()
+  //   );
+  // }, [ArrayAreas, ArrayContratista]);
+
+  React.useEffect(() => {
+  const allUids = ArrayAreas.map((a) => a.uid).filter((uid): uid is string => !!uid);
+  const allContratistaUids = ArrayContratista.map((c) => c.uid).filter((uid): uid is string => !!uid);
+
+  if (ArrayAreas.length > 0 && Array.from(AreaSeleccionada).length === 0) {
+    setAreaSeleccionada(new Set(allUids));
+  }
+  if (ArrayContratista.length > 0 && Array.from(ContratistaSeleccionado).length === 0) {
+    setContratistaSeleccionado(new Set(allContratistaUids));
+  }
+
+}, [ArrayAreas,ArrayContratista]);
+
+  const UpdateCurvaS = async () => {
+    console.log("Actualizando curva S con WhatIf");
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL_PY}/ParadaDePlanta/ProcesarWhatIf`,
+      {
+        params: {
+          area: Array.from(AreaSeleccionada),
+          contratista: Array.from(ContratistaSeleccionado),
+        },
+        paramsSerializer: (params) => {
+          const searchParams = new URLSearchParams();
+
+          for (const key in params) {
+            const value = params[key];
+            if (Array.isArray(value)) {
+              value.forEach((v) => searchParams.append(key, v));
+            } else {
+              searchParams.append(key, value);
+            }
+          }
+
+          return searchParams.toString();
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      // aca debo setear la nueva curva
+      console.log(response.data);
+      setLineChartActive((response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter((item) => item.Ejex)); //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
+      setLineChartActive(
+        chartConfig[activeChart].label === "Curva Real"
+          ? (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter((item) => item.Ejex)//Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
+          : (response.data.CurvaWhatIf.Ajustada as TypeCurvaSGeneral).filter((item) => item.Ejex)//Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
+      );
+      console.log("Datos actualizados")
+    } else {
+      console.error("Error al obtener los datos:");
+    }
+  };
+
+  //---------------------------------------------
+
+
+
+
+
+  React.useEffect(() => {
+    const selectedArea = Array.from(AreaSeleccionada)[0];
+    const selectedContratista = Array.from(ContratistaSeleccionado)[0];
+
+    const fuenteDatos =
+      chartConfig[activeChart].label === "Curva Real"
+        ? data.General
+        : data.Ajustada;
+
+    const filtrado = fuenteDatos.filter((item) => {
+      const matchArea = selectedArea ? item.Filtro02 === selectedArea : true;
+      const matchContratista = selectedContratista
+        ? item.Filtro01 === selectedContratista
+        : true;
+      return matchArea && matchContratista;
+    });
+
+    // console.log("Filtrado", filtrado);
+    setLineChartActive(filtrado.filter((item) => item.Ejex));
+  }, [
+    AreaSeleccionada,
+    ContratistaSeleccionado,
+    activeChart,
+    data.General,
+    data.Ajustada,
+  ]);
+
+  const total = {
+    LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
+    LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
+  };
+
+  return (
+    <>
+      {name !== "WhatIf" && (
+        <div
+          key={name}
+          className="flex w-full items-center justify-start gap-2 mb-2"
+        >
+          <Dropdown>
+            <DropdownTrigger className="">
+              <Button
+                endContent={<ChevronDownIcon className="text-small" />}
+                variant="faded"
+              >
+                {Array.from(AreaSeleccionada).length === 0
+                  ? "Areas"
+                  : AreaSeleccionada}
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              disallowEmptySelection
+              aria-label="Table Columns"
+              closeOnSelect={false}
+              selectedKeys={AreaSeleccionada}
+              selectionMode="single"
+              onSelectionChange={setAreaSeleccionada}
+            >
+              {ArrayAreas.map((status) => (
+                <DropdownItem key={status.uid} className="capitalize">
+                  {status.name}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+
+          <Dropdown>
+            <DropdownTrigger className="">
+              <Button
+                endContent={<ChevronDownIcon className="text-small" />}
+                variant="faded"
+              >
+                {Array.from(ContratistaSeleccionado).length === 0
+                  ? "Contratistas"
+                  : ContratistaSeleccionado}
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              disallowEmptySelection
+              aria-label="Table Columns"
+              closeOnSelect={false}
+              selectedKeys={ContratistaSeleccionado}
+              selectionMode="single"
+              onSelectionChange={setContratistaSeleccionado}
+            >
+              {ArrayContratista.map((status) => (
+                <DropdownItem key={status.uid} className="capitalize">
+                  {status.name}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+      )}
+
+      {name === "WhatIf" && (
+        <div
+          key={name}
+          className="flex w-full items-center justify-start gap-2 mb-2"
+        >
+          <Dropdown>
+            <DropdownTrigger className="">
+              <Button
+                endContent={<ChevronDownIcon className="text-small" />}
+                variant="faded"
+              >
+                {Array.from(AreaSeleccionada).length === 0
+                  ? "Areas"
+                  : "Selección Multiple de áreas"}
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              disallowEmptySelection
+              aria-label="Table Columns"
+              closeOnSelect={false}
+              selectedKeys={AreaSeleccionada}
+              selectionMode="multiple"
+              onSelectionChange={setAreaSeleccionada}
+            >
+              {ArrayAreas.map((status) => (
+                <DropdownItem key={status.uid} className="capitalize">
+                  {status.name}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+
+          <Dropdown>
+            <DropdownTrigger className="">
+              <Button
+                endContent={<ChevronDownIcon className="text-small" />}
+                variant="faded"
+              >
+                {Array.from(ContratistaSeleccionado).length === 0
+                  ? "Contratistas"
+                  : "Selección Multiple de contratistas"}
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              disallowEmptySelection
+              aria-label="Table Columns"
+              closeOnSelect={false}
+              selectedKeys={ContratistaSeleccionado}
+              selectionMode="multiple"
+              onSelectionChange={setContratistaSeleccionado}
+            >
+              {ArrayContratista.map((status) => (
+                <DropdownItem key={status.uid} className="capitalize">
+                  {status.name}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+      )}
+
+      <Button variant="faded" className="mb-4" onClick={() => UpdateCurvaS()}>
+        Actualizar Curva S
+      </Button>
+
+      <Card className=" w-full">
+        <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
+          <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
+            <CardTitle>Curva S con Barras</CardTitle>
+            <CardDescription>
+              Comparación entre línea base y real
+            </CardDescription>
+          </div>
+          <div className="flex">
+            {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
+              const chart = key as keyof typeof chartConfig;
+              return (
+                <button
+                  key={chart}
+                  data-active={activeChart === chart}
+                  className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                  onClick={() => {
+                    setLineChartActive(
+                      chartConfig[chart].label === "Curva Real"
+                        ? data.General.filter((item) => item.Ejex)
+                        : data.Ajustada.filter((item) => item.Ejex)
+                    );
+                    setActiveChart(chart);
+                  }}
+                >
+                  <span className="text-xs text-muted-foreground">
+                    {chartConfig[chart].label}
+                  </span>
+                  <span className="text-lg font-bold leading-none sm:text-3xl">
+                    {total[key as keyof typeof total].toLocaleString()}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </CardHeader>
+        <CardContent className="px-2 sm:p-6">
+          <ChartContainer
+            config={chartConfig}
+            className="aspect-auto h-[250px] w-full"
+          >
+            <ComposedChart
+              data={lineChartActive}
+              margin={{ left: 12, right: 12 }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="Ejex"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={32}
+                tickFormatter={(value) => {
+                  const date = new Date(value);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                }}
+              />
+
+              {/* Eje Y para las Barras */}
+              <YAxis
+                yAxisId="left"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+
+              {/* Eje Y para las Líneas */}
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+
+              <ChartTooltipRecharts
+                cursor={false}
+                content={<ChartTooltipContent indicator="dot" />}
+              />
+              {/* Barras */}
+              <Bar
+                dataKey="hh_lb"
+                fill="var(--color-desktop)"
+                radius={4}
+                yAxisId="left"
+              />
+              <Bar
+                dataKey="hh_real"
+                fill="var(--color-mobile)"
+                radius={4}
+                yAxisId="left"
+              />
+              {/* Línea */}
+              <Line
+                dataKey="hh_lb_cum"
+                type="monotone"
+                // stroke={`var(--color-${activeChart})`}
+                stroke={`var(--color-desktop)`}
+                strokeWidth={2}
+                dot={true}
+                yAxisId="right"
+              />
+              <Line
+                dataKey="hh_real_cum"
+                type="monotone"
+                // stroke="var(--color-secondary)"
+                stroke={`var(--color-mobile)`}
+                strokeWidth={2}
+                dot={true}
+                yAxisId="right"
+              />
+            </ComposedChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+    </>
+  );
+});
+
+export default function Page() {
+  const ArrayOpcionCurvas = [
+    {
+      value: "CurvaGeneral",
+      label: "Curva S General",
+    },
+    {
+      value: "CurvaArea",
+      label: "Curva S por Área",
+    },
+    {
+      value: "CurvaContratista",
+      label: "Curva S por Contratista",
+    },
+    {
+      value: "CurvaAreaContratista",
+      label: "Curva S por Área y Contratista",
+    },
+    {
+      value: "CurvaEspecialidadContratista",
+      label: "Curva S por Especialidad y Contratista",
+    },
+    {
+      value: "WhatIf",
+      label: "What If",
+    },
+  ];
+
+  const [opcionCurvas, setOpcionCurvas] = React.useState<Selection>(
+    new Set([ArrayOpcionCurvas[0].value])
+  );
+
+  const [LineaCombinada, setLineaCombinada] = useState<TypeCurvaSGeneral>([]);
+  const [LineaCombinadaAjustada, setLineaCombinadaAjustada] =
+    useState<TypeCurvaSGeneral>([]);
+
+  const [CurvaAreaTotal, setCurvaAreaTotal] = useState<TypeCurvaSGeneral>([]);
+  const [CurvaAreaAjustada, setCurvaAreaAjustada] = useState<TypeCurvaSGeneral>(
     []
   );
 
-  return (
-    <Card className=" w-full">
-      <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle>Curva S con Barras</CardTitle>
-          <CardDescription>Comparación entre línea base y real</CardDescription>
-        </div>
-        <div className="flex">
-          {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
-            const chart = key as keyof typeof chartConfig;
-            return (
-              <button
-                key={chart}
-                data-active={activeChart === chart}
-                className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-                onClick={() => {
-                  setLineChartActive(
-                    chartConfig[chart].label === "Curva Real"
-                      ? data.LineaCombinada
-                      : data.LineaCombinadaAjustada
-                  );
-                  setActiveChart(chart);
-                }}
-              >
-                <span className="text-xs text-muted-foreground">
-                  {chartConfig[chart].label}
-                </span>
-                <span className="text-lg font-bold leading-none sm:text-3xl">
-                  {total[key as keyof typeof total].toLocaleString()}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </CardHeader>
-      <CardContent className="px-2 sm:p-6">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
-        >
-          <ComposedChart
-            data={lineChartActive}
-            margin={{ left: 12, right: 12 }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="Ejex"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                });
-              }}
-            />
+  const [CurvaContratistaTotal, setCurvaContratistaTotal] =
+    useState<TypeCurvaSGeneral>([]);
+  const [CurvaContratistaAjustada, setCurvaContratistaAjustada] =
+    useState<TypeCurvaSGeneral>([]);
 
-            {/* Eje Y para las Barras */}
-            <YAxis
-              yAxisId="left"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
+  const [CurvaAreaContratistaTotal, setCurvaAreaContratistaTotal] =
+    useState<TypeCurvaSGeneral>([]);
+  const [CurvaAreaContratistaAjustada, setCurvaAreaContratistaAjustada] =
+    useState<TypeCurvaSGeneral>([]);
 
-            {/* Eje Y para las Líneas */}
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
+  const [CurvaEspecialidadContratista, setCurvaEspecialidadContratista] =
+    useState<TypeCurvaSGeneral>([]);
+  const [
+    CurvaEspecialidadContratistaAjustada,
+    setCurvaEspecialidadContratistaAjustada,
+  ] = useState<TypeCurvaSGeneral>([]);
 
-            <ChartTooltipRecharts
-              cursor={false}
-              content={<ChartTooltipContent indicator="dot" />}
-            />
-            {/* Barras */}
-            <Bar
-              dataKey="hh_lb"
-              fill="var(--color-desktop)"
-              radius={4}
-              yAxisId="left"
-            />
-            <Bar
-              dataKey="hh_real"
-              fill="var(--color-mobile)"
-              radius={4}
-              yAxisId="left"
-            />
-            {/* Línea */}
-            <Line
-              dataKey="hh_lb_cum"
-              type="monotone"
-              stroke={`var(--color-${activeChart})`}
-              strokeWidth={2}
-              dot={true}
-              yAxisId="right"
-            />
-            <Line
-              dataKey="hh_real_cum"
-              type="monotone"
-              stroke="var(--color-secondary)"
-              strokeWidth={2}
-              dot={true}
-              yAxisId="right"
-            />
-          </ComposedChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  );
-}
+  const [CurvaWhatIf, setCurvaWhatIf] = useState<TypeCurvaSGeneral>([]);
+  const [CurvaWhatIfAjustada, setCurvaWhatIfAjustada] =
+    useState<TypeCurvaSGeneral>([]);
 
-export default function Page() {
-  // const [LineaBase, setLineaBase] = useState<TypeLineaBase>([]);
-  // const [LineaReal, setLineaReal] = useState<TypeLineaBase>([]);
-  const [LineaCombinada, setLineaCombinada] = useState<TypeLineaCombinada>([]);
-  const [LineaCombinadaAjustada, setLineaCombinadaAjustada] =
-    useState<TypeLineaCombinada>([]);
+  const [ValoresTotales, setValoresTotales] = useState<TypeValoresTotales>({
+    AvanceReal: 0,
+    AvanceRealAjustado: 0,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL_PY}/ParadaDePlanta/ProcesarLineaBase`
       );
+
+      console.log(response.data);
+
       if (response.status === 200) {
-        // response.data.df_LineaBase.map(
-        //   (item: any) => (item.Ejex = new Date(item.Ejex))
-        // );
-        // response.data.df_Real.map(
-        //   (item: any) => (item.Ejex = new Date(item.Ejex))
-        // );
-        response.data.df_Combinado.map(
-          (item: any) => (item.Ejex = new Date(item.Ejex))
+        Object.keys(response.data).forEach((key) => {
+          response.data[key].General.map((item: any) => {
+            item.Ejex = new Date(item.Ejex);
+          });
+          response.data[key].Ajustada.map((item: any) => {
+            item.Ejex = new Date(item.Ejex);
+          });
+        });
+
+        setLineaCombinada(response.data.CurvaGeneral.General);
+        setLineaCombinadaAjustada(response.data.CurvaGeneral.Ajustada);
+
+        setCurvaAreaTotal(response.data.CurvaArea.General);
+        setCurvaAreaAjustada(response.data.CurvaArea.Ajustada);
+
+        setCurvaContratistaTotal(response.data.CurvaContratista.General);
+        setCurvaContratistaAjustada(response.data.CurvaContratista.Ajustada);
+
+        setCurvaAreaContratistaTotal(
+          response.data.CurvaAreaContratista.General
         );
-        response.data.df_CombinadoAjustada.map(
-          (item: any) => (item.Ejex = new Date(item.Ejex))
+        setCurvaAreaContratistaAjustada(
+          response.data.CurvaAreaContratista.Ajustada
         );
 
-        // setLineaBase(response.data.df_LineaBase);
-        // setLineaReal(response.data.df_Real);
-        console.log(response.data.df_Combinado);
-        console.log(response.data.df_CombinadoAjustada);
-        setLineaCombinada(response.data.df_Combinado);
-        setLineaCombinadaAjustada(response.data.df_CombinadoAjustada);
+        setCurvaEspecialidadContratista(
+          response.data.CurvaEspecialidadContratista.General
+        );
+        setCurvaEspecialidadContratistaAjustada(
+          response.data.CurvaEspecialidadContratista.Ajustada
+        );
+
+        setCurvaWhatIf(response.data.CurvaWhatIf.General);
+        setCurvaWhatIfAjustada(response.data.CurvaWhatIf.Ajustada);
       } else {
         console.log("Error");
       }
@@ -1144,16 +1844,160 @@ export default function Page() {
     fetchData();
   }, []);
 
+  const curvaSeleccionada = Array.from(opcionCurvas)[0] || "CurvaGeneral";
+
+  const CurvaSMemo = useMemo(() => {
+    const curvaMap: Record<string, JSX.Element> = {
+      CurvaGeneral: (
+        <CurvaSUnaVariable
+          key="CurvaGeneral"
+          name="CurvaGeneral"
+          data={{ General: LineaCombinada, Ajustada: LineaCombinadaAjustada }}
+          totales={ValoresTotales}
+        />
+      ),
+      CurvaArea: (
+        <CurvaSUnaVariable
+          key="CurvaArea"
+          name="CurvaArea"
+          data={{ General: CurvaAreaTotal, Ajustada: CurvaAreaAjustada }}
+          totales={ValoresTotales}
+        />
+      ),
+      CurvaContratista: (
+        <CurvaSUnaVariable
+          key="CurvaContratista"
+          name="CurvaContratista"
+          data={{
+            General: CurvaContratistaTotal,
+            Ajustada: CurvaContratistaAjustada,
+          }}
+          totales={ValoresTotales}
+        />
+      ),
+      CurvaAreaContratista: (
+        <CurvaSDosVariable
+          key="CurvaAreaContratista"
+          name="CurvaAreaContratista"
+          data={{
+            General: CurvaAreaContratistaTotal,
+            Ajustada: CurvaAreaContratistaAjustada,
+          }}
+          totales={ValoresTotales}
+        />
+      ),
+      CurvaEspecialidadContratista: (
+        <CurvaSDosVariable
+          key="CurvaEspecialidadContratista"
+          name="CurvaEspecialidadContratista"
+          data={{
+            General: CurvaEspecialidadContratista,
+            Ajustada: CurvaEspecialidadContratistaAjustada,
+          }}
+          totales={ValoresTotales}
+        />
+      ),
+      WhatIf: (
+        <CurvaSDosVariable
+          key="WhatIf"
+          name="WhatIf"
+          data={{
+            General: CurvaWhatIf,
+            Ajustada: CurvaWhatIfAjustada,
+          }}
+          totales={ValoresTotales}
+        />
+      ),
+    };
+
+    return curvaMap[curvaSeleccionada] ?? null;
+  }, [
+    curvaSeleccionada,
+    LineaCombinada,
+    LineaCombinadaAjustada,
+    CurvaAreaTotal,
+    CurvaAreaAjustada,
+    CurvaContratistaTotal,
+    CurvaContratistaAjustada,
+    ValoresTotales,
+
+    CurvaAreaContratistaTotal,
+    CurvaAreaContratistaAjustada,
+    CurvaEspecialidadContratista,
+    CurvaEspecialidadContratistaAjustada,
+  ]);
+
+  const WhatIfMemo = useMemo(() => {
+    const curvaMap: Record<string, JSX.Element> = {
+      CurvaEspecialidadContratista: (
+        <CurvaSDosVariable
+          key="CurvaEspecialidadContratista"
+          name="CurvaAreaEspecialidadContratista"
+          data={{
+            General: CurvaEspecialidadContratista,
+            Ajustada: CurvaEspecialidadContratistaAjustada,
+          }}
+          totales={ValoresTotales}
+        />
+      ),
+    };
+
+    return curvaMap[curvaSeleccionada] ?? null;
+  }, [
+    curvaSeleccionada,
+    LineaCombinada,
+    LineaCombinadaAjustada,
+    CurvaAreaTotal,
+    CurvaAreaAjustada,
+    CurvaContratistaTotal,
+    CurvaContratistaAjustada,
+    ValoresTotales,
+
+    CurvaAreaContratistaTotal,
+    CurvaAreaContratistaAjustada,
+    CurvaEspecialidadContratista,
+    CurvaEspecialidadContratistaAjustada,
+  ]);
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
       <h1 className="text-4xl font-bold text-white text-center mt-8">
         Dashboard PdP
       </h1>
-      <div className="mt-8 w-5/6">
-        <ChartInteractivoCombinado
-          data={{ LineaCombinada, LineaCombinadaAjustada }}
-        />
+
+      <div className="mb-2">
+        <Dropdown>
+          <DropdownTrigger className="">
+            <Button
+              endContent={<ChevronDownIcon className="text-small" />}
+              variant="faded"
+            >
+              {Array.from(opcionCurvas).length === 0
+                ? "Opciones de Curva"
+                : opcionCurvas}
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu
+            disallowEmptySelection
+            aria-label="Table Columns"
+            closeOnSelect={true}
+            selectedKeys={opcionCurvas}
+            selectionMode="single"
+            onSelectionChange={setOpcionCurvas}
+          >
+            {ArrayOpcionCurvas.map((opcion) => (
+              <DropdownItem key={opcion.value} className="capitalize">
+                {opcion.label}
+              </DropdownItem>
+            ))}
+          </DropdownMenu>
+        </Dropdown>
       </div>
+
+      <div className="w-5/6">{CurvaSMemo}</div>
+      {/* <div className={"w-5/6" + (curvaSeleccionada === "WhatIf" ? " block" : " hidden")}>
+        {WhatIfMemo}
+      </div> */}
 
       <div className="w-5/6 flex flex-row items-center gap-4">
         <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
@@ -1222,10 +2066,29 @@ export default function Page() {
         </div>
       </div>
 
-      {/* <div className="w-4/5 grid gap-4 grid-cols-1 p-8 rounded-lg border-2 border-slate-300 mr-auto ml-auto md:grid-cols-2"> */}
-      <div>
-        {/* <ChartLine data={LineaBase} />
-        <ChartLIneInteractive LineaBase={LineaBase} LineaReal={LineaReal} />
+      {/* <div className="mt-8 w-5/6">
+        <CurvaSUnaVariable
+          data={{ General: CurvaAreaTotal, Ajustada: CurvaAreaAjustada }}
+          totales={ValoresTotales}
+        />
+      </div> */}
+
+      {/* <div className="mt-8 w-5/6">{MemoCurvaSUnaVariable}</div> */}
+    </div>
+  );
+}
+
+{
+  /* <div className="w-4/5 grid gap-4 grid-cols-1 p-8 rounded-lg border-2 border-slate-300 mr-auto ml-auto md:grid-cols-2"> */
+}
+{
+  /* <div className="w-5/6 h-full"> */
+}
+{
+  /* <ChartLine data={LineaCombinada} /> */
+}
+{
+  /* <ChartLIneInteractive LineaBase={LineaBase} LineaReal={LineaReal} />
         <ChartDobleLine data={LineaCombinada} />
         <ChartPie />
         <ChartBar data={LineaCombinada} />
@@ -1233,14 +2096,18 @@ export default function Page() {
           <ChartRadar />
           <ChartRadialGrid />
           <ChartRadialShape />
-        </div> */}
-        {/* <CombinedChart data={LineaCombinada} /> */}
+        </div> */
+}
+{
+  /* <CombinedChart data={LineaCombinada} /> */
+}
 
-        {/* <div className="w-full md:w-4/5 grid mx-auto p-8">
+{
+  /* <div className="w-full md:w-4/5 grid mx-auto p-8">
         <ChartLIneInteractive LineaBase={LineaBase} LineaReal={LineaReal} />
         <TableDemo />
-      </div> */}
-      </div>
-    </div>
-  );
+      </div> */
+}
+{
+  /* </div> */
 }

@@ -24,7 +24,8 @@ export function ProtectedRouteComponentemail({ children}: ProtectedRouteProps) {
       if (status === 'authenticated' && session?.user?.email) {
         try {
 
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/data/validateusers`,{params: {user: session.user.email}})      
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/data/validateusers`,{params: {user: session.user.email}})
+         
 
           if (response.status === 200) {
             setIsAuthorized(true)
