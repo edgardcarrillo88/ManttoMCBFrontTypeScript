@@ -1665,32 +1665,32 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
 
   //---------------------------------------------
 
-  // React.useEffect(() => {
-  //   const selectedArea = Array.from(AreaSeleccionada)[0];
-  //   const selectedContratista = Array.from(ContratistaSeleccionado)[0];
+  React.useEffect(() => {
+    const selectedArea = Array.from(AreaSeleccionada)[0];
+    const selectedContratista = Array.from(ContratistaSeleccionado)[0];
 
-  //   const fuenteDatos =
-  //     chartConfig[activeChart].label === "Curva Real"
-  //       ? data.General
-  //       : data.Ajustada;
+    const fuenteDatos =
+      chartConfig[activeChart].label === "Curva Real"
+        ? data.General
+        : data.Ajustada;
 
-  //   const filtrado = fuenteDatos.filter((item) => {
-  //     const matchArea = selectedArea ? item.Filtro02 === selectedArea : true;
-  //     const matchContratista = selectedContratista
-  //       ? item.Filtro01 === selectedContratista
-  //       : true;
-  //     return matchArea && matchContratista;
-  //   });
+    const filtrado = fuenteDatos.filter((item) => {
+      const matchArea = selectedArea ? item.Filtro02 === selectedArea : true;
+      const matchContratista = selectedContratista
+        ? item.Filtro01 === selectedContratista
+        : true;
+      return matchArea && matchContratista;
+    });
 
-  //   console.log("Filtrado", filtrado);
-  //   setLineChartActive(filtrado.filter((item) => item.Ejex.getTime() !== 0));
-  // }, [
-  //   AreaSeleccionada,
-  //   ContratistaSeleccionado,
-  //   activeChart,
-  //   data.General,
-  //   data.Ajustada,
-  // ]);
+    console.log("Filtrado", filtrado);
+    setLineChartActive(filtrado.filter((item) => item.Ejex.getTime() !== 0));
+  }, [
+    AreaSeleccionada,
+    ContratistaSeleccionado,
+    activeChart,
+    data.General,
+    data.Ajustada,
+  ]);
 
   const total = {
     LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
@@ -1821,9 +1821,11 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
         </div>
       )}
 
+      {name === "WhatIf" && (
       <Button variant="faded" className="mb-4" onClick={() => UpdateCurvaS()}>
         Actualizar Curva S
       </Button>
+      )}
 
       <Card className=" w-full">
         <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
