@@ -1264,10 +1264,10 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
     return 0;
   }
 
-  var total = {
-    LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
-    LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
-  };
+  // var total = {
+  //   LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
+  //   LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
+  // };
 
   return (
     <div key={name}>
