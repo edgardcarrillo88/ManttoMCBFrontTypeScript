@@ -162,6 +162,24 @@ const chartConfig = {
     color: "hsl(var(--chart-2))",
   },
 
+  AvanceReal: {
+    label: "Avance Real",
+    color: "hsl(var(--chart-1))",
+  },
+  AvanceRealAjustado: {
+    label: "Avance Ajustado",
+    color: "hsl(var(--chart-2))",
+  },
+
+  SPI: {
+    label: "SPI",
+    color: "hsl(var(--chart-1))",
+  },
+  SPIAjustado: {
+    label: "SPI Ajustado",
+    color: "hsl(var(--chart-2))",
+  },
+
   visitors: {
     label: "Visitors",
   },
@@ -1152,6 +1170,14 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
     new Set()
   );
 
+  const [avanceTotal, setAvanceTotal] = useState<{
+    AvanceReal: string;
+    AvanceRealAjustado: string;
+  }>({
+    AvanceReal: "0%",
+    AvanceRealAjustado: "0%",
+  });
+
   useEffect(() => {
     const defaultUid = ArrayAreas[0]?.uid;
     setAreaSeleccionada(defaultUid ? new Set([defaultUid]) : new Set());
@@ -1160,25 +1186,85 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   //---------------------------------------------
 
   const [activeChart, setActiveChart] =
-    React.useState<keyof typeof chartConfig>("LineaBaseReal");
+    React.useState<keyof typeof chartConfig>("AvanceReal");
   const [lineChartActive, setLineChartActive] = useState(data.General);
 
   React.useEffect(() => {
     const fuenteDatos =
-      chartConfig[activeChart].label === "Curva Real"
+      chartConfig[activeChart].label === "Avance Real"
         ? data.General
         : data.Ajustada;
+
+    const fuenteDatosAjustada =
+      chartConfig[activeChart].label === "Avance Real"
+        ? data.Ajustada
+        : data.General;
 
     const selected = Array.from(AreaSeleccionada)[0];
     if (selected) {
       const filtrado = fuenteDatos.filter((item) => item.Filtro01 === selected);
+      const filtradoAjustado = fuenteDatosAjustada.filter(
+        (item) => item.Filtro01 === selected
+      );
       setLineChartActive(filtrado);
+      const avance = calcularPorcentajeAvance(filtrado);
+      const avanceAjustado = calcularPorcentajeAvance(filtradoAjustado);
+      setAvanceTotal({
+        AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
+        AvanceRealAjustado:
+          avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
+      });
     } else {
       setLineChartActive(data.General); // Si no hay selección, mostrar todo
+      const avance = calcularPorcentajeAvance(data.General);
+      const avanceAjustado = calcularPorcentajeAvance(data.Ajustada);
+      setAvanceTotal({
+        AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
+        AvanceRealAjustado:
+          avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
+      });
     }
   }, [AreaSeleccionada, activeChart, data.General, data.Ajustada]);
 
-  const total = {
+  // LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
+
+  function calcularPorcentajeAvance(data: TypeCurvaSGeneral): number | null {
+    if (!data.length) return 0;
+
+    // Redondear la fecha actual a la siguiente hora (por ejemplo, 17:45 → 18:00)
+    const ahora = new Date();
+    ahora.setSeconds(0);
+    ahora.setMilliseconds(0);
+    if (ahora.getMinutes() > 0) {
+      ahora.setHours(ahora.getHours() + 1);
+      ahora.setMinutes(0);
+    }
+
+    // Buscar coincidencia exacta por fecha y hora
+    let match = data.find(
+      (item) =>
+        item.Ejex.getFullYear() === ahora.getFullYear() &&
+        item.Ejex.getMonth() === ahora.getMonth() &&
+        item.Ejex.getDate() === ahora.getDate() &&
+        item.Ejex.getHours() === ahora.getHours()
+    );
+
+    // Si no hay coincidencia exacta, buscar la fecha menor más cercana
+    if (!match) {
+      const fechaMasCercana = data
+        .filter((item) => item.Ejex <= ahora)
+        .sort((a, b) => b.Ejex.getTime() - a.Ejex.getTime()); // de mayor a menor
+      match = fechaMasCercana[0]; // el más cercano hacia atrás
+    }
+
+    if (match && match.hh_lb_cum > 0) {
+      return (match.hh_real_cum / match.hh_lb_cum) * 100;
+    }
+
+    return 0;
+  }
+
+  var total = {
     LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
     LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
   };
@@ -1223,8 +1309,9 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
             </CardDescription>
           </div>
           <div className="flex">
-            {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
+            {["AvanceReal", "AvanceRealAjustado"].map((key) => {
               const chart = key as keyof typeof chartConfig;
+              console.log(key); //xq se imprime 24 veces?
               return (
                 <button
                   key={chart}
@@ -1232,7 +1319,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                   className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
                   onClick={() => {
                     setLineChartActive(
-                      chartConfig[chart].label === "Curva Real"
+                      chartConfig[chart].label === "Avance Real"
                         ? data.General
                         : data.Ajustada
                     );
@@ -1243,7 +1330,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                     {chartConfig[chart].label}
                   </span>
                   <span className="text-lg font-bold leading-none sm:text-3xl">
-                    {total[key as keyof typeof total].toLocaleString()}
+                    {avanceTotal[key as keyof typeof avanceTotal]}
                   </span>
                 </button>
               );
@@ -1313,18 +1400,6 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                 content={<ChartTooltipContent indicator="dot" />}
               />
 
-              {/* <Legend
-                verticalAlign="middle"
-                align="right"
-                layout="vertical"
-                iconType="circle"
-                wrapperStyle={{
-                  paddingLeft: 40,
-                  paddingRight: -20,
-                  lineHeight: "24px",
-                }}
-              /> */}
-
               <Legend
                 verticalAlign="middle"
                 align="right"
@@ -1353,7 +1428,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                     })}
                   </ul>
                 )}
-                 wrapperStyle={{
+                wrapperStyle={{
                   paddingLeft: 40,
                   paddingRight: -20,
                   lineHeight: "24px",
@@ -1413,10 +1488,18 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
     React.useState<Selection>(new Set([]));
 
   const [activeChart, setActiveChart] =
-    React.useState<keyof typeof chartConfig>("LineaBaseReal");
+    React.useState<keyof typeof chartConfig>("AvanceReal");
   const [lineChartActive, setLineChartActive] = useState(
-    data.General.filter((item) => item.Ejex)
+    data.General.filter((item) => item.Ejex.getTime() !== 0)
   );
+
+  const [avanceTotal, setAvanceTotal] = useState<{
+    AvanceReal: string;
+    AvanceRealAjustado: string;
+  }>({
+    AvanceReal: "0%",
+    AvanceRealAjustado: "0%",
+  });
 
   const uniqueAreas = Array.from(
     new Set(
@@ -1448,15 +1531,6 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       name: contratista,
     }));
   }, [data.General]);
-
-  // useEffect(() => {
-  //   const defaultUidArea = ArrayAreas[0]?.uid;
-  //   const defaultUidContratista = ArrayContratista[0]?.uid;
-  //   setAreaSeleccionada(defaultUidArea ? new Set([defaultUidArea]) : new Set());
-  //   setContratistaSeleccionado(
-  //     defaultUidContratista ? new Set([defaultUidContratista]) : new Set()
-  //   );
-  // }, [ArrayAreas, ArrayContratista]);
 
   React.useEffect(() => {
     const allUids = ArrayAreas.map((a) => a.uid).filter(
@@ -1506,54 +1580,117 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
     if (response.status === 200) {
       // aca debo setear la nueva curva
       console.log(response.data);
+
+      Object.keys(response.data).forEach((key) => {
+        response.data[key].General.map((item: any) => {
+          item.Ejex = new Date(item.Ejex);
+        });
+        response.data[key].Ajustada.map((item: any) => {
+          item.Ejex = new Date(item.Ejex);
+        });
+      });
+
       setLineChartActive(
         (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter(
-          (item) => item.Ejex
+          (item) => item.Ejex.getTime() !== 0
         )
       ); //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
       setLineChartActive(
         chartConfig[activeChart].label === "Curva Real"
           ? (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter(
-              (item) => item.Ejex
+              (item) => item.Ejex.getTime() !== 0
             ) //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
           : (response.data.CurvaWhatIf.Ajustada as TypeCurvaSGeneral).filter(
-              (item) => item.Ejex
+              (item) => item.Ejex.getTime() !== 0
             ) //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
       );
+
+      const avance = calcularPorcentajeAvance(
+        (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter(
+          (item) => item.Ejex.getTime() !== 0
+        )
+      );
+      const avanceAjustado = calcularPorcentajeAvance(
+        (response.data.CurvaWhatIf.Ajustada as TypeCurvaSGeneral).filter(
+          (item) => item.Ejex.getTime() !== 0
+        )
+      );
+      setAvanceTotal({
+        AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
+        AvanceRealAjustado:
+          avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
+      });
+
       console.log("Datos actualizados");
     } else {
       console.error("Error al obtener los datos:");
     }
   };
 
+  function calcularPorcentajeAvance(data: TypeCurvaSGeneral): number | null {
+    if (!data.length) return 0;
+
+    // Redondear la fecha actual a la siguiente hora (por ejemplo, 17:45 → 18:00)
+    const ahora = new Date();
+    ahora.setSeconds(0);
+    ahora.setMilliseconds(0);
+    if (ahora.getMinutes() > 0) {
+      ahora.setHours(ahora.getHours() + 1);
+      ahora.setMinutes(0);
+    }
+
+    // Buscar coincidencia exacta por fecha y hora
+    let match = data.find(
+      (item) =>
+        item.Ejex.getFullYear() === ahora.getFullYear() &&
+        item.Ejex.getMonth() === ahora.getMonth() &&
+        item.Ejex.getDate() === ahora.getDate() &&
+        item.Ejex.getHours() === ahora.getHours()
+    );
+
+    // Si no hay coincidencia exacta, buscar la fecha menor más cercana
+    if (!match) {
+      const fechaMasCercana = data
+        .filter((item) => item.Ejex <= ahora)
+        .sort((a, b) => b.Ejex.getTime() - a.Ejex.getTime()); // de mayor a menor
+      match = fechaMasCercana[0]; // el más cercano hacia atrás
+    }
+
+    if (match && match.hh_lb_cum > 0) {
+      return (match.hh_real_cum / match.hh_lb_cum) * 100;
+    }
+
+    return 0;
+  }
+
   //---------------------------------------------
 
-  React.useEffect(() => {
-    const selectedArea = Array.from(AreaSeleccionada)[0];
-    const selectedContratista = Array.from(ContratistaSeleccionado)[0];
+  // React.useEffect(() => {
+  //   const selectedArea = Array.from(AreaSeleccionada)[0];
+  //   const selectedContratista = Array.from(ContratistaSeleccionado)[0];
 
-    const fuenteDatos =
-      chartConfig[activeChart].label === "Curva Real"
-        ? data.General
-        : data.Ajustada;
+  //   const fuenteDatos =
+  //     chartConfig[activeChart].label === "Curva Real"
+  //       ? data.General
+  //       : data.Ajustada;
 
-    const filtrado = fuenteDatos.filter((item) => {
-      const matchArea = selectedArea ? item.Filtro02 === selectedArea : true;
-      const matchContratista = selectedContratista
-        ? item.Filtro01 === selectedContratista
-        : true;
-      return matchArea && matchContratista;
-    });
+  //   const filtrado = fuenteDatos.filter((item) => {
+  //     const matchArea = selectedArea ? item.Filtro02 === selectedArea : true;
+  //     const matchContratista = selectedContratista
+  //       ? item.Filtro01 === selectedContratista
+  //       : true;
+  //     return matchArea && matchContratista;
+  //   });
 
-    // console.log("Filtrado", filtrado);
-    setLineChartActive(filtrado.filter((item) => item.Ejex));
-  }, [
-    AreaSeleccionada,
-    ContratistaSeleccionado,
-    activeChart,
-    data.General,
-    data.Ajustada,
-  ]);
+  //   console.log("Filtrado", filtrado);
+  //   setLineChartActive(filtrado.filter((item) => item.Ejex.getTime() !== 0));
+  // }, [
+  //   AreaSeleccionada,
+  //   ContratistaSeleccionado,
+  //   activeChart,
+  //   data.General,
+  //   data.Ajustada,
+  // ]);
 
   const total = {
     LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
@@ -1697,7 +1834,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
             </CardDescription>
           </div>
           <div className="flex">
-            {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
+            {["AvanceReal", "AvanceRealAjustado"].map((key) => {
               const chart = key as keyof typeof chartConfig;
               return (
                 <button
@@ -1706,9 +1843,13 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
                   className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
                   onClick={() => {
                     setLineChartActive(
-                      chartConfig[chart].label === "Curva Real"
-                        ? data.General.filter((item) => item.Ejex)
-                        : data.Ajustada.filter((item) => item.Ejex)
+                      chartConfig[chart].label === "Avance Real"
+                        ? data.General.filter(
+                            (item) => item.Ejex.getTime() !== 0
+                          )
+                        : data.Ajustada.filter(
+                            (item) => item.Ejex.getTime() !== 0
+                          )
                     );
                     setActiveChart(chart);
                   }}
@@ -1717,7 +1858,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
                     {chartConfig[chart].label}
                   </span>
                   <span className="text-lg font-bold leading-none sm:text-3xl">
-                    {total[key as keyof typeof total].toLocaleString()}
+                    {avanceTotal[key as keyof typeof avanceTotal]}
                   </span>
                 </button>
               );
@@ -1731,7 +1872,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
           >
             <ComposedChart
               data={lineChartActive}
-              margin={{ left: 12, right: 12 }}
+              margin={{ left: 12, right: 12, bottom: 24 }}
             >
               <CartesianGrid vertical={false} />
               <XAxis
@@ -1745,7 +1886,14 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
                   return date.toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
+                    hour: "2-digit",
                   });
+                }}
+                label={{
+                  value: "Fechas",
+                  position: "insideBottom",
+                  offset: -10,
+                  style: { fontWeight: "bold", fontSize: 12, fill: "#333" },
                 }}
               />
 
@@ -1755,6 +1903,8 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
+                tickFormatter={(value) => `${value} hh`}
+                label={{ value: "HH", angle: -90, position: "insideLeft" }}
               />
 
               {/* Eje Y para las Líneas */}
@@ -1764,12 +1914,55 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
+                tickFormatter={(value) => `${value} hh`}
+                label={{
+                  value: "HH Acumuladas",
+                  angle: 90,
+                  position: "insideRight",
+                  offset: -20,
+                }}
               />
 
               <ChartTooltipRecharts
                 cursor={false}
                 content={<ChartTooltipContent indicator="dot" />}
               />
+
+              <Legend
+                verticalAlign="middle"
+                align="right"
+                layout="vertical"
+                content={({ payload }) => (
+                  <ul className="list-none m-0 p-0">
+                    {payload?.map((entry, index) => {
+                      const isCum = String(entry.dataKey).includes("cum");
+                      return (
+                        <li
+                          key={`item-${index}`}
+                          className="flex items-center mb-1"
+                        >
+                          <div
+                            style={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: isCum ? "50%" : "2px", // círculo para reales, cuadrado para plan
+                              backgroundColor: entry.color,
+                              marginRight: 8,
+                            }}
+                          />
+                          <span className="text-sm">{entry.value}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                wrapperStyle={{
+                  paddingLeft: 40,
+                  paddingRight: -20,
+                  lineHeight: "24px",
+                }}
+              />
+
               {/* Barras */}
               <Bar
                 dataKey="hh_lb"
@@ -1809,6 +2002,18 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
     </>
   );
 });
+
+const BaymaxLoader = () => (
+  <div className="flex flex-col items-center justify-center w-full h-full">
+    {/* Cabeza de Baymax con relación 5:3 */}
+    <div className="relative w-full aspect-[5/3] rounded-[50%/60%] bg-white shadow-md">
+      <div className="absolute top-[45%] left-1/2 w-[60%] h-[8%] -translate-x-1/2 -translate-y-[30%] border-b-[1.5em] border-black baymax"></div>
+    </div>
+    <p className="mt-4 text-center text-white font-medium text-2xl ">
+      Cargando...
+    </p>
+  </div>
+);
 
 export default function Page() {
   const ArrayOpcionCurvas = [
@@ -1877,13 +2082,13 @@ export default function Page() {
     AvanceRealAjustado: 0,
   });
 
+  const [isVisible, setIsVisible] = useState<Boolean>(true);
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL_PY}/ParadaDePlanta/ProcesarLineaBase`
       );
-
-      console.log(response.data);
 
       if (response.status === 200) {
         Object.keys(response.data).forEach((key) => {
@@ -1920,6 +2125,7 @@ export default function Page() {
 
         setCurvaWhatIf(response.data.CurvaWhatIf.General);
         setCurvaWhatIfAjustada(response.data.CurvaWhatIf.Ajustada);
+        setIsVisible(false);
       } else {
         console.log("Error");
       }
@@ -2011,156 +2217,133 @@ export default function Page() {
     CurvaEspecialidadContratistaAjustada,
   ]);
 
-  const WhatIfMemo = useMemo(() => {
-    const curvaMap: Record<string, JSX.Element> = {
-      CurvaEspecialidadContratista: (
-        <CurvaSDosVariable
-          key="CurvaEspecialidadContratista"
-          name="CurvaAreaEspecialidadContratista"
-          data={{
-            General: CurvaEspecialidadContratista,
-            Ajustada: CurvaEspecialidadContratistaAjustada,
-          }}
-          totales={ValoresTotales}
-        />
-      ),
-    };
-
-    return curvaMap[curvaSeleccionada] ?? null;
-  }, [
-    curvaSeleccionada,
-    LineaCombinada,
-    LineaCombinadaAjustada,
-    CurvaAreaTotal,
-    CurvaAreaAjustada,
-    CurvaContratistaTotal,
-    CurvaContratistaAjustada,
-    ValoresTotales,
-
-    CurvaAreaContratistaTotal,
-    CurvaAreaContratistaAjustada,
-    CurvaEspecialidadContratista,
-    CurvaEspecialidadContratistaAjustada,
-  ]);
-
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
-      <h1 className="text-4xl font-bold text-white text-center mt-8">
+      <h1 className="text-4xl font-bold text-white text-center mt-8 mb-4">
         Dashboard PdP
       </h1>
 
-      <div className="mb-2">
-        <Dropdown>
-          <DropdownTrigger className="">
-            <Button
-              endContent={<ChevronDownIcon className="text-small" />}
-              variant="faded"
-            >
-              {Array.from(opcionCurvas).length === 0
-                ? "Opciones de Curva"
-                : opcionCurvas}
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu
-            disallowEmptySelection
-            aria-label="Table Columns"
-            closeOnSelect={true}
-            selectedKeys={opcionCurvas}
-            selectionMode="single"
-            onSelectionChange={setOpcionCurvas}
-          >
-            {ArrayOpcionCurvas.map((opcion) => (
-              <DropdownItem key={opcion.value} className="capitalize">
-                {opcion.label}
-              </DropdownItem>
-            ))}
-          </DropdownMenu>
-        </Dropdown>
-      </div>
+      {isVisible && (
+        <div className="w-[600px]">
+          <BaymaxLoader />
+        </div>
+      )}
 
-      <div className="w-5/6">{CurvaSMemo}</div>
-      {/* <div className={"w-5/6" + (curvaSeleccionada === "WhatIf" ? " block" : " hidden")}>
-        {WhatIfMemo}
-      </div> */}
+      {!isVisible && (
+        <div className="w-5/6 flex flex-col items-center">
+          <div className="mb-2 mt-8 flex flex-col items-center">
+            <h3 className="text-white mb-2">Selecciona tipo de Curva S</h3>
+            <Dropdown>
+              <DropdownTrigger className="">
+                <Button
+                  endContent={<ChevronDownIcon className="text-small" />}
+                  variant="faded"
+                >
+                  {Array.from(opcionCurvas).length === 0
+                    ? "Opciones de Curva"
+                    : opcionCurvas}
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={true}
+                selectedKeys={opcionCurvas}
+                selectionMode="single"
+                onSelectionChange={setOpcionCurvas}
+              >
+                {ArrayOpcionCurvas.map((opcion) => (
+                  <DropdownItem key={opcion.value} className="capitalize">
+                    {opcion.label}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          </div>
 
-      <div className="w-5/6 flex flex-col md:flex-row items-center gap-4">
-        <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
-          <Label className="text-2xl font-bold text-white">Listado de SP</Label>
-          <Table className="rounded-lg">
-            <TableCaption>
-              Solamente se muestran las SPs aprobadas (todos los montos estan en
-              USD)
-            </TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Pos</TableHead>
-                <TableHead>Partida</TableHead>
-                <TableHead>Texto Breve</TableHead>
-                <TableHead className="text-right">Monto</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoices.map((item) => (
-                <TableRow key={item.invoice}>
-                  <TableCell className="font-medium">{item.invoice}</TableCell>
-                  <TableCell>{item.paymentMethod}</TableCell>
-                  <TableCell>{item.invoice}</TableCell>
-                  <TableCell>{item.paymentStatus}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-            {/* <TableFooter>
+          <div className="w-5/6">{CurvaSMemo}</div>
+
+          <div className="w-5/6 flex flex-col md:flex-row items-center gap-4">
+            <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+              <Label className="text-2xl font-bold text-white">
+                Listado de SP
+              </Label>
+              <Table className="rounded-lg">
+                <TableCaption>
+                  Solamente se muestran las SPs aprobadas (todos los montos
+                  estan en USD)
+                </TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Pos</TableHead>
+                    <TableHead>Partida</TableHead>
+                    <TableHead>Texto Breve</TableHead>
+                    <TableHead className="text-right">Monto</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invoices.map((item) => (
+                    <TableRow key={item.invoice}>
+                      <TableCell className="font-medium">
+                        {item.invoice}
+                      </TableCell>
+                      <TableCell>{item.paymentMethod}</TableCell>
+                      <TableCell>{item.invoice}</TableCell>
+                      <TableCell>{item.paymentStatus}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                {/* <TableFooter>
               <TableRowCdn>
                 <TableCellCdn colSpan={3}>Total</TableCellCdn>
                 <TableCellCdn className="text-right">$2,500.00</TableCellCdn>
               </TableRowCdn>
             </TableFooter> */}
-          </Table>
-        </div>
+              </Table>
+            </div>
 
-        <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
-          <Label className="text-2xl font-bold text-white">Listado de OC</Label>
-          <Table className="rounded-lg">
-            <TableCaption>(todos los montos estan en USD)</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Pos</TableHead>
-                <TableHead>Partida</TableHead>
-                <TableHead>Texto Breve</TableHead>
-                <TableHead>Proveedor</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoices.map((item) => (
-                <TableRow key={item.invoice}>
-                  <TableCell className="font-medium">{item.invoice}</TableCell>
-                  <TableCell>{item.paymentMethod}</TableCell>
-                  <TableCell>{item.invoice}</TableCell>
-                  <TableCell>{item.paymentStatus}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-            {/* <TableFooter>
+            <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+              <Label className="text-2xl font-bold text-white">
+                Listado de OC
+              </Label>
+              <Table className="rounded-lg">
+                <TableCaption>(todos los montos estan en USD)</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Pos</TableHead>
+                    <TableHead>Partida</TableHead>
+                    <TableHead>Texto Breve</TableHead>
+                    <TableHead>Proveedor</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invoices.map((item) => (
+                    <TableRow key={item.invoice}>
+                      <TableCell className="font-medium">
+                        {item.invoice}
+                      </TableCell>
+                      <TableCell>{item.paymentMethod}</TableCell>
+                      <TableCell>{item.invoice}</TableCell>
+                      <TableCell>{item.paymentStatus}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                {/* <TableFooter>
               <TableRowCdn>
                 <TableCellCdn colSpan={3}>Total</TableCellCdn>
                 <TableCellCdn className="text-right">$2,500.00</TableCellCdn>
               </TableRowCdn>
             </TableFooter> */}
-          </Table>
+              </Table>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* <div className="mt-8 w-5/6">
-        <CurvaSUnaVariable
-          data={{ General: CurvaAreaTotal, Ajustada: CurvaAreaAjustada }}
-          totales={ValoresTotales}
-        />
-      </div> */}
-
-      {/* <div className="mt-8 w-5/6">{MemoCurvaSUnaVariable}</div> */}
+      )}
     </div>
   );
 }
+
+//---------------------------------------------------------------------------------------------
 
 {
   /* <div className="w-4/5 grid gap-4 grid-cols-1 p-8 rounded-lg border-2 border-slate-300 mr-auto ml-auto md:grid-cols-2"> */

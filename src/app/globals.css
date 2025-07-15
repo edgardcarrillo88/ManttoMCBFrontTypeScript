@@ -72,3 +72,58 @@ body {
   }
 }
 
+
+/* Loader de Baymax */
+.baymax {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 60%;
+  height: 8%;
+  border-bottom: 5px solid #000;
+  transform: translate(-50%, -30%);
+  z-index: 10; /* Asegura que esté encima del cuerpo */
+}
+
+/* Ojos de Baymax */
+.baymax::before,
+.baymax::after {
+  content: "";
+  position: absolute;
+  width: 20%;
+  height: 400%;
+  top: -140%;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, #efefef 50%, #000 50%);
+  background-size: 200% 200%;
+  background-position: 0 -100%;
+  animation: blink 2s infinite;
+  z-index: 20; /* Más alto aún */
+}
+
+
+
+.baymax::before {
+  left: -15%;
+  transform: skewX(-4deg);
+}
+
+/* Ojo derecho */
+.baymax::after {
+  right: -15%;
+  transform: skewX(4deg);
+}
+
+@keyframes blink {
+  0%,
+  80% {
+    background-position: 0 100%;
+  }
+  85%,
+  95% {
+    background-position: 0 0%;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
