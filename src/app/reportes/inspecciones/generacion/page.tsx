@@ -46,6 +46,7 @@ import {
   Upload,
   FileText,
   ImageIcon,
+  CalendarIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -59,6 +60,10 @@ import {
 import { useRouter } from "next/navigation";
 import { Spinner } from "@nextui-org/spinner";
 import { ProtectedRouteComponentemail } from "@/components/protected-route-email";
+import { useSession } from "next-auth/react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import axios from "axios";
 
 const empresas = [
   "Empresa Industrial ABC S.A.",
@@ -122,7 +127,9 @@ const formSchema = z
   .object({
     empresa: z.string().min(1, "Debe seleccionar una empresa"),
     categoria: z.string().min(1, "Debe seleccionar una categoría"),
-    fecha: z.string().min(1, "La fecha es obligatoria"),
+    fecha: z.date({
+      message: "Campo obligatorio",
+    }),
     hora: z.string().min(1, "La hora es obligatoria"),
     area: z.string().min(1, "Debe seleccionar un área"),
     descripcion: z
@@ -154,7 +161,7 @@ const formSchema = z
     }
   );
 
-type FormData = z.infer<typeof formSchema>;
+type DatosFormularioSchema = z.infer<typeof formSchema>;
 
 const FormInspecciones = () => {
   const [openEmpresa, setOpenEmpresa] = useState(false);
@@ -165,13 +172,14 @@ const FormInspecciones = () => {
   const [fileNames, setFileNames] = useState<File[]>([]);
 
   const router = useRouter();
+  const { data: session } = useSession();
 
-  const form = useForm<FormData>({
+  const form = useForm<DatosFormularioSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       empresa: "",
       categoria: "",
-      fecha: "",
+      fecha: new Date(),
       hora: "",
       area: "",
       descripcion: "",
@@ -185,16 +193,60 @@ const FormInspecciones = () => {
   const watchEsObservacionSeguridad = form.watch("esObservacionSeguridad");
   console.log(form.watch());
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (values: DatosFormularioSchema) => {
     try {
       setModal(true);
+      const formData = new FormData();
+
+      Object.keys(values).forEach((key) => {
+        const typedKey = key as keyof DatosFormularioSchema;
+        const value = values[typedKey];
+        if (key !== "archivos" && value !== undefined) {
+          if (Array.isArray(value)) {
+            // value.forEach((item) => DatosFormularioSchema.append(key, item.toString()));
+            formData.append(key, JSON.stringify(value));
+          } else if (value instanceof Date) {
+            formData.append(key, value.toISOString());
+          } else if (typeof value === "boolean") {
+            formData.append(key, value.toString());
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      formData.append("User", session?.user?.name as string);
+      formData.append("email", session?.user?.email as string);
+
+      if (archivos && archivos.length > 0) {
+        archivos.forEach((file: File) => {
+          formData.append("file", file);
+        });
+      }
+
       console.log({
-        ...data,
+        ...values,
         archivos: archivos,
       });
-      setTimeout(() => {
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/data/crearinpeccion`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        console.log("todo de ptmr");
+          setTimeout(() => {
         setModalLoader(false);
-      }, 3000);
+      }, 2000);
+
+      }
+
     } catch (error) {
       console.log(error);
     }
@@ -401,13 +453,43 @@ const FormInspecciones = () => {
                             <FormLabel className="text-white font-medium">
                               Fecha *
                             </FormLabel>
-                            <FormControl>
+                            {/* <FormControl>
                               <Input
                                 type="date"
                                 className="bg-white/5 border-gray-600 text-white"
                                 {...field}
                               />
-                            </FormControl>
+                            </FormControl> */}
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    className={cn(
+                                      "w-[240px] pl-4 w-48 pr-3 py-2 text-left font-normal bg-gray-700 text-white border-2 border-gray-600 rounded-xl shadow-md hover:bg-gray-600 focus:ring-2 focus:ring-blue-400 transition-all",
+                                      !field.value && "text-gray-400"
+                                    )}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "PPP")
+                                    ) : (
+                                      <span>Selecciona una fecha</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-5 w-5 text-blue-400 opacity-80 transition-opacity duration-200" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-2 bg-gray-800 border border-gray-700 rounded-xl shadow-lg">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  // disabled={(date) => date < new Date()}
+                                  initialFocus
+                                  className="rounded-lg bg-gray-800 text-white shadow-md p-2"
+                                />
+                              </PopoverContent>
+                            </Popover>
                             <FormMessage className="text-red-400" />
                           </FormItem>
                         )}
