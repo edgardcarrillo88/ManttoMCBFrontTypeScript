@@ -386,7 +386,7 @@ const FormInspecciones = () => {
                                           field.onChange(empresa);
                                           setOpenEmpresa(false);
                                         }}
-                                        className="text-black hover:bg-gray-700"
+                                        className="text-gray bg-white/20 hover:bg-gray-700"
                                       >
                                         <Check
                                           className={cn(
@@ -558,7 +558,7 @@ const FormInspecciones = () => {
                                           field.onChange(area);
                                           setOpenArea(false);
                                         }}
-                                        className="text-black hover:bg-gray-700"
+                                        className="text-white bg-white/20  hover:bg-gray-700"
                                       >
                                         <Check
                                           className={cn(
