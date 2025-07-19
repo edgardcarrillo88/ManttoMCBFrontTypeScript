@@ -563,7 +563,7 @@ const FormInspecciones = () => {
                                           field.onChange(area);
                                           setOpenArea(false);
                                         }}
-                                        className="text-white bg-white/20  hover:bg-gray-700"
+                                        className="text-gray bg-white/20 hover:bg-gray-700"
                                       >
                                         <Check
                                           className={cn(
