@@ -241,12 +241,10 @@ const FormInspecciones = () => {
 
       if (response.status === 200) {
         console.log("todo de ptmr");
-          setTimeout(() => {
-        setModalLoader(false);
-      }, 2000);
-
+        setTimeout(() => {
+          setModalLoader(false);
+        }, 2000);
       }
-
     } catch (error) {
       console.log(error);
     }
@@ -428,11 +426,16 @@ const FormInspecciones = () => {
                                   <SelectValue placeholder="Seleccionar..." />
                                 </SelectTrigger>
                               </FormControl>
-                              <SelectContent className="bg-gray-800 border-gray-600">
+                              <SelectContent
+                                className="bg-gray-800 border-gray-600"
+                                // onTouchStart={(e) => {
+                                //   e.stopPropagation();
+                                // }}
+                              >
                                 {categorias.map((categoria) => (
                                   <SelectItem
                                     key={categoria}
-                                    value={categoria}
+                                    value={categoria.toString()}
                                     className="text-white hover:bg-gray-700"
                                   >
                                     {categoria}
@@ -445,6 +448,7 @@ const FormInspecciones = () => {
                         )}
                       />
 
+                      {/*Fecha*/}
                       <FormField
                         control={form.control}
                         name="fecha"
@@ -495,6 +499,7 @@ const FormInspecciones = () => {
                         )}
                       />
 
+                      {/* Hora */}
                       <FormField
                         control={form.control}
                         name="hora"
