@@ -13,7 +13,7 @@ export default function page() {
               title="Report Section"
               width="100%"
               height="100%"
-              src="https://app.powerbi.com/view?r=eyJrIjoiMzQwMGQ5OTMtOTc4Yy00MTVlLWE4ODMtZjJlMmEyY2VjYTk4IiwidCI6IjAwMDE1ZDkyLTIxYWQtNDhhOC04NDQ1LWE3ZDY4YmY4OTliZCIsImMiOjR9"
+              src="https://app.powerbi.com/view?r=eyJrIjoiOWQzNWUxYTEtOTRhYS00YmEzLTg3N2EtYjMyOTJjNWJlYjBkIiwidCI6IjAwMDE1ZDkyLTIxYWQtNDhhOC04NDQ1LWE3ZDY4YmY4OTliZCIsImMiOjR9"
               frameBorder={1}
               allowFullScreen={true}
             ></iframe>
