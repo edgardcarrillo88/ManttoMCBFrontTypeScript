@@ -302,9 +302,9 @@ const FormInspecciones = () => {
 
       if (response.status === 200) {
         console.log("todo de ptmr");
-        setTimeout(() => {
-          setModalLoader(false);
-        }, 2000);
+        // setTimeout(() => {
+        // }, 2000);
+        setModalLoader(false);
       }
     } catch (error) {
       console.log(error);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,8 +51,9 @@ import {
   ChevronDown,
   Check,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import { es } from "date-fns/locale";
+import axios from "axios";
 
 // Tipos de datos
 interface FileAttachment {
@@ -64,155 +65,156 @@ interface FileAttachment {
 }
 
 interface Submission {
-  id: string;
-  nombre: string;
-  usuario: string;
+  _id: string;
+  // nombre: string;
+  // usuario: string;
   empresa: string;
-  comentarios: string;
+  area:string;
+  descripcion: string;
   categoria: string;
-  prioridad: string;
-  fechaEnvio: Date;
-  archivos: FileAttachment[];
-  estado: "pendiente" | "en_proceso" | "completado" | "rechazado";
+  // prioridad: string;
+  fecha: Date;
+  FilesData: FileAttachment[];
+  // estado: "pendiente" | "en_proceso" | "completado" | "rechazado";
 }
 
 // Datos de ejemplo
-const mockSubmissions: Submission[] = [
-  {
-    id: "1",
-    nombre: "Juan Pérez",
-    usuario: "juan.perez@email.com",
-    empresa: "TechCorp SA",
-    comentarios: "Solicitud de revisión de documentos para el proyecto Alpha.",
-    categoria: "Documentación",
-    prioridad: "Alta",
-    fechaEnvio: new Date("2024-01-15"),
-    estado: "pendiente",
-    archivos: [
-      {
-        id: "f1",
-        name: "propuesta-proyecto.pdf",
-        type: "application/pdf",
-        size: 2048576,
-        url: "/placeholder.svg?height=300&width=400&text=Propuesta+Proyecto",
-      },
-      {
-        id: "f3",
-        name: "Vaquita.png",
-        type: "image/png",
-        size: 512000,
-        url: "https://media.istockphoto.com/id/1402436756/es/foto/carga-de-documentos-desde-la-carpeta-abra-la-carpeta-archivo-con-documentos-en-blanco.jpg?b=1&s=612x612&w=0&k=20&c=MsBlrt9bWQK8Dd_THdoMthVDY4xb8pdLq7-Kv8rXLOo=",
-      },
-    ],
-  },
+// const mockSubmissions: Submission[] = [
+//   {
+//     _id: "1",
+//     // nombre: "Juan Pérez",
+//     // usuario: "juan.perez@email.com",
+//     empresa: "TechCorp SA",
+//     descripcion: "Solicitud de revisión de documentos para el proyecto Alpha.",
+//     categoria: "Documentación",
+//     // prioridad: "Alta",
+//     fecha: new Date("2024-01-15"),
+//     // estado: "pendiente",
+//     FilesData: [
+//       {
+//         id: "f1",
+//         name: "propuesta-proyecto.pdf",
+//         type: "application/pdf",
+//         size: 2048576,
+//         url: "/placeholder.svg?height=300&width=400&text=Propuesta+Proyecto",
+//       },
+//       {
+//         id: "f3",
+//         name: "Vaquita.png",
+//         type: "image/png",
+//         size: 512000,
+//         url: "https://media.istockphoto.com/id/1402436756/es/foto/carga-de-documentos-desde-la-carpeta-abra-la-carpeta-archivo-con-documentos-en-blanco.jpg?b=1&s=612x612&w=0&k=20&c=MsBlrt9bWQK8Dd_THdoMthVDY4xb8pdLq7-Kv8rXLOo=",
+//       },
+//     ],
+//   },
 
-  {
-    id: "2",
-    nombre: "María González",
-    usuario: "maria.gonzalez@email.com",
-    empresa: "InnovaCorp",
-    comentarios: "Envío de reportes mensuales y análisis de métricas.",
-    categoria: "Reportes",
-    prioridad: "Media",
-    fechaEnvio: new Date("2024-01-14"),
-    estado: "en_proceso",
-    archivos: [
-      {
-        id: "f4",
-        name: "reporte-enero.pdf",
-        type: "application/pdf",
-        size: 3072000,
-        url: "/placeholder.svg?height=300&width=400&text=Reporte+Enero",
-      },
-      {
-        id: "f5",
-        name: "graficos-metricas.jpg",
-        type: "image/jpeg",
-        size: 768000,
-        url: "/placeholder.svg?height=300&width=400&text=Gráficos+Métricas",
-      },
-    ],
-  },
-  {
-    id: "3",
-    nombre: "Carlos Rodríguez",
-    usuario: "carlos.rodriguez@email.com",
-    empresa: "TechCorp SA",
-    comentarios: "Solicitud de soporte técnico para resolver problemas.",
-    categoria: "Soporte Técnico",
-    prioridad: "Baja",
-    fechaEnvio: new Date("2024-01-13"),
-    estado: "completado",
-    archivos: [
-      {
-        id: "f6",
-        name: "captura-error.png",
-        type: "image/png",
-        size: 256000,
-        url: "/placeholder.svg?height=300&width=400&text=Captura+Error",
-      },
-    ],
-  },
-  {
-    id: "4",
-    nombre: "Ana Martínez",
-    usuario: "ana.martinez@email.com",
-    empresa: "DataSolutions",
-    comentarios: "Análisis de datos del primer trimestre.",
-    categoria: "Análisis",
-    prioridad: "Alta",
-    fechaEnvio: new Date("2024-01-12"),
-    estado: "completado",
-    archivos: [
-      {
-        id: "f7",
-        name: "analisis-q1.png",
-        type: "image/png",
-        size: 1024000,
-        url: "/placeholder.svg?height=300&width=400&text=Análisis+Q1",
-      },
-      {
-        id: "f8",
-        name: "dashboard.jpg",
-        type: "image/jpeg",
-        size: 2048000,
-        url: "/placeholder.svg?height=300&width=400&text=Dashboard+Métricas",
-      },
-    ],
-  },
-  {
-    id: "5",
-    nombre: "Luis Torres",
-    usuario: "luis.torres@email.com",
-    empresa: "InnovaCorp",
-    comentarios: "Documentación técnica del nuevo sistema.",
-    categoria: "Documentación",
-    prioridad: "Media",
-    fechaEnvio: new Date("2024-01-11"),
-    estado: "pendiente",
-    archivos: [
-      {
-        id: "f9",
-        name: "arquitectura.png",
-        type: "image/png",
-        size: 1536000,
-        url: "/placeholder.svg?height=300&width=400&text=Arquitectura+Sistema",
-      },
-    ],
-  },
-  {
-    id: "6",
-    nombre: "Sofia Herrera",
-    usuario: "sofia.herrera@email.com",
-    empresa: "DataSolutions",
-    comentarios: "Reporte de incidencias del sistema.",
-    categoria: "Reportes",
-    prioridad: "Alta",
-    fechaEnvio: new Date("2024-01-10"),
-    estado: "en_proceso",
-    archivos: [],
-  },
-];
+//   {
+//     _id: "2",
+//     // nombre: "María González",
+//     // usuario: "maria.gonzalez@email.com",
+//     empresa: "InnovaCorp",
+//     descripcion: "Envío de reportes mensuales y análisis de métricas.",
+//     categoria: "Reportes",
+//     // prioridad: "Media",
+//     fecha: new Date("2024-01-14"),
+//     // estado: "en_proceso",
+//     FilesData: [
+//       {
+//         id: "f4",
+//         name: "reporte-enero.pdf",
+//         type: "application/pdf",
+//         size: 3072000,
+//         url: "/placeholder.svg?height=300&width=400&text=Reporte+Enero",
+//       },
+//       {
+//         id: "f5",
+//         name: "graficos-metricas.jpg",
+//         type: "image/jpeg",
+//         size: 768000,
+//         url: "/placeholder.svg?height=300&width=400&text=Gráficos+Métricas",
+//       },
+//     ],
+//   },
+//   {
+//     _id: "3",
+//     // nombre: "Carlos Rodríguez",
+//     // usuario: "carlos.rodriguez@email.com",
+//     empresa: "TechCorp SA",
+//     descripcion: "Solicitud de soporte técnico para resolver problemas.",
+//     categoria: "Soporte Técnico",
+//     // prioridad: "Baja",
+//     fecha: new Date("2024-01-13"),
+//     // estado: "completado",
+//     FilesData: [
+//       {
+//         id: "f6",
+//         name: "captura-error.png",
+//         type: "image/png",
+//         size: 256000,
+//         url: "/placeholder.svg?height=300&width=400&text=Captura+Error",
+//       },
+//     ],
+//   },
+//   {
+//     _id: "4",
+//     // nombre: "Ana Martínez",
+//     // usuario: "ana.martinez@email.com",
+//     empresa: "DataSolutions",
+//     descripcion: "Análisis de datos del primer trimestre.",
+//     categoria: "Análisis",
+//     // prioridad: "Alta",
+//     fecha: new Date("2024-01-12"),
+//     // estado: "completado",
+//     FilesData: [
+//       {
+//         id: "f7",
+//         name: "analisis-q1.png",
+//         type: "image/png",
+//         size: 1024000,
+//         url: "/placeholder.svg?height=300&width=400&text=Análisis+Q1",
+//       },
+//       {
+//         id: "f8",
+//         name: "dashboard.jpg",
+//         type: "image/jpeg",
+//         size: 2048000,
+//         url: "/placeholder.svg?height=300&width=400&text=Dashboard+Métricas",
+//       },
+//     ],
+//   },
+//   {
+//     _id: "5",
+//     // nombre: "Luis Torres",
+//     // usuario: "luis.torres@email.com",
+//     empresa: "InnovaCorp",
+//     descripcion: "Documentación técnica del nuevo sistema.",
+//     categoria: "Documentación",
+//     // prioridad: "Media",
+//     fecha: new Date("2024-01-11"),
+//     // estado: "pendiente",
+//     FilesData: [
+//       {
+//         id: "f9",
+//         name: "arquitectura.png",
+//         type: "image/png",
+//         size: 1536000,
+//         url: "/placeholder.svg?height=300&width=400&text=Arquitectura+Sistema",
+//       },
+//     ],
+//   },
+//   {
+//     _id: "6",
+//     // nombre: "Sofia Herrera",
+//     // usuario: "sofia.herrera@email.com",
+//     empresa: "DataSolutions",
+//     descripcion: "Reporte de incidencias del sistema.",
+//     categoria: "Reportes",
+//     // prioridad: "Alta",
+//     fecha: new Date("2024-01-10"),
+//     // estado: "en_proceso",
+//     FilesData: [],
+//   },
+// ];
 
 const CHART_COLORS = [
   "#0088FE",
@@ -224,26 +226,74 @@ const CHART_COLORS = [
 ];
 
 export default function SubmissionsPage() {
-  const [submissions] = useState<Submission[]>(mockSubmissions);
+  const [submissions] = useState<Submission[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [records, SetRecords] = useState<Submission[]>([]);
+  const [totalPages, settotalPages] = useState(0);
+  const [totalRecords, setTotalRecords] = useState(0);
+
+  useEffect(() => {
+    fetchData(currentPage, itemsPerPage);
+  }, []);
+
+  async function fetchData(page: number, RowPerPage: number) {
+    const RowPerPageValue = RowPerPage || 5;
+    let URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/data/getalldatainspeccion?page=${page}&perPage=${RowPerPageValue}`;
+
+    console.log(searchTerm);
+
+    if (searchTerm) {
+      URL = `${URL}&empresa=${searchTerm}`;
+    }
+
+    console.log(URL);
+
+    const response = await axios.get(URL);
+
+    console.log(response.data);
+
+    SetRecords(response.data.docs);
+    settotalPages(response.data.totalPages);
+    setTotalRecords(response.data.totalDocs);
+  }
 
   // Filtrar envíos por búsqueda
-  const filteredSubmissions = useMemo(() => {
-    return submissions.filter(
-      (submission) =>
-        submission.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        submission.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        submission.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        submission.comentarios.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [submissions, searchTerm]);
+  // const filteredSubmissions = useMemo(() => {
+  //   // return submissions.filter(
+  //   //   (submission) =>
+  //   //     submission.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //   //     submission.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //   //     submission.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //   //     submission.comentarios.toLowerCase().includes(searchTerm.toLowerCase())
+  //   // );
+  //   fetchData(1, itemsPerPage);
+  //   return records;
+  // }, [submissions, searchTerm,itemsPerPage]);
+
+  // Paginación
+  const paginatedSubmissions = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+      fetchData(currentPage, itemsPerPage);
+    // return records.slice(startIndex, endIndex);
+     return records;
+  }, [ currentPage, itemsPerPage]);
+
+  // const totalPages = Math.ceil(filteredSubmissions.length / itemsPerPage);
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   // Datos para gráfico circular (por empresa)
   const companyData = useMemo(() => {
-    const companyCounts = submissions.reduce((acc, submission) => {
+    const companyCounts = records.reduce((acc, submission) => {
       acc[submission.empresa] = (acc[submission.empresa] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
@@ -252,14 +302,14 @@ export default function SubmissionsPage() {
       name: empresa,
       value: count,
     }));
-  }, [submissions]);
+  }, [records]);
 
   // Datos para gráfico de barras (por categoría)
   const categoryData = useMemo(() => {
     const filteredData =
       selectedCategories.length > 0
-        ? submissions.filter((s) => selectedCategories.includes(s.categoria))
-        : submissions;
+        ? records.filter((s) => selectedCategories.includes(s.categoria))
+        : records;
 
     const categoryCounts = filteredData.reduce((acc, submission) => {
       acc[submission.categoria] = (acc[submission.categoria] || 0) + 1;
@@ -270,12 +320,12 @@ export default function SubmissionsPage() {
       categoria,
       count,
     }));
-  }, [submissions, selectedCategories]);
+  }, [records, selectedCategories]);
 
   // Obtener todas las categorías únicas
   const allCategories = useMemo(() => {
-    return Array.from(new Set(submissions.map((s) => s.categoria)));
-  }, [submissions]);
+    return Array.from(new Set(records.map((s) => s.categoria)));
+  }, [records]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -339,65 +389,66 @@ export default function SubmissionsPage() {
       <Card className="w-5/6 mx-auto mt-6 mb-6 bg-white shadow-lg">
         <CardHeader>
           <CardTitle>
-            Lista de Reportes ({filteredSubmissions.length})
+            Lista de Reportes ({totalRecords} total, mostrando{" "}
+            {records.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
                 <TableHead>Empresa</TableHead>
+                <TableHead>Area</TableHead>
                 <TableHead>Categoría</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Prioridad</TableHead>
+                {/* <TableHead>Estado</TableHead>
+                <TableHead>Prioridad</TableHead> */}
                 <TableHead>Fecha</TableHead>
                 <TableHead>Archivos</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredSubmissions.map((submission) => {
-                const imageFiles = getImageFiles(submission.archivos);
+              {records.map((submission) => {
+                const imageFiles = getImageFiles(submission.FilesData);
                 return (
                   <TableRow
-                    key={submission.id}
+                    key={submission._id}
                     className="hover:bg-gray-50 relative"
                     onMouseMove={(e) => {
                       setTooltipPosition({ x: e.clientX, y: e.clientY });
                     }}
-                    onMouseEnter={() => setHoveredRow(submission.id)}
+                    onMouseEnter={() => setHoveredRow(submission._id)}
                     onMouseLeave={() => setHoveredRow(null)}
                   >
                     <TableCell className="font-medium">
-                      {submission.nombre}
+                      {submission.empresa}
                     </TableCell>
-                    <TableCell>{submission.empresa}</TableCell>
+                    <TableCell>{submission.area}</TableCell>
                     <TableCell>{submission.categoria}</TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(submission.estado)}>
+                      {/* <Badge className={getStatusColor(submission.estado)}>
                         {submission.estado.replace("_", " ")}
-                      </Badge>
+                      </Badge> */}
                     </TableCell>
                     <TableCell>
-                      <Badge className={getPriorityColor(submission.prioridad)}>
+                      {/* <Badge className={getPriorityColor(submission.prioridad)}>
                         {submission.prioridad}
-                      </Badge>
+                      </Badge> */}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {format(submission.fechaEnvio, "dd/MM/yyyy", {
+                        {format(submission.fecha, "dd/MM/yyyy", {
                           locale: es,
                         })}
                       </div>
                     </TableCell>
                     <TableCell className="relative">
                       <div className="flex items-center gap-2">
-                        {submission.archivos.length > 0 && (
+                        {submission.FilesData.length > 0 && (
                           <>
                             <FileText className="h-4 w-4" />
                             <span className="text-sm">
-                              {submission.archivos.length}
+                              {submission.FilesData.length}
                             </span>
                           </>
                         )}
@@ -416,15 +467,117 @@ export default function SubmissionsPage() {
               })}
             </TableBody>
           </Table>
+          {/* Controles de paginación */}
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">
+                Mostrando{" "}
+                {Math.min(
+                  (currentPage - 1) * itemsPerPage + 1,
+                  records.length
+                )}{" "}
+                a{" "}
+                {Math.min(
+                  currentPage * itemsPerPage,
+                  records.length
+                )}{" "}
+                de {records.length} resultados
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Filas por página:</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="border rounded px-2 py-1 text-sm"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                >
+                  {"<<"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  {"<"}
+                </Button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNumber;
+                    if (totalPages <= 5) {
+                      pageNumber = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNumber = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNumber = totalPages - 4 + i;
+                    } else {
+                      pageNumber = currentPage - 2 + i;
+                    }
+
+                    return (
+                      <Button
+                        key={pageNumber}
+                        variant={
+                          currentPage === pageNumber ? "default" : "outline"
+                        }
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNumber)}
+                        className="w-8 h-8 p-0"
+                      >
+                        {pageNumber}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  {">"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                >
+                  {">>"}
+                </Button>
+              </div>
+            </div>
+          </div>
           {/* Hover overlay con imágenes - fuera de la tabla */}
           {hoveredRow && (
             <div className="fixed z-50 pointer-events-none">
               {(() => {
-                const submission = filteredSubmissions.find(
-                  (s) => s.id === hoveredRow
+                const submission = records.find(
+                  (s) => s._id === hoveredRow
                 );
                 const imageFiles = submission
-                  ? getImageFiles(submission.archivos)
+                  ? getImageFiles(submission.FilesData)
                   : [];
 
                 if (!submission || imageFiles.length === 0) return null;
