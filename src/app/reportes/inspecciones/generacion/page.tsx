@@ -66,14 +66,52 @@ import { Calendar } from "@/components/ui/calendar";
 import axios from "axios";
 
 const empresas = [
-  "Empresa Industrial ABC S.A.",
-  "Manufacturas del Norte Ltda.",
-  "Corporación Metalúrgica XYZ",
-  "Industrias Químicas del Sur",
-  "Textiles y Confecciones S.A.S.",
-  "Alimentos Procesados Colombia",
-  "Construcciones y Obras Civiles",
-  "Tecnología y Sistemas Integrados",
+  "Prodise",
+  "Vibrotechnology",
+  "Esermin",
+  "IngePeru",
+  "Confipetrol",
+  "Emensa",
+  "Invesux",
+  "RTS",
+  "Selin",
+  "Precision",
+  "Voyant",
+  "Vivargo",
+  "Eccocentury",
+  "Emsumir",
+  "3R",
+  "Adecco",
+  "AQP",
+  "CBT",
+  "Compair",
+  "Comsertran",
+  "Conductix",
+  "D&A",
+  "Ebro",
+  "Famose",
+  "Fireno",
+  "FlSmidth",
+  "Geyer & Kabel",
+  "Hosch",
+  "JJC",
+  "Konecrane",
+  "Martin eng.",
+  "Metalec & Gruas",
+  "Sagintario",
+  "Metso",
+  "Sandvik",
+  "Schneider",
+  "V&C Corporate SAC",
+  "Yale",
+  "Tega",
+  "Atlantica",
+  "ABB",
+  "Morken",
+  "Pack Energy",
+  "Hitachi",
+  "Energia Peruana",
+  "Makyl",
 ];
 
 const areas = [
@@ -93,6 +131,7 @@ const areas = [
   "Oxidos - Ripios",
   "Oxidos - EW",
   "Almacén L30",
+  "Otros",
 ];
 
 const categorias = [
@@ -110,14 +149,35 @@ const categorias = [
 ];
 
 const tiposRiesgo = [
-  "Riesgo Físico",
-  "Riesgo Químico",
-  "Riesgo Biológico",
-  "Riesgo Ergonómico",
-  "Riesgo Psicosocial",
-  "Riesgo Mecánico",
-  "Riesgo Eléctrico",
-  "Riesgo Locativo",
+  "Uso, trabajo bajo influencia de alcohol  y/o drogas",
+  "Desactivar un dispositivo de seguridad",
+  "No asegurar la carga adecuadamente",
+  "No respetar el PARE",
+  "Manipulación inadecuada de Productos Químicos",
+  "No uso o uso inadecuado del claxon",
+  "Operar vehículo o equipo a exceso de velocidad",
+  "Operar equipos o herramientas sin autorización",
+  "Omisión o incorrecto llenado de herramientas de gestión documentaria para la actividad",
+  "Dejar herramienta o equipo conectado",
+  "Traslado deficiente de materiales",
+  "Realiza actividades sin capacitación específica para la tarea",
+  "Uso de herramienta o equipo defectuoso",
+  "Maniobras de conducción inadecuadas",
+  "Realiza mantenimiento a equipo o herramienta sin bloquear energía",
+  "Postura / Posición inadecuada",
+  "No uso de camino peatonal",
+  "Mal uso de herramienta o equipo",
+  "Dejar mal ubicado una herramienta o equipo",
+  "Toma de atajos",
+  "Bromas/Juegos",
+  "No uso de cinturón de seguridad",
+  "Levantamiento inadecuado manual de carga",
+  "Uso de celular en áreas de riesgo o mientras camina",
+  "Ingreso a áreas no autorizadas y/o no respetar señalización/demarcación",
+  "Se expone a la linea de fuego",
+  "No usar pasamanos",
+  "No uso o uso incorrecto de EPP",
+  "Tipo de Acto Subestándar",
 ];
 
 const nivelesRiesgo = ["Bajo", "Medio", "Alto", "Crítico"];
@@ -195,6 +255,7 @@ const FormInspecciones = () => {
 
   const onSubmit = async (values: DatosFormularioSchema) => {
     try {
+      console.log(values);
       setModal(true);
       const formData = new FormData();
 
