@@ -70,7 +70,7 @@ const Options: Option[] = [
 export default function page() {
 
   return (
- <ProtectedRouteComponentemail>
+ <ProtectedRouteComponentemail empresa="Marcobre">
     <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
       <div className="mt-8">
         {/* <h1 className="text-6xl font-bold text-rose-700">Marcobre</h1> */}

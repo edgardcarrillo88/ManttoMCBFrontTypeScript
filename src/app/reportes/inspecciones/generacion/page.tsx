@@ -357,7 +357,7 @@ const FormInspecciones = () => {
   };
 
   return (
-    <ProtectedRouteComponentemail>
+    <ProtectedRouteComponentemail empresa= "Marcobre">
       <>
         {/* Modal */}
         {modal && (

@@ -92,7 +92,7 @@ export default function page() {
   };
 
   return (
-    <ProtectedRouteComponentemail>
+    <ProtectedRouteComponentemail empresa="Marcobre">
     <>
       <LoadFile
         title={"Carga de Provisiones"}

@@ -189,7 +189,6 @@ export default function page(params: any) {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/cost/getprocesscompromisosdata`
       );
-      console.log(response.data.dataSP);
 
       response.data.dataSP = response.data.dataSP.map((item: TypeSPs) => ({
         ...item,
@@ -624,7 +623,7 @@ export default function page(params: any) {
   };
 
   return (
-    <ProtectedRouteComponentemail>
+    <ProtectedRouteComponentemail empresa="Marcobre">
       <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
         <div className="text-white text-2xl mt-8 flex flex-col items-center w-4/5 px-4 py-2">
           <div className="flex justify-center">

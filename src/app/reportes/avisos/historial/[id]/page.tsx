@@ -642,7 +642,7 @@ export default function page({ params }: PageProps) {
   console.log(form.formState.errors);
 
   return (
-    <ProtectedRouteComponentemail>
+    <ProtectedRouteComponentemail empresa="Marcobre">
       <>
         {/* Modal */}
         {modal && (

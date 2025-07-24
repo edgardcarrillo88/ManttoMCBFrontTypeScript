@@ -412,7 +412,7 @@ export default function InputForm(params: any) {
   }
 
   return (
-    <ProtectedRouteComponentemail>
+    <ProtectedRouteComponentemail empresa="Todos">
     <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center justify-center">
       <Form {...form}>
         <form

@@ -586,7 +586,7 @@ export default function page() {
   });
 
   return (
-    <ProtectedRouteComponentemail>
+    <ProtectedRouteComponentemail empresa="Todos">
       <>
         {/* Modal */}
         {modal && (

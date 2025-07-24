@@ -1,51 +1,67 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { LockIcon } from 'lucide-react'
-import axios from 'axios'
-
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { LockIcon } from "lucide-react";
+import axios from "axios";
 
 interface ProtectedRouteProps {
-  children: React.ReactNode
+  children: React.ReactNode;
+  empresa: string;
 }
 
-
-export function ProtectedRouteComponentemail({ children}: ProtectedRouteProps) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [isAuthorized, setIsAuthorized] = useState(false)
-  const [error, setError] = useState('')
+export function ProtectedRouteComponentemail({
+  children,
+  empresa,
+}: ProtectedRouteProps) {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const checkUserAccess = async () => {
-      if (status === 'authenticated' && session?.user?.email) {
+      if (status === "authenticated" && session?.user?.email) {
         try {
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/data/validateusers`,
+            { params: { user: session.user.email } }
+          );
 
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/data/validateusers`,{params: {user: session.user.email}})
-         
+          console.log(response.data.response[0].empresa);
 
-          if (response.status === 200) {
-            setIsAuthorized(true)
+          if (
+            response.status === 200 
+            &&
+            (response.data.response[0].empresa === empresa ||
+              empresa === "Todos")
+          ) {
+            setIsAuthorized(true);
           } else {
-            setError('You are not authorized to access this page.')
-            router.push('/unauthorized')
+            setError("You are not authorized to access this page.");
+            router.push("/unauthorized");
           }
         } catch (err) {
-          setError('An error occurred while checking access.')
-          router.push('/unauthorized')
+          setError("An error occurred while checking access.");
+          router.push("/unauthorized");
         }
-      } else if (status === 'unauthenticated') {
-        router.push('/api/auth/signin')
+      } else if (status === "unauthenticated") {
+        router.push("/api/auth/signin");
       }
-    }
+    };
 
-    checkUserAccess()
-  }, [session, status, router])
+    checkUserAccess();
+  }, [session, status, router]);
 
-  if (status === 'loading' || !isAuthorized) {
+  if (status === "loading" || !isAuthorized) {
     return (
       <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center justify-center">
         <Card className="w-full max-w-md bg-gray-800 text-white border-gray-700">
@@ -54,13 +70,13 @@ export function ProtectedRouteComponentemail({ children}: ProtectedRouteProps) {
               <LockIcon className="mr-2" /> Checking Access
             </CardTitle>
             <CardDescription className="text-gray-400 text-center">
-              {error || 'Verifying user permissions...'}
+              {error || "Verifying user permissions..."}
             </CardDescription>
           </CardHeader>
         </Card>
       </div>
-    )
+    );
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
