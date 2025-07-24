@@ -54,7 +54,7 @@ const Options: Option[] = [
     subtitle: "Mantto Planta",
     description: "compromisos y saldos por partidas",
     image:
-      "https://images.pexels.com/photos/7693229/pexels-photo-7693229.jpeg?auto=compress&cs=tinysrgb&w=300",
+      "https://images.pexels.com/photos/9660/business-money-pink-coins.jpg",
     path: "/costos/compromisos",
   },
   {

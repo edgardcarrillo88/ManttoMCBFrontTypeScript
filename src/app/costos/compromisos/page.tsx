@@ -57,7 +57,7 @@ const columns = [
   { name: "MONTO SP", uid: "montosp" },
   { name: "MONTO OC", uid: "montooc" },
   { name: "TOTAL COMPR", uid: "totalcompromiso" },
-  { name: "Q0", uid: "forecast" },
+  { name: "Q2", uid: "forecast" },
   { name: "SALDO", uid: "saldo" },
 ];
 
@@ -201,9 +201,7 @@ export default function page(params: any) {
       setCompromisoSPs(response.data.dataSP);
       setFilterCompromisoSPs(response.data.dataSP);
 
-      console.log(
-        response.data.dataOC.filter((item: any) => item.Partida === "MPLT-207")
-      );
+
 
       response.data.dataOC = response.data.dataOC.map((item: TypeOCs) => ({
         ...item,

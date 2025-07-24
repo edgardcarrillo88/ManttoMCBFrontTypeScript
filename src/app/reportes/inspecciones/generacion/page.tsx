@@ -112,6 +112,13 @@ const empresas = [
   "Hitachi",
   "Energia Peruana",
   "Makyl",
+  "HRO",
+  "MILLS",
+  "FISAC",
+  "ESPIASA",
+  "ZAMINE",
+  "FITFLOW PERU",
+  "Marcobre"
 ];
 
 const areas = [

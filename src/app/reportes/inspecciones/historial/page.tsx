@@ -61,7 +61,7 @@ interface FileAttachment {
   name: string;
   type: string;
   size: number;
-  url: string;
+  webkitRelativePath: string;
 }
 
 interface Submission {
@@ -263,17 +263,17 @@ export default function SubmissionsPage() {
   }
 
   // Filtrar envíos por búsqueda
-  // const filteredSubmissions = useMemo(() => {
-  //   // return submissions.filter(
-  //   //   (submission) =>
-  //   //     submission.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //   //     submission.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //   //     submission.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //   //     submission.comentarios.toLowerCase().includes(searchTerm.toLowerCase())
-  //   // );
-  //   fetchData(1, itemsPerPage);
-  //   return records;
-  // }, [submissions, searchTerm,itemsPerPage]);
+  const filteredSubmissions = useMemo(() => {
+    // return submissions.filter(
+    //   (submission) =>
+    //     submission.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //     submission.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //     submission.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //     submission.comentarios.toLowerCase().includes(searchTerm.toLowerCase())
+    // );
+    fetchData(1, itemsPerPage);
+    return records;
+  }, [submissions, searchTerm,itemsPerPage]);
 
   // Paginación
   const paginatedSubmissions = useMemo(() => {
@@ -282,7 +282,7 @@ export default function SubmissionsPage() {
       fetchData(currentPage, itemsPerPage);
     // return records.slice(startIndex, endIndex);
      return records;
-  }, [ currentPage, itemsPerPage]);
+  }, [filteredSubmissions, currentPage, itemsPerPage]);
 
   // const totalPages = Math.ceil(filteredSubmissions.length / itemsPerPage);
 
@@ -292,7 +292,7 @@ export default function SubmissionsPage() {
   }, [searchTerm]);
 
   // Datos para gráfico circular (por empresa)
-  const companyData = useMemo(() => {
+  const  categoryData= useMemo(() => {
     const companyCounts = records.reduce((acc, submission) => {
       acc[submission.empresa] = (acc[submission.empresa] || 0) + 1;
       return acc;
@@ -305,7 +305,7 @@ export default function SubmissionsPage() {
   }, [records]);
 
   // Datos para gráfico de barras (por categoría)
-  const categoryData = useMemo(() => {
+  const companyData = useMemo(() => {
     const filteredData =
       selectedCategories.length > 0
         ? records.filter((s) => selectedCategories.includes(s.categoria))
@@ -317,14 +317,18 @@ export default function SubmissionsPage() {
     }, {} as Record<string, number>);
 
     return Object.entries(categoryCounts).map(([categoria, count]) => ({
-      categoria,
-      count,
+      name: categoria,
+      value: count,
     }));
   }, [records, selectedCategories]);
 
   // Obtener todas las categorías únicas
   const allCategories = useMemo(() => {
     return Array.from(new Set(records.map((s) => s.categoria)));
+  }, [records]);
+
+    const allEmpresas = useMemo(() => {
+    return Array.from(new Set(records.map((s) => s.empresa)));
   }, [records]);
 
   const getStatusColor = (status: string) => {
@@ -357,6 +361,10 @@ export default function SubmissionsPage() {
 
   const getImageFiles = (archivos: FileAttachment[]) => {
     return archivos.filter((file) => file.type.startsWith("image/"));
+  };
+
+    const getdocsFiles = (archivos: FileAttachment[]) => {
+    return archivos.filter((file) => !file.type.startsWith("image/"));
   };
 
   const handleCategoryToggle = (category: string) => {
@@ -409,6 +417,7 @@ export default function SubmissionsPage() {
             <TableBody>
               {records.map((submission) => {
                 const imageFiles = getImageFiles(submission.FilesData);
+                const docsFiles = getdocsFiles(submission.FilesData);
                 return (
                   <TableRow
                     key={submission._id}
@@ -424,16 +433,16 @@ export default function SubmissionsPage() {
                     </TableCell>
                     <TableCell>{submission.area}</TableCell>
                     <TableCell>{submission.categoria}</TableCell>
-                    <TableCell>
-                      {/* <Badge className={getStatusColor(submission.estado)}>
+                    {/* <TableCell>
+                      <Badge className={getStatusColor(submission.estado)}>
                         {submission.estado.replace("_", " ")}
-                      </Badge> */}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      {/* <Badge className={getPriorityColor(submission.prioridad)}>
+                      <Badge className={getPriorityColor(submission.prioridad)}>
                         {submission.prioridad}
-                      </Badge> */}
-                    </TableCell>
+                      </Badge>
+                    </TableCell> */}
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
@@ -448,7 +457,7 @@ export default function SubmissionsPage() {
                           <>
                             <FileText className="h-4 w-4" />
                             <span className="text-sm">
-                              {submission.FilesData.length}
+                              {docsFiles.length}
                             </span>
                           </>
                         )}
@@ -604,7 +613,7 @@ export default function SubmissionsPage() {
                       {imageFiles.slice(0, 4).map((file) => (
                         <div key={file.id} className="space-y-1">
                           <img
-                            src={file.url || "/placeholder.svg"}
+                            src={file.webkitRelativePath || "/placeholder.svg"}
                             alt={file.name}
                             className="w-full h-20 object-cover rounded border"
                           />
@@ -634,7 +643,7 @@ export default function SubmissionsPage() {
         {/* Gráfico circular - Reportes por empresa */}
         <Card>
           <CardHeader>
-            <CardTitle>Reportes por Empresa</CardTitle>
+            <CardTitle>Reportes por Categorias</CardTitle>
           </CardHeader>
           <CardContent>
             <ChartContainer
@@ -677,7 +686,7 @@ export default function SubmissionsPage() {
         {/* Gráfico de barras - Reportes por categoría */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Reportes por Categoría</CardTitle>
+            <CardTitle>Reportes por Empresas</CardTitle>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -694,10 +703,10 @@ export default function SubmissionsPage() {
                   <CommandList>
                     <CommandEmpty>No se encontraron categorías.</CommandEmpty>
                     <CommandGroup>
-                      {allCategories.map((category) => (
+                      {allEmpresas.map((category) => (
                         <CommandItem
                           key={category}
-                          onSelect={() => handleCategoryToggle(category)}
+                          onSelect={() => handleCategoryToggle(category)} //editar desde a
                         >
                           <div className="flex items-center space-x-2">
                             <Checkbox
@@ -731,14 +740,14 @@ export default function SubmissionsPage() {
                 <BarChart data={categoryData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
-                    dataKey="categoria"
+                    dataKey="name"
                     angle={-45}
                     textAnchor="end"
                     height={80}
                   />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill="var(--color-count)" />
+                  <Bar dataKey="value" fill="var(--color-count)" />
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
