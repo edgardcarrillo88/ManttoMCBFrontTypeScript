@@ -268,6 +268,56 @@ type ChartLineProps = {
   data: TypeCurvaSGeneral;
 };
 
+type TypeActivities = {
+  ActividadCancelada: string;
+  Labor?: {
+    Mecanicos: number;
+    Soldadores: number;
+    Vigias: number;
+    Electricista: number;
+    Instrumentista: number;
+  };
+  NoLabor?: {
+    Andamios: boolean;
+    CamionGrua: boolean;
+    Telescopica: boolean;
+  };
+  TAG?: string;
+  WBS: string;
+  area: string;
+  avance?: number;
+  comentarios?: string;
+  contratista: string;
+  descripcion: string;
+  especialidad?: string;
+  estado: string;
+
+  finplan: string;
+  inicioplan: string;
+  finreal?: string;
+  inicioreal?: string;
+
+  hh: number;
+  id: number;
+  responsable: string;
+  nivel: number;
+
+  updatedAt: string;
+  __v: number;
+  _id: string;
+  deleted: boolean;
+};
+
+type TypeThirdParty = {
+  name: string;
+  uid: string;
+};
+
+type TypeEspecialidad = {
+  name: string;
+  uid: string;
+};
+
 // export function ChartLine({ data }: ChartLineProps) {
 //   return (
 //     <>
@@ -1822,9 +1872,9 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       )}
 
       {name === "WhatIf" && (
-      <Button variant="faded" className="mb-4" onClick={() => UpdateCurvaS()}>
-        Actualizar Curva S
-      </Button>
+        <Button variant="faded" className="mb-4" onClick={() => UpdateCurvaS()}>
+          Actualizar Curva S
+        </Button>
       )}
 
       <Card className=" w-full">
@@ -2084,10 +2134,26 @@ export default function Page() {
     AvanceRealAjustado: 0,
   });
 
+  const [activities, setActivities] = useState<TypeActivities[]>([]);
+  const [thirdparty, setThirdparty] = useState<TypeThirdParty[]>([]);
+  const [especliadad, setEspecialidad] = useState<TypeEspecialidad[]>([]);
+
   const [isVisible, setIsVisible] = useState<Boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      const responseActivities = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/schedule`
+      );
+
+      const responseThirdParty = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/thirdparty`
+      );
+
+      const responseEspecialidad = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/especialidad`
+      );
+
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL_PY}/ParadaDePlanta/ProcesarLineaBase`
       );
@@ -2127,6 +2193,54 @@ export default function Page() {
 
         setCurvaWhatIf(response.data.CurvaWhatIf.General);
         setCurvaWhatIfAjustada(response.data.CurvaWhatIf.Ajustada);
+
+        setActivities(responseActivities.data.data);
+        setThirdparty(responseThirdParty.data.Contratistas);
+        setEspecialidad(responseEspecialidad.data.Especialidades);
+
+        console.log(response.data.CurvaContratista.General);
+        console.log(response.data.CurvaArea.General);
+        //CurvaContratistaTotal
+
+        const roundedDate = (date: Date) => {
+          const fecha = new Date(date);
+          if (
+            (fecha.getMinutes() > 0 || fecha.getSeconds() > 0,
+            fecha.getMilliseconds() > 0)
+          ) {
+            fecha.setHours(fecha.getHours() + 1);
+          }
+          fecha.setMinutes(0, 0, 0);
+          return fecha;
+        };
+
+        const findInArray = (fechaaaa: Date) => {
+          const minDate = new Date(response.data.CurvaContratista.General[0].Ejex);
+          const maxDate = new Date(
+            response.data.CurvaContratista.General[response.data.CurvaContratista.General.length - 1].Ejex
+          );
+
+          if (fechaaaa < minDate) {
+            return 0;
+          }
+          if (fechaaaa > maxDate) {
+            return response.data.CurvaContratista.General[response.data.CurvaContratista.General.length - 1].hh_real_cum/response.data.CurvaContratista.General[response.data.CurvaContratista.General.length - 1].hh_lb_cum;
+          }
+          const match = response.data.CurvaContratista.General.find(
+            (obj: any) => new Date(obj.Ejex).getTime() === fechaaaa.getTime()
+          );
+          if (match) return match.hh_real_cum/match.hh_lb_cum;
+
+          return null;
+        };
+
+        const now = new Date();
+        console.log(now);
+        const DateRounded = roundedDate(now);
+        console.log(DateRounded);
+        const value = findInArray(DateRounded);
+        console.log(value);
+
         setIsVisible(false);
       } else {
         console.log("Error");
@@ -2268,32 +2382,33 @@ export default function Page() {
           <div className="w-5/6 flex flex-col md:flex-row items-center gap-4">
             <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
               <Label className="text-2xl font-bold text-white">
-                Listado de SP
+                Listado de actividades atrasadas
               </Label>
               <Table className="rounded-lg">
-                <TableCaption>
-                  Solamente se muestran las SPs aprobadas (todos los montos
-                  estan en USD)
-                </TableCaption>
+                <TableCaption>Actividades atrasadas</TableCaption>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Pos</TableHead>
-                    <TableHead>Partida</TableHead>
-                    <TableHead>Texto Breve</TableHead>
-                    <TableHead className="text-right">Monto</TableHead>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Empresa</TableHead>
+                    <TableHead>Descripcion</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-center">Avance</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {invoices.map((item) => (
-                    <TableRow key={item.invoice}>
-                      <TableCell className="font-medium">
-                        {item.invoice}
-                      </TableCell>
-                      <TableCell>{item.paymentMethod}</TableCell>
-                      <TableCell>{item.invoice}</TableCell>
-                      <TableCell>{item.paymentStatus}</TableCell>
-                    </TableRow>
-                  ))}
+                  {activities
+                    .filter((item) => item.estado === "Atrasado")
+                    .map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell className="font-medium">{item.id}</TableCell>
+                        <TableCell>{item.contratista}</TableCell>
+                        <TableCell>{item.descripcion}</TableCell>
+                        <TableCell>{item.estado}</TableCell>
+                        <TableCell className="text-center">
+                          {item.avance}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
                 {/* <TableFooter>
               <TableRowCdn>
