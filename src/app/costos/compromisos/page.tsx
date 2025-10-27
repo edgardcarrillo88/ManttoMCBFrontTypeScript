@@ -57,7 +57,7 @@ const columns = [
   { name: "MONTO SP", uid: "montosp" },
   { name: "MONTO OC", uid: "montooc" },
   { name: "TOTAL COMPR", uid: "totalcompromiso" },
-  { name: "Q2", uid: "forecast" },
+  { name: "Q3", uid: "forecast" },
   { name: "SALDO", uid: "saldo" },
 ];
 
@@ -209,10 +209,12 @@ export default function page(params: any) {
         updatedAt: new Date(item.updatedAt),
       }));
 
+
       setCompromisoOCs(response.data.dataOC);
       setFilterCompromisoOCs(response.data.dataOC);
-
-      console.log(response.data.data.filter);
+      
+      console.log("Holi");
+      console.log(response.data.dataOC.filter((item: any) => item.Partida === "MPLT-208"));
       setCompromisosPartidas(response.data.data);
     };
     fetchData();

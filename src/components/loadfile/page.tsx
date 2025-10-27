@@ -58,7 +58,6 @@ export default function FileUploadPage({
   const router = useRouter();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("Cargando");
     const files = event.target.files;
     if (files) {
       const newFiles = Array.from(files).map((file) => ({
@@ -69,6 +68,7 @@ export default function FileUploadPage({
       }));
       setUploadedFiles([...newFiles]);
     }
+      event.target.value = "";
   };
 
   const removeFile = (index: number) => {

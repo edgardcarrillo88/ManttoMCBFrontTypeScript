@@ -13,6 +13,8 @@ import {
   SortDescriptor,
 } from "@nextui-org/table";
 
+import { Label } from "@/components/ui/label";
+
 import {
   DropdownTrigger,
   Dropdown,
@@ -25,7 +27,7 @@ import { Chip, ChipProps } from "@nextui-org/chip";
 
 import { Pagination } from "@nextui-org/pagination";
 import { Button } from "@nextui-org/button";
-
+import { FileSpreadsheet } from "lucide-react";
 
 import { VerticalDotsIcon } from "@/components/table/utils/VerticalDotsIcon";
 import { ChevronDownIcon } from "@/components/table/utils/ChevronDownIcon";
@@ -35,8 +37,11 @@ import { capitalize } from "@/components/table/utils/utils";
 
 import { ProtectedRouteComponentemail } from "@/components/protected-route-email";
 
-
 import { useRouter } from "next/navigation";
+import * as XLSX from "xlsx";
+
+import LoadFile from "@/components/loadfile/page";
+import { Spinner } from "@nextui-org/spinner";
 
 const columns = [
   { name: "ID", uid: "id", sortable: true },
@@ -97,6 +102,8 @@ type TypeActivities = {
   };
   TAG?: string;
   WBS: string;
+  curva: string;
+  rutacritica: string;
   area: string;
   avance?: number;
   comentarios?: string;
@@ -107,18 +114,22 @@ type TypeActivities = {
 
   finplan: string;
   inicioplan: string;
-  finreal?: string;
-  inicioreal?: string;
+  finreal?: string | null;
+  inicioreal?: string | null;
 
   hh: number;
   id: number;
   responsable: string;
   nivel: number;
 
+  createdAt: string;
   updatedAt: string;
   __v: number;
   _id: string;
   deleted: boolean;
+  lastupdate: string;
+  OT?: string;
+  BloqueRC?: string;
 };
 
 type TypeThirdParty = {
@@ -154,6 +165,10 @@ export default function page(params: any) {
   const [thirdparty, setThirdparty] = useState<TypeThirdParty[]>([]);
   const [especliadad, setEspecialidad] = useState<TypeEspecialidad[]>([]);
   const [page, setPage] = React.useState(1);
+
+  const [modalLoader, setModalLoader] = useState(true);
+  const [modal, setModal] = useState(false);
+  const [message, setMessage] = useState("");
 
   const router = useRouter();
 
@@ -592,11 +607,109 @@ export default function page(params: any) {
     );
   }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
 
+  const exportToExcel = () => {
+    const dataPdP = activities.map(
+      ({
+        nivel,
+        WBS,
+        area,
+        hh,
+        curva,
+        rutacritica,
+        inicioplan,
+        finplan,
+        estado,
+        ActividadCancelada,
+        deleted,
+        createdAt,
+        updatedAt,
+        __v,
+        lastupdate,
+        OT,
+        BloqueRC,
+        Labor = {},
+        NoLabor = {},
+        ...rest
+      }) => ({
+        ...rest,
+        ...Labor,
+        ...NoLabor,
+      })
+    );
+
+    const formatDate = (date?: string | null) => {
+      if (!date) return null;
+      return new Date(date);
+      // .toLocaleString("es-PE", {
+      //   timeZone: "America/Lima",
+      //   year: "numeric",
+      //   month: "2-digit",
+      //   day: "2-digit",
+      //   hour: "2-digit",
+      //   minute: "2-digit",
+      //   second: "2-digit",
+      //   hour12: false,
+      // });
+    };
+
+    const dataPdPProcesada = dataPdP.map((item) => ({
+      ...item,
+      inicioreal: formatDate(item.inicioreal),
+      finreal: formatDate(item.finreal),
+    }));
+
+    const workbook = XLSX.utils.book_new();
+    const sheet = XLSX.utils.json_to_sheet(dataPdPProcesada);
+
+    Object.keys(sheet).forEach((cell) => {
+      if (cell[0] === "!") return;
+      const col = cell.replace(/[0-9]/g, "");
+      if (col === "J" || col === "K") {
+        sheet[cell].z = "dd/mm/yyyy hh:mm";
+      }
+    });
+
+    XLSX.utils.book_append_sheet(workbook, sheet, "ReportePdP");
+    XLSX.writeFile(workbook, "ReportePdP.xlsx");
+  };
+
+  const handleResponse = async (status: number, datos: any) => {
+    setModal(true);
+    console.log(status);
+    console.log(datos);
+    console.log(datos.filter((item: any)=> item.isValid===false));
+    try {
+      if (status === 200) {
+        setModalLoader(false);
+        setMessage("Datos cargados correctamente");
+      }
+    } catch (error) {
+      setModalLoader(false);
+      setMessage("Error al cargar los datos");
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+    setModalLoader(false);
+  };
+
   return (
     <ProtectedRouteComponentemail empresa="Todos">
       <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
-        <div className="text-white text-2xl mt-8 flex items-start">
-          Listado de tareas de Parada de Planta
+        <div className="text-white text-2xl mt-8 flex flex-col items-center w-4/5 px-4 py-2">
+          <div className="flex justify-center">
+            <Label className="text-2xl font-bold">
+              Actividades Parada de Planta
+            </Label>
+          </div>
+          <div className="w-full flex justify-end">
+            <button
+              onClick={() => exportToExcel()}
+              className="flex border-2 border-blue-600 items-center text-sm gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all"
+            >
+              <FileSpreadsheet size={20} />
+              <span>Plantilla Excel</span>
+            </button>
+          </div>
         </div>
         <div className="w-5/6 mt-8">
           <Table
@@ -636,6 +749,44 @@ export default function page(params: any) {
               )}
             </TableBody>
           </Table>
+        </div>
+
+        <div className="w-full mt-8 items-center">
+          <LoadFile
+            title={
+              "Actualización de actividades PDP (descargar la plantilla excel y actualizarla)"
+            }
+            MessageOk="Actividades cargadas correctamente"
+            pathExcelProcess={`${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/massiveupdate`}
+            OnResponse={handleResponse}
+          />
+          {/* Modal */}
+          {modal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white p-6 max-w-sm w-full rounded-xl">
+                {modalLoader && (
+                  <div>
+                    <h2 className="text-lg font-bold ">
+                      Cargando datos a base de datos
+                    </h2>
+                    <Spinner size="md" color="primary" labelColor="primary" />
+                  </div>
+                )}
+                {!modalLoader && <p className="mt-2">{message}</p>}
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => {
+                      setModal(false);
+                      setModalLoader(false);
+                    }}
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </ProtectedRouteComponentemail>
