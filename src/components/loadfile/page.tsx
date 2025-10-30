@@ -96,6 +96,7 @@ export default function FileUploadPage({
         setUploadedFiles([]);
         setModalLoader(false);
         setModal(false);
+        console.log(response);
         if (OnResponse) {;
           OnResponse(response.status, response.data.datos);
         }

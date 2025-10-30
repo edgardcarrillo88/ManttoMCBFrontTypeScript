@@ -38,10 +38,25 @@ import { capitalize } from "@/components/table/utils/utils";
 import { ProtectedRouteComponentemail } from "@/components/protected-route-email";
 
 import { useRouter } from "next/navigation";
-import * as XLSX from "xlsx";
+// import * as XLSX from "xlsx";
+// import XLSX from "xlsx-style";
+
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 import LoadFile from "@/components/loadfile/page";
 import { Spinner } from "@nextui-org/spinner";
+
+import {
+  Table as TableChadcn,
+  TableBody as TableBodyChadcn,
+  TableCaption as TableCaptionChadcn,
+  TableCell as TableCellChadcn,
+  TableFooter as TableFooterChadcn,
+  TableHead as TableHeadChadcn,
+  TableHeader as TableHeaderChadcn,
+  TableRow as TableRowChadcn,
+} from "@/components/ui/table";
 
 const columns = [
   { name: "ID", uid: "id", sortable: true },
@@ -142,6 +157,32 @@ type TypeEspecialidad = {
   uid: string;
 };
 
+type TypeLogError = {
+  _id: string;
+  id: number;
+  descripcion: string;
+  TAG: string;
+  avance: number;
+  responsable: string;
+  contratista: string;
+  especialidad: string;
+  ActividadCancelada: string;
+  comentarios: string;
+  inicioreal: string;
+  finreal: string;
+  Mecanicos: number;
+  Soldadores: number;
+  Vigias: number;
+  Electricista: number;
+  Instrumentista: number;
+  Andamios: boolean;
+  CamionGrua: boolean;
+  Telescopica: boolean;
+  Errors: [];
+  Message: string;
+  isValid: boolean;
+};
+
 export default function page(params: any) {
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(
@@ -168,7 +209,9 @@ export default function page(params: any) {
 
   const [modalLoader, setModalLoader] = useState(true);
   const [modal, setModal] = useState(false);
+  const [errorModal, setErrorModal] = useState(false);
   const [message, setMessage] = useState("");
+  const [logerror, setLogError] = useState<TypeLogError[]>([]);
 
   const router = useRouter();
 
@@ -607,7 +650,7 @@ export default function page(params: any) {
     );
   }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     const dataPdP = activities.map(
       ({
         nivel,
@@ -619,7 +662,6 @@ export default function page(params: any) {
         inicioplan,
         finplan,
         estado,
-        ActividadCancelada,
         deleted,
         createdAt,
         updatedAt,
@@ -640,16 +682,6 @@ export default function page(params: any) {
     const formatDate = (date?: string | null) => {
       if (!date) return null;
       return new Date(date);
-      // .toLocaleString("es-PE", {
-      //   timeZone: "America/Lima",
-      //   year: "numeric",
-      //   month: "2-digit",
-      //   day: "2-digit",
-      //   hour: "2-digit",
-      //   minute: "2-digit",
-      //   second: "2-digit",
-      //   hour12: false,
-      // });
     };
 
     const dataPdPProcesada = dataPdP.map((item) => ({
@@ -658,30 +690,78 @@ export default function page(params: any) {
       finreal: formatDate(item.finreal),
     }));
 
-    const workbook = XLSX.utils.book_new();
-    const sheet = XLSX.utils.json_to_sheet(dataPdPProcesada);
+    // const workbook = XLSX.utils.book_new();
+    // const sheet = XLSX.utils.json_to_sheet(dataPdPProcesada);
 
-    Object.keys(sheet).forEach((cell) => {
-      if (cell[0] === "!") return;
-      const col = cell.replace(/[0-9]/g, "");
-      if (col === "J" || col === "K") {
-        sheet[cell].z = "dd/mm/yyyy hh:mm";
-      }
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("ReportePdP");
+
+    const headers = Object.keys(dataPdPProcesada[0]);
+    sheet.addRow(headers);
+    dataPdPProcesada.forEach((row: any) => {
+      sheet.addRow(headers.map((key: any) => row[key]));
     });
 
-    XLSX.utils.book_append_sheet(workbook, sheet, "ReportePdP");
-    XLSX.writeFile(workbook, "ReportePdP.xlsx");
+    // Object.keys(sheet).forEach((cell) => {
+    //   if (cell[0] === "!") return;
+    //   const col = cell.replace(/[0-9]/g, "");
+    //   if (col === "J" || col === "K") {
+    //     sheet[cell].z = "dd/mm/yyyy hh:mm";
+    //   }
+    // });
+
+    sheet.getColumn(11).numFmt = "dd/mm/yyyy hh:mm";
+    sheet.getColumn(12).numFmt = "dd/mm/yyyy hh:mm";
+
+    const columns = [
+      "E",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+    ];
+
+    columns.forEach((col) => {
+      const cell = sheet.getCell(`${col}1`);
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFFF00" },
+      };
+    });
+
+    // XLSX.utils.book_append_sheet(workbook, sheet, "ReportePdP");
+    // XLSX.writeFile(workbook, "ReportePdP.xlsx");
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, "ReportePdP.xlsx");
   };
 
   const handleResponse = async (status: number, datos: any) => {
     setModal(true);
+
     console.log(status);
     console.log(datos);
-    console.log(datos.filter((item: any)=> item.isValid===false));
+    console.log(datos.filter((item: any) => item.isValid === false));
     try {
       if (status === 200) {
         setModalLoader(false);
         setMessage("Datos cargados correctamente");
+        if (datos.filter((item: any) => item.isValid === false).length > 0) {
+          setLogError(datos.filter((item: any) => item.isValid === false));
+          setErrorModal(true);
+        }
       }
     } catch (error) {
       setModalLoader(false);
@@ -703,7 +783,11 @@ export default function page(params: any) {
           </div>
           <div className="w-full flex justify-end">
             <button
-              onClick={() => exportToExcel()}
+              onClick={() => {
+                setLogError([]);
+                setErrorModal(false);
+                exportToExcel();
+              }}
               className="flex border-2 border-blue-600 items-center text-sm gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all"
             >
               <FileSpreadsheet size={20} />
@@ -711,6 +795,7 @@ export default function page(params: any) {
             </button>
           </div>
         </div>
+
         <div className="w-5/6 mt-8">
           <Table
             aria-label="Example table with custom cells, pagination and sorting"
@@ -751,6 +836,51 @@ export default function page(params: any) {
           </Table>
         </div>
 
+        {/* Tabla de errores */}
+        {errorModal && (
+          <div className="bg-white p-4 mt-8 mb-8 border-8 border-red-500 rounded-xl w-5/6">
+            {/* <div className="relative p-4 mt-8 mb-8 w-5/6 rounded-xl bg-white z-10">
+  <div className="absolute inset-0 rounded-xl border-8 border-transparent z-[-1] animate-spin-slow bg-[conic-gradient(from_0deg,_#f00_0%,_#ff0_25%,_#0f0_50%,_#0ff_75%,_#f00_100%)] bg-[length:200%_200%] bg-no-repeat bg-center blur-sm"></div> */}
+
+            <div className="flex flex-col">
+              <Label className="text-2xl font-bold text-red-500">
+                Resumen de actividades con Errores (No se ha cargado ninguna
+                actividad del excel cargado)
+              </Label>
+              <Label className=" text-red-200">
+                Corregir errores y cargar nuevamente toda la plantilla
+              </Label>
+            </div>
+            <TableChadcn className="rounded-lg">
+              <TableCaptionChadcn>Actividades con errores</TableCaptionChadcn>
+              <TableHeaderChadcn>
+                <TableRowChadcn>
+                  <TableHeadChadcn>ID</TableHeadChadcn>
+                  <TableHeadChadcn>Actividad</TableHeadChadcn>
+                  <TableHeadChadcn>Mensaje Error</TableHeadChadcn>
+                </TableRowChadcn>
+              </TableHeaderChadcn>
+              <TableBodyChadcn>
+                {logerror.map((item) => (
+                  <TableRowChadcn key={item.id}>
+                    <TableCellChadcn className="font-medium">
+                      {item.id}
+                    </TableCellChadcn>
+                    <TableCellChadcn>{item.descripcion}</TableCellChadcn>
+                    <TableCellChadcn>{item.Message}</TableCellChadcn>
+                  </TableRowChadcn>
+                ))}
+              </TableBodyChadcn>
+              {/* <TableFooter>
+              <TableRowCdn>
+                <TableCellCdn colSpan={3}>Total</TableCellCdn>
+                <TableCellCdn className="text-right">$2,500.00</TableCellCdn>
+              </TableRowCdn>
+            </TableFooter> */}
+            </TableChadcn>
+          </div>
+        )}
+
         <div className="w-full mt-8 items-center">
           <LoadFile
             title={
@@ -760,6 +890,7 @@ export default function page(params: any) {
             pathExcelProcess={`${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/massiveupdate`}
             OnResponse={handleResponse}
           />
+
           {/* Modal */}
           {modal && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
