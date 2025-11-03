@@ -212,6 +212,8 @@ export default function page(params: any) {
   const [errorModal, setErrorModal] = useState(false);
   const [message, setMessage] = useState("");
   const [logerror, setLogError] = useState<TypeLogError[]>([]);
+  const [correoempresa, setCorreoEmpresa] = useState("");
+  const [userempresa, setUserempresa] = useState("");
 
   const router = useRouter();
 
@@ -220,20 +222,28 @@ export default function page(params: any) {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/schedule`
       );
-      setActivities(response.data.data);
 
       const response2 = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/thirdparty`
       );
-      setThirdparty(response2.data.Contratistas);
 
       const response3 = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/especialidad`
       );
-      setEspecialidad(response3.data.Especialidades);
+
+
+      if (correoempresa.toLocaleLowerCase() == "marcobre") {
+        setActivities(response.data.data);
+        setThirdparty(response2.data.Contratistas);
+        setEspecialidad(response3.data.Especialidades);
+      } else {
+        setActivities(response.data.data.filter((item: any) => item.contratista.toLowerCase() == correoempresa.toLocaleLowerCase()));
+        setThirdparty(response2.data.Contratistas.filter((item: any) => item.name.toLowerCase() == correoempresa.toLocaleLowerCase));
+        setEspecialidad(response3.data.Especialidades);
+      }
     };
     fetchData();
-  }, []);
+  }, [correoempresa]);
 
   const hasSearchFilter = Boolean(filterValue);
 
@@ -266,6 +276,7 @@ export default function page(params: any) {
       Array.from(thirdPartyFilter).length !== 0 &&
       Array.from(thirdPartyFilter).length !== thirdparty.length
     ) {
+      console.log(thirdPartyFilter);
       filteredUsers = filteredUsers.filter((item) =>
         Array.from(thirdPartyFilter).includes(item.contratista)
       );
@@ -750,15 +761,12 @@ export default function page(params: any) {
 
   const handleResponse = async (status: number, datos: any) => {
     setModal(true);
-
-    console.log(status);
-    console.log(datos);
-    console.log(datos.filter((item: any) => item.isValid === false));
     try {
       if (status === 200) {
         setModalLoader(false);
-        setMessage("Datos cargados correctamente");
+        setMessage("Se proceso la información");
         if (datos.filter((item: any) => item.isValid === false).length > 0) {
+          setMessage("Revisar los errores y volver a cargar el archivo");
           setLogError(datos.filter((item: any) => item.isValid === false));
           setErrorModal(true);
         }
@@ -772,8 +780,14 @@ export default function page(params: any) {
     setModalLoader(false);
   };
 
+  const handleThirdParty = async (status: number, datos: any) => {
+    console.log(datos);
+    setCorreoEmpresa(datos.datos.empresa);
+    setUserempresa(datos.datos.email);
+  };
+
   return (
-    <ProtectedRouteComponentemail empresa="Todos">
+    <ProtectedRouteComponentemail empresa="Todos" OnResponse={handleThirdParty}>
       <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
         <div className="text-white text-2xl mt-8 flex flex-col items-center w-4/5 px-4 py-2">
           <div className="flex justify-center">
@@ -784,8 +798,6 @@ export default function page(params: any) {
           <div className="w-full flex justify-end">
             <button
               onClick={() => {
-                setLogError([]);
-                setErrorModal(false);
                 exportToExcel();
               }}
               className="flex border-2 border-blue-600 items-center text-sm gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all"
@@ -796,6 +808,7 @@ export default function page(params: any) {
           </div>
         </div>
 
+        {/* Tabla de actividades */}
         <div className="w-5/6 mt-8">
           <Table
             aria-label="Example table with custom cells, pagination and sorting"
@@ -881,6 +894,7 @@ export default function page(params: any) {
           </div>
         )}
 
+        {/* Carga de archivos */}
         <div className="w-full mt-8 items-center">
           <LoadFile
             title={

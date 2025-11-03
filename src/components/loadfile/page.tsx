@@ -23,6 +23,7 @@ import {
 import { Spinner } from "@nextui-org/spinner";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 interface UploadedFile {
   name: string;
@@ -36,10 +37,10 @@ type ResponseData = {
 };
 
 type FileUploadPageProps = {
-  pathExcelProcess?: string;
-  pathLoadData?: string;
   title: string;
   MessageOk: string;
+  pathExcelProcess?: string;
+  pathLoadData?: string;
   OnResponse?: (status: number, datos: ResponseData) => void;
 };
 
@@ -56,6 +57,7 @@ export default function FileUploadPage({
   const [modalLoader, setModalLoader] = useState(true);
 
   const router = useRouter();
+  const user = useSession().data?.user;
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -80,10 +82,11 @@ export default function FileUploadPage({
   const OnSubmitFile = async () => {
     console.log("Iniciando envío de información");
     setModal(true);
-    
+    console.log(user);
     const newfile = new FormData();
 
     newfile.append("file", uploadedFiles[0].file);
+    newfile.append("email", user?.email as string);
 
 
     if (pathExcelProcess) {

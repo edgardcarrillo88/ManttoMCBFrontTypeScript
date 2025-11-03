@@ -13,14 +13,20 @@ import {
 import { LockIcon } from "lucide-react";
 import axios from "axios";
 
+type ResponseData = {
+  datos: any;
+};
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
   empresa: string;
+  OnResponse?: (status: number, datos: ResponseData) => void; //######################################
 }
 
 export function ProtectedRouteComponentemail({
   children,
   empresa,
+  OnResponse,
 }: ProtectedRouteProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -36,14 +42,20 @@ export function ProtectedRouteComponentemail({
             { params: { user: session.user.email } }
           );
 
-          console.log(response.data.response[0].empresa);
+          console.log(response.data.response[0]);
 
           if (
-            response.status === 200 
-            &&
+            response.status === 200 &&
             (response.data.response[0].empresa === empresa ||
               empresa === "Todos")
           ) {
+            if (OnResponse) {
+              const objectUser = {
+                email: response.data.response[0].correo,
+                empresa: response.data.response[0].empresa,
+              }
+              OnResponse(response.status, {datos: objectUser});
+            }
             setIsAuthorized(true);
           } else {
             setError("You are not authorized to access this page.");
@@ -70,7 +82,7 @@ export function ProtectedRouteComponentemail({
               <LockIcon className="mr-2" /> Checking Access
             </CardTitle>
             <CardDescription className="text-gray-400 text-center">
-              {error || "Verifying user permissions..."}
+              {error || "Verificando acceso de usuario..."}
             </CardDescription>
           </CardHeader>
         </Card>
