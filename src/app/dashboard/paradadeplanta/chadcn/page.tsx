@@ -1247,6 +1247,8 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
     React.useState<keyof typeof chartConfig>("AvanceReal");
   const [lineChartActive, setLineChartActive] = useState(data.General);
 
+  console.log(data.General);
+
   React.useEffect(() => {
     const fuenteDatos =
       chartConfig[activeChart].label === "Avance Real"
@@ -1259,12 +1261,32 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
         : data.General;
 
     const selected = Array.from(AreaSeleccionada)[0];
+
     if (selected) {
       const filtrado = fuenteDatos.filter((item) => item.Filtro01 === selected);
       const filtradoAjustado = fuenteDatosAjustada.filter(
         (item) => item.Filtro01 === selected
       );
+
+
+      //setLineChartActive(filtrado); LO he comentado y reemplazado por el condiconal de abajo
+
+
+
+
+        if (toggle === true) {
+      const newArray = filtrado.map(
+        ({ hh_real, hh_lb, ...rest }) => rest
+      );
+      setLineChartActive(newArray);
+    } else {
       setLineChartActive(filtrado);
+    }
+
+
+
+
+
       const avance = calcularPorcentajeAvance(filtrado);
       const avanceAjustado = calcularPorcentajeAvance(filtradoAjustado);
       setAvanceTotal({
@@ -1273,7 +1295,27 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
           avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
       });
     } else {
-      setLineChartActive(data.General); // Si no hay selección, mostrar todo
+
+      //setLineChartActive(data.General); // Si no hay selección, mostrar todo // LO he comentado y reemplazado por el condiconal de abajo
+
+
+
+
+
+
+        if (toggle === true) {
+      const newArray = data.General.map(
+        ({ hh_real, hh_lb, ...rest }) => rest
+      );
+      setLineChartActive(newArray);
+    } else {
+      setLineChartActive(data.General);
+    }
+
+
+
+
+
       const avance = calcularPorcentajeAvance(data.General);
       const avanceAjustado = calcularPorcentajeAvance(data.Ajustada);
       setAvanceTotal({
@@ -1282,7 +1324,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
           avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
       });
     }
-  }, [AreaSeleccionada, activeChart, data.General, data.Ajustada]);
+  }, [AreaSeleccionada, activeChart, data.General, data.Ajustada, toggle]);
 
   // LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
 
@@ -1327,16 +1369,26 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   //   LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
   // };
 
-  React.useEffect(() => {
-    if (toggle === true) {
-      const newArray = lineChartActive.map(
-        ({ hh_real, hh_lb, ...rest }) => rest
-      );
-      setLineChartActive(newArray);
-    } else {
-      setLineChartActive(data.General);
-    }
-  }, [toggle]);
+
+
+
+
+
+  // React.useEffect(() => {
+
+  //   if (toggle === true) {
+  //     const newArray = lineChartActive.map(
+  //       ({ hh_real, hh_lb, ...rest }) => rest
+  //     );
+  //     setLineChartActive(newArray);
+  //   } else {
+  //     setLineChartActive(data.General);
+  //   }
+  // }, [toggle]);
+
+
+  
+
 
   return (
     <div key={name}>
