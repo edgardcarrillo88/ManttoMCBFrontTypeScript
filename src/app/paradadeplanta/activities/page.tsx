@@ -699,6 +699,8 @@ export default function page(params: any) {
       ...item,
       inicioreal: formatDate(item.inicioreal),
       finreal: formatDate(item.finreal),
+      // inicioplan: formatDate(item.inicioplan),
+      // finplan: formatDate(item.finplan),
     }));
 
     // const workbook = XLSX.utils.book_new();

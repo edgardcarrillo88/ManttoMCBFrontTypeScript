@@ -66,6 +66,12 @@ import { ChevronDownIcon } from "@/components/table/utils/ChevronDownIcon";
 import { Button } from "@nextui-org/button";
 import { set } from "date-fns";
 import { useMemo } from "react";
+import { Switch } from "@/components/ui/switch";
+import { Label as LabelChadCN } from "@/components/ui/label";
+
+import { ItemMedia } from "@/components/ui/item";
+
+import { RefreshCcw } from "lucide-react";
 
 // export const description = "A line chart with dots";
 
@@ -232,9 +238,9 @@ type TypeCurvaSGeneral = {
   Filtro01?: string;
   Filtro02?: string;
 
-  hh_lb: number;
+  hh_lb?: number;
   hh_lb_cum: number;
-  hh_real: number;
+  hh_real?: number;
   hh_real_cum: number;
 }[];
 
@@ -262,6 +268,7 @@ type ChartLineCombinadaPropsArea = {
   name: string;
   data: TypeChartDataArea;
   totales: TypeValoresTotales;
+  toggle?: boolean;
 };
 
 type ChartLineProps = {
@@ -1204,6 +1211,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   name,
   data,
   totales,
+  toggle,
 }: ChartLineCombinadaPropsArea) {
   const uniqueAreas = Array.from(
     new Set(data.General.map((item) => item.Filtro01))
@@ -1319,6 +1327,17 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   //   LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
   // };
 
+  React.useEffect(() => {
+    if (toggle === true) {
+      const newArray = lineChartActive.map(
+        ({ hh_real, hh_lb, ...rest }) => rest
+      );
+      setLineChartActive(newArray);
+    } else {
+      setLineChartActive(data.General);
+    }
+  }, [toggle]);
+
   return (
     <div key={name}>
       <div className={`mb-2 ${name === "CurvaGeneral" ? "hidden" : "block"}`}>
@@ -1361,7 +1380,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
           <div className="flex">
             {["AvanceReal", "AvanceRealAjustado"].map((key) => {
               const chart = key as keyof typeof chartConfig;
-              console.log(key); //xq se imprime 24 veces?
+              // console.log(key); //xq se imprime 24 veces?
               return (
                 <button
                   key={chart}
@@ -1629,7 +1648,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
 
     if (response.status === 200) {
       // aca debo setear la nueva curva
-      console.log(response.data);
+      // console.log(response.data);
 
       Object.keys(response.data).forEach((key) => {
         response.data[key].General.map((item: any) => {
@@ -1872,9 +1891,25 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       )}
 
       {name === "WhatIf" && (
-        <Button variant="faded" className="mb-4" onClick={() => UpdateCurvaS()}>
-          Actualizar Curva S
-        </Button>
+        // <Button variant="faded" className="mb-4" onClick={() => UpdateCurvaS()}>
+        //   Actualizar Curva S
+        // </Button>
+        <div
+          className="flex items-center space-x-2 text-white border b-2 border-gray-500 rounded-2xl p-4 mt-2 mb-2"
+          onClick={() => {
+            UpdateCurvaS();
+          }}
+        >
+          <ItemMedia
+            className="border b-2 rounded-2xl text-black"
+            variant="icon"
+          >
+            <RefreshCcw />
+          </ItemMedia>
+          <LabelChadCN htmlFor="airplane-mode" className="text-white">
+            Actualizar curva S
+          </LabelChadCN>
+        </div>
       )}
 
       <Card className=" w-full">
@@ -2138,6 +2173,8 @@ export default function Page() {
   const [thirdparty, setThirdparty] = useState<TypeThirdParty[]>([]);
   const [especliadad, setEspecialidad] = useState<TypeEspecialidad[]>([]);
 
+  const [ToggleBarras, setToggleBarras] = useState(false);
+
   const [isVisible, setIsVisible] = useState<Boolean>(true);
 
   useEffect(() => {
@@ -2198,8 +2235,8 @@ export default function Page() {
         setThirdparty(responseThirdParty.data.Contratistas);
         setEspecialidad(responseEspecialidad.data.Especialidades);
 
-        console.log(response.data.CurvaContratista.General);
-        console.log(response.data.CurvaArea.General);
+        // console.log(response.data.CurvaContratista.General);
+        // console.log(response.data.CurvaArea.General);
         //CurvaContratistaTotal
 
         const roundedDate = (date: Date) => {
@@ -2215,31 +2252,39 @@ export default function Page() {
         };
 
         const findInArray = (fechaaaa: Date) => {
-          const minDate = new Date(response.data.CurvaContratista.General[0].Ejex);
+          const minDate = new Date(
+            response.data.CurvaContratista.General[0].Ejex
+          );
           const maxDate = new Date(
-            response.data.CurvaContratista.General[response.data.CurvaContratista.General.length - 1].Ejex
+            response.data.CurvaContratista.General[
+              response.data.CurvaContratista.General.length - 1
+            ].Ejex
           );
 
           if (fechaaaa < minDate) {
             return 0;
           }
           if (fechaaaa > maxDate) {
-            return response.data.CurvaContratista.General[response.data.CurvaContratista.General.length - 1].hh_real_cum/response.data.CurvaContratista.General[response.data.CurvaContratista.General.length - 1].hh_lb_cum;
+            return (
+              response.data.CurvaContratista.General[
+                response.data.CurvaContratista.General.length - 1
+              ].hh_real_cum /
+              response.data.CurvaContratista.General[
+                response.data.CurvaContratista.General.length - 1
+              ].hh_lb_cum
+            );
           }
           const match = response.data.CurvaContratista.General.find(
             (obj: any) => new Date(obj.Ejex).getTime() === fechaaaa.getTime()
           );
-          if (match) return match.hh_real_cum/match.hh_lb_cum;
+          if (match) return match.hh_real_cum / match.hh_lb_cum;
 
           return null;
         };
 
         const now = new Date();
-        console.log(now);
         const DateRounded = roundedDate(now);
-        console.log(DateRounded);
         const value = findInArray(DateRounded);
-        console.log(value);
 
         setIsVisible(false);
       } else {
@@ -2260,6 +2305,7 @@ export default function Page() {
           name="CurvaGeneral"
           data={{ General: LineaCombinada, Ajustada: LineaCombinadaAjustada }}
           totales={ValoresTotales}
+          toggle={ToggleBarras}
         />
       ),
       CurvaArea: (
@@ -2268,6 +2314,7 @@ export default function Page() {
           name="CurvaArea"
           data={{ General: CurvaAreaTotal, Ajustada: CurvaAreaAjustada }}
           totales={ValoresTotales}
+          toggle={ToggleBarras}
         />
       ),
       CurvaContratista: (
@@ -2279,6 +2326,7 @@ export default function Page() {
             Ajustada: CurvaContratistaAjustada,
           }}
           totales={ValoresTotales}
+          toggle={ToggleBarras}
         />
       ),
       CurvaAreaContratista: (
@@ -2331,6 +2379,8 @@ export default function Page() {
     CurvaAreaContratistaAjustada,
     CurvaEspecialidadContratista,
     CurvaEspecialidadContratistaAjustada,
+
+    ToggleBarras,
   ]);
 
   return (
@@ -2347,6 +2397,7 @@ export default function Page() {
 
       {!isVisible && (
         <div className="w-5/6 flex flex-col items-center">
+          {/* Botones */}
           <div className="mb-2 mt-8 flex flex-col items-center">
             <h3 className="text-white mb-2">Selecciona tipo de Curva S</h3>
             <Dropdown>
@@ -2377,9 +2428,26 @@ export default function Page() {
             </Dropdown>
           </div>
 
-          <div className="w-5/6">{CurvaSMemo}</div>
+          {/* Curvas */}
+          <div className="w-5/6">
+            {CurvaSMemo}
+            <div className="flex items-center space-x-2 text-white border b-2 border-gray-500 rounded-2xl p-4 mt-2">
+              <Switch
+                onCheckedChange={() => {
+                  setToggleBarras(!ToggleBarras);
+                }}
+                id="airplane-mode"
+              />
+              <LabelChadCN htmlFor="airplane-mode" className="text-white">
+                {ToggleBarras === true
+                  ? "Activar barras de avace"
+                  : "Desactivar barras de avace"}
+              </LabelChadCN>
+            </div>
+          </div>
 
-          <div className="w-5/6 flex flex-col md:flex-row items-center gap-4">
+          {/* Tablas */}
+          <div className="w-5/6 flex flex-col md:flex-row items-start gap-4">
             <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
               <Label className="text-2xl font-bold text-white">
                 Listado de actividades atrasadas

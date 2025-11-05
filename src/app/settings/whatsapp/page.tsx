@@ -602,65 +602,9 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Gestión de bases de datos */}
-        <Card className="w-5/6">
-          <CardHeader>
-            <CardTitle>Parada de Planta</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <Button
-              className="w-60"
-              onClick={() => {
-                setModalParadaPlanta(true);
-                setBaseDatosPdP("activities");
-              }}
-            >
-              Eliminar datos de cronograma
-            </Button>
-            <Button
-              className="w-60"
-              onClick={() => {
-                setModalParadaPlanta(true);
-                setBaseDatosPdP("updates");
-              }}
-            >
-              Eliminar historial de actualizaciones
-            </Button>
-          </CardContent>
-        </Card>
-
-        {modalParadaPlanta && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 ">
-            <div className="bg-gray-50 p-4 border-gray-200 rounded-2xl">
-              <div className="text-black font-bold">
-                Modal de parada de planta
-              </div>
-              <div className="text-black">sub titulo</div>
-              <div className="flex flex-row mt-4 m-auto gap-2">
-                <Button
-                  onClick={async () => {
-                    if (baseDatosPdP === "activities") {
-                      const response = await axios.post(
-                        `${process.env.NEXT_PUBLIC_BACKEND_URL_2}/deleteschedule`
-                      );
-                    }
-
-                    if (baseDatosPdP === "updates") {
-                      const response = await axios.post(
-                        `${process.env.NEXT_PUBLIC_BACKEND_URL_2}/deleteschedulehistorydata`
-                      );
-                    }
-                  }}
-                >
-                  Aceptar
-                </Button>
-                <Button>Cancelar</Button>
-              </div>
-            </div>
-          </div>
-        )}
+  
+        
       </div>
     </ProtectedRouteComponentemail>
   );
 }
-//inset-0
