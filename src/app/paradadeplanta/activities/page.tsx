@@ -231,14 +231,24 @@ export default function page(params: any) {
         `${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/especialidad`
       );
 
-
       if (correoempresa.toLocaleLowerCase() == "marcobre") {
         setActivities(response.data.data);
         setThirdparty(response2.data.Contratistas);
         setEspecialidad(response3.data.Especialidades);
       } else {
-        setActivities(response.data.data.filter((item: any) => item.contratista.toLowerCase() == correoempresa.toLocaleLowerCase()));
-        setThirdparty(response2.data.Contratistas.filter((item: any) => item.name.toLowerCase() == correoempresa.toLocaleLowerCase));
+        setActivities(
+          response.data.data.filter(
+            (item: any) =>
+              item.contratista.toLowerCase() ==
+              correoempresa.toLocaleLowerCase()
+          )
+        );
+        setThirdparty(
+          response2.data.Contratistas.filter(
+            (item: any) =>
+              item.name.toLowerCase() == correoempresa.toLocaleLowerCase
+          )
+        );
         setEspecialidad(response3.data.Especialidades);
       }
     };
@@ -429,7 +439,7 @@ export default function page(params: any) {
                       router.push(`/paradadeplanta/activities/${activities.id}`)
                     }
                   >
-                    Edit
+                    Actualizar
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
@@ -670,8 +680,8 @@ export default function page(params: any) {
         hh,
         curva,
         rutacritica,
-        inicioplan,
-        finplan,
+        // inicioplan,
+        // finplan,
         estado,
         deleted,
         createdAt,
@@ -699,15 +709,35 @@ export default function page(params: any) {
       ...item,
       inicioreal: formatDate(item.inicioreal),
       finreal: formatDate(item.finreal),
-      // inicioplan: formatDate(item.inicioplan),
-      // finplan: formatDate(item.finplan),
+      inicioplan: formatDate(item.inicioplan),
+      finplan: formatDate(item.finplan),
     }));
 
-    // const workbook = XLSX.utils.book_new();
-    // const sheet = XLSX.utils.json_to_sheet(dataPdPProcesada);
-
     const workbook = new ExcelJS.Workbook();
+    const sheetInstructivo = workbook.addWorksheet("Instrucciones");
     const sheet = workbook.addWorksheet("ReportePdP");
+
+    const instrucciones = [
+      "Este es el instructivo de actualización masiva de actividades de parada de planta. Favor de considerar los siguientes puntos:",
+      "",
+      "1. No cambiar el nombre de las hojas.",
+      "2. No cambiar el nombre de los encabezados.",
+      "3. Solo debe actualizar los datos de las columnas que están sombreadas de amarillo.",
+      "4. Siempre debe agregar comentarios de avance.",
+      "5. Para la parte de recursos labor (Andamieros, mecánicos, instrumentistas, etc), debe asignar un valor numérico.",
+      '6. Para la parte de recursos no labor (Andamios, camión grúa, telescópica), colocar los valores de "Verdadero" o "Falso".',
+      "7. No modificar el campo _id.",
+      "8. No modificar el formato de las celdas",
+      "9. El formato de fecha esta configurado como dd/mm/yyy hh:mm",
+      "10. Sí es posible borrar filas. El sistema va a procesar todas las filas que se tengan en la hoja ReportePdP.",
+    ];
+
+    instrucciones.forEach((linea, index) => {
+      sheetInstructivo.getCell(`A${index + 1}`).value = linea;
+      sheetInstructivo.getCell(`A${index + 1}`).alignment = { wrapText: true };
+    });
+
+    sheetInstructivo.getColumn(1).width = 120;
 
     const headers = Object.keys(dataPdPProcesada[0]);
     sheet.addRow(headers);
@@ -715,21 +745,13 @@ export default function page(params: any) {
       sheet.addRow(headers.map((key: any) => row[key]));
     });
 
-    // Object.keys(sheet).forEach((cell) => {
-    //   if (cell[0] === "!") return;
-    //   const col = cell.replace(/[0-9]/g, "");
-    //   if (col === "J" || col === "K") {
-    //     sheet[cell].z = "dd/mm/yyyy hh:mm";
-    //   }
-    // });
-
-    sheet.getColumn(11).numFmt = "dd/mm/yyyy hh:mm";
-    sheet.getColumn(12).numFmt = "dd/mm/yyyy hh:mm";
+    sheet.getColumn(5).numFmt = "dd/mm/yyyy hh:mm";
+    sheet.getColumn(6).numFmt = "dd/mm/yyyy hh:mm";
+    sheet.getColumn(13).numFmt = "dd/mm/yyyy hh:mm";
+    sheet.getColumn(14).numFmt = "dd/mm/yyyy hh:mm";
 
     const columns = [
-      "E",
-      "I",
-      "J",
+      "G",
       "K",
       "L",
       "M",
@@ -740,6 +762,8 @@ export default function page(params: any) {
       "R",
       "S",
       "T",
+      "U",
+      "V",
     ];
 
     columns.forEach((col) => {
@@ -749,6 +773,15 @@ export default function page(params: any) {
         pattern: "solid",
         fgColor: { argb: "FFFF00" },
       };
+    });
+
+    sheet.columns.forEach((column: any) => {
+      let maxLength = 10; // valor mínimo por defecto
+      column.eachCell({ includeEmpty: true }, (cell: any) => {
+        const cellValue = cell.value ? cell.value.toString() : "";
+        maxLength = Math.max(maxLength, cellValue.length);
+      });
+      column.width = maxLength + 2; // margen adicional
     });
 
     // XLSX.utils.book_append_sheet(workbook, sheet, "ReportePdP");
@@ -766,7 +799,7 @@ export default function page(params: any) {
     try {
       if (status === 200) {
         setModalLoader(false);
-        setMessage("Se proceso la información");
+        setMessage("Se esta procesando la información...");
         if (datos.filter((item: any) => item.isValid === false).length > 0) {
           setMessage("Revisar los errores y volver a cargar el archivo");
           setLogError(datos.filter((item: any) => item.isValid === false));
@@ -791,64 +824,67 @@ export default function page(params: any) {
   return (
     <ProtectedRouteComponentemail empresa="Todos" OnResponse={handleThirdParty}>
       <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
+        {/* Titulo y boton */}
         <div className="text-white text-2xl mt-8 flex flex-col items-center w-4/5 px-4 py-2">
           <div className="flex justify-center">
-            <Label className="text-2xl font-bold">
-              Actividades Parada de Planta
+            <Label className="text-4xl font-bold">
+              ACTIVIDADES PARADA DE PLANTA
             </Label>
           </div>
-          <div className="w-full flex justify-end">
+          <div className="w-full flex flex-col items-center justify-center mt-12 rounded-2xl">
             <button
               onClick={() => {
                 exportToExcel();
               }}
-              className="flex border-2 border-blue-600 items-center text-sm gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all"
+              // className="flex border-2 border-blue-600 items-center text-sm gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all"
+              className="shiny-border flex border-none rounded-xl  items-center text-sm gap-2 bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-all"
             >
               <FileSpreadsheet size={20} />
-              <span>Plantilla Excel</span>
+              <span>Descargar Plantilla Excel de CARGA MASIVA</span>
             </button>
+            <span className="text-xs mt-6">
+              (Descarga la plantilla, actualiza tus actividades en el excel y
+              cargalo aquí 👇🏻)
+            </span>
           </div>
         </div>
 
-        {/* Tabla de actividades */}
-        <div className="w-5/6 mt-8">
-          <Table
-            aria-label="Example table with custom cells, pagination and sorting"
-            isHeaderSticky
-            bottomContent={bottomContent}
-            bottomContentPlacement="outside"
-            classNames={{
-              wrapper: "max-h-[600px]",
-            }}
-            selectedKeys={selectedKeys}
-            // selectionMode="multiple"
-            sortDescriptor={sortDescriptor}
-            topContent={topContent}
-            topContentPlacement="outside"
-            onSelectionChange={setSelectedKeys}
-            onSortChange={setSortDescriptor}
-          >
-            <TableHeader columns={headerColumns}>
-              {(column) => (
-                <TableColumn
-                  key={column.uid}
-                  align={column.uid === "actions" ? "center" : "start"}
-                  allowsSorting={column.sortable}
-                >
-                  {column.name}
-                </TableColumn>
-              )}
-            </TableHeader>
-            <TableBody emptyContent={"No activities found"} items={sortedItems}>
-              {(item) => (
-                <TableRow key={item.id}>
-                  {(columnKey) => (
-                    <TableCell>{renderCell(item, columnKey)}</TableCell>
-                  )}
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+        {/* Carga de archivos */}
+        <div className="w-full mt-8 mb-8 items-center">
+          <LoadFile
+            title={"Cargar Plantilla actualizada de PdP"}
+            MessageOk="Actividades cargadas correctamente"
+            pathExcelProcess={`${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/massiveupdate`}
+            OnResponse={handleResponse}
+          />
+
+          {/* Modal */}
+          {modal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white p-6 max-w-sm w-full rounded-xl">
+                {modalLoader && (
+                  <div>
+                    <h2 className="text-lg font-bold ">
+                      Cargando datos a base de datos
+                    </h2>
+                    <Spinner size="md" color="primary" labelColor="primary" />
+                  </div>
+                )}
+                {!modalLoader && <p className="mt-2">{message}</p>}
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => {
+                      setModal(false);
+                      setModalLoader(false);
+                    }}
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tabla de errores */}
@@ -896,44 +932,45 @@ export default function page(params: any) {
           </div>
         )}
 
-        {/* Carga de archivos */}
-        <div className="w-full mt-8 items-center">
-          <LoadFile
-            title={
-              "Actualización de actividades PDP (descargar la plantilla excel y actualizarla)"
-            }
-            MessageOk="Actividades cargadas correctamente"
-            pathExcelProcess={`${process.env.NEXT_PUBLIC_BACKEND_URL_2}/data/massiveupdate`}
-            OnResponse={handleResponse}
-          />
-
-          {/* Modal */}
-          {modal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white p-6 max-w-sm w-full rounded-xl">
-                {modalLoader && (
-                  <div>
-                    <h2 className="text-lg font-bold ">
-                      Cargando datos a base de datos
-                    </h2>
-                    <Spinner size="md" color="primary" labelColor="primary" />
-                  </div>
-                )}
-                {!modalLoader && <p className="mt-2">{message}</p>}
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={() => {
-                      setModal(false);
-                      setModalLoader(false);
-                    }}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                  >
-                    Cerrar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* Tabla de actividades */}
+        <div className="w-5/6 mt-8 mb-8">
+          <Table
+            aria-label="Example table with custom cells, pagination and sorting"
+            isHeaderSticky
+            bottomContent={bottomContent}
+            bottomContentPlacement="outside"
+            classNames={{
+              wrapper: "max-h-[600px]",
+            }}
+            selectedKeys={selectedKeys}
+            // selectionMode="multiple"
+            sortDescriptor={sortDescriptor}
+            topContent={topContent}
+            topContentPlacement="outside"
+            onSelectionChange={setSelectedKeys}
+            onSortChange={setSortDescriptor}
+          >
+            <TableHeader columns={headerColumns}>
+              {(column) => (
+                <TableColumn
+                  key={column.uid}
+                  align={column.uid === "actions" ? "center" : "start"}
+                  allowsSorting={column.sortable}
+                >
+                  {column.name}
+                </TableColumn>
+              )}
+            </TableHeader>
+            <TableBody emptyContent={"No activities found"} items={sortedItems}>
+              {(item) => (
+                <TableRow key={item.id}>
+                  {(columnKey) => (
+                    <TableCell>{renderCell(item, columnKey)}</TableCell>
+                  )}
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </ProtectedRouteComponentemail>

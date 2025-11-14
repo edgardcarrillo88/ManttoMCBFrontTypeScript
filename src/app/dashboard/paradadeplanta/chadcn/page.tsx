@@ -72,6 +72,7 @@ import { Label as LabelChadCN } from "@/components/ui/label";
 import { ItemMedia } from "@/components/ui/item";
 
 import { RefreshCcw } from "lucide-react";
+import { fetchData } from "next-auth/client/_utils";
 
 // export const description = "A line chart with dots";
 
@@ -269,6 +270,7 @@ type ChartLineCombinadaPropsArea = {
   data: TypeChartDataArea;
   totales: TypeValoresTotales;
   toggle?: boolean;
+  loader?: boolean;
 };
 
 type ChartLineProps = {
@@ -324,360 +326,6 @@ type TypeEspecialidad = {
   name: string;
   uid: string;
 };
-
-// export function ChartLine({ data }: ChartLineProps) {
-//   return (
-//     <>
-//       <Card className="">
-//         <CardHeader>
-//           <CardTitle>Linea Base General</CardTitle>
-//           <CardDescription>PdP Enero 2025</CardDescription>
-//         </CardHeader>
-
-//         <CardContent>
-//           <ChartContainer config={chartConfig}>
-//             <LineChart
-//               accessibilityLayer
-//               // data={chartData}
-//               data={data}
-//               margin={{
-//                 left: 12,
-//                 right: 12,
-//               }}
-//             >
-//               <CartesianGrid vertical={false} />
-//               <XAxis
-//                 // dataKey="month"
-//                 dataKey="Ejex"
-//                 tickLine={false}
-//                 axisLine={false}
-//                 tickMargin={8}
-//                 // tickFormatter={(value: any) => value.slice(0, 3)}
-//                 tickFormatter={(value) => {
-//                   const date = new Date(value);
-//                   return date.toLocaleDateString("en-US", {
-//                     month: "short",
-//                     day: "numeric",
-//                   });
-//                 }}
-//               />
-//               <ChartTooltip
-//                 cursor={false}
-//                 content={<ChartTooltipContent hideLabel />}
-//               />
-//               <Line
-//                 // dataKey="desktop"
-//                 dataKey="hh_lb_cum"
-//                 type="monotone"
-//                 stroke="var(--color-desktop)"
-//                 strokeWidth={2}
-//                 dot={{
-//                   fill: "var(--color-desktop)",
-//                 }}
-//                 activeDot={{
-//                   r: 6,
-//                 }}
-//               />
-//               <ChartLegend
-//                 content={
-//                   <ChartLegendContent
-//                     //  nameKey="desktop"
-//                     nameKey="hh_lb_cum"
-//                   />
-//                 }
-//               />
-//             </LineChart>
-//           </ChartContainer>
-//         </CardContent>
-//         <CardFooter className="flex-col items-start gap-2 text-sm">
-//           <div className="flex gap-2 font-medium leading-none">
-//             Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//           </div>
-//           <div className="leading-none text-muted-foreground">
-//             Showing total visitors for the last 6 months
-//           </div>
-//         </CardFooter>
-//       </Card>
-
-//       <Card className="">
-//         <CardHeader>
-//           <CardTitle>Line Chart - Dots</CardTitle>
-//           <CardDescription>January - June 2024</CardDescription>
-//         </CardHeader>
-//         <CardContent>
-//           <ChartContainer config={chartConfig}>
-//             <LineChart
-//               accessibilityLayer
-//               data={chartData}
-//               margin={{
-//                 left: 12,
-//                 right: 12,
-//               }}
-//             >
-//               <CartesianGrid vertical={false} />
-//               <XAxis
-//                 dataKey="month"
-//                 tickLine={false}
-//                 axisLine={false}
-//                 tickMargin={8}
-//                 tickFormatter={(value: any) => value.slice(0, 3)}
-//               />
-//               <ChartTooltip
-//                 cursor={false}
-//                 content={<ChartTooltipContent hideLabel />}
-//               />
-//               <Line
-//                 dataKey="mobile"
-//                 type="natural"
-//                 stroke="var(--color-desktop)"
-//                 strokeWidth={2}
-//                 dot={{
-//                   fill: "var(--color-desktop)",
-//                 }}
-//                 activeDot={{
-//                   r: 6,
-//                 }}
-//               />
-//             </LineChart>
-//           </ChartContainer>
-//         </CardContent>
-//         <CardFooter className="flex-col items-start gap-2 text-sm">
-//           <div className="flex gap-2 font-medium leading-none">
-//             Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//           </div>
-//           <div className="leading-none text-muted-foreground">
-//             Showing total visitors for the last 6 months
-//           </div>
-//         </CardFooter>
-//       </Card>
-//     </>
-//   );
-// }
-
-// export function ChartLIneInteractive({
-//   LineaBase,
-//   LineaReal,
-// }: ChartLineMultipleProps) {
-//   const [activeChart, setActiveChart] =
-//     React.useState<keyof typeof chartConfig>("LineaBaseReal");
-//   const [LineChartActive, setLineChartActive] = useState(LineaBase);
-
-//   React.useEffect(() => {
-//     setLineChartActive(LineaBase);
-//   }, [LineaBase, LineaReal]);
-
-//   const total = React.useMemo(
-//     () => ({
-//       LineaBaseReal: "70%",
-//       LineaBaseAjustada: "80%",
-//     }),
-//     []
-//   );
-//   return (
-//     <Card className="">
-//       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-//         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-//           <CardTitle>Curva S General</CardTitle>
-//           <CardDescription>
-//             Línea Base real y Línea base ajustada
-//           </CardDescription>
-//         </div>
-//         <div className="flex">
-//           {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
-//             const chart = key as keyof typeof chartConfig;
-//             return (
-//               <button
-//                 key={chart}
-//                 data-active={activeChart === chart}
-//                 className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-//                 onClick={() => {
-//                   if (chartConfig[chart].label === "Curva Real") {
-//                     setLineChartActive(LineaBase);
-//                     setActiveChart(chart);
-//                   } else {
-//                     setLineChartActive(LineaReal);
-//                     setActiveChart(chart);
-//                   }
-//                 }}
-//               >
-//                 <span className="text-xs text-muted-foreground">
-//                   {chartConfig[chart].label}
-//                 </span>
-//                 <span className="text-lg font-bold leading-none sm:text-3xl">
-//                   {total[key as keyof typeof total].toLocaleString()}
-//                 </span>
-//               </button>
-//             );
-//           })}
-//         </div>
-//       </CardHeader>
-//       <CardContent className="px-2 sm:p-6">
-//         <ChartContainer
-//           config={chartConfig}
-//           className="aspect-auto h-[250px] w-full"
-//         >
-//           <LineChart
-//             accessibilityLayer
-//             data={LineChartActive}
-//             margin={{
-//               left: 12,
-//               right: 12,
-//             }}
-//           >
-//             <CartesianGrid vertical={false} />
-//             <XAxis
-//               dataKey="Ejex"
-//               tickLine={false}
-//               axisLine={false}
-//               tickMargin={8}
-//               minTickGap={32}
-//               tickFormatter={(value) => {
-//                 const date = new Date(value);
-//                 return date.toLocaleDateString("en-US", {
-//                   month: "short",
-//                   day: "numeric",
-//                 });
-//               }}
-//             />
-//             <ChartTooltip
-//               content={
-//                 <ChartTooltipContent
-//                   className="w-[150px]"
-//                   nameKey="Ejex"
-//                   labelFormatter={(value) => {
-//                     console.log(value);
-//                     const date = new Date(value);
-//                     return date.toLocaleDateString("en-US", {
-//                       month: "short",
-//                       day: "numeric",
-//                     });
-//                   }}
-//                 />
-//               }
-//             />
-//             <Line
-//               dataKey={"hh"}
-//               type="monotone"
-//               stroke={`var(--color-${activeChart})`}
-//               strokeWidth={2}
-//               dot={true}
-//             />
-//           </LineChart>
-//         </ChartContainer>
-//       </CardContent>
-//     </Card>
-//   );
-// }
-
-// export function ChartDobleLine({ data }: ChartLineCombinadaProps) {
-//   return (
-//     <Card className="">
-//       <CardHeader>
-//         <CardTitle>Line Chart - Multiple</CardTitle>
-//         <CardDescription>PdP Sulfuros</CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <ChartContainer config={chartConfig}>
-//           <LineChart
-//             accessibilityLayer
-//             data={data}
-//             margin={{
-//               left: 12,
-//               right: 12,
-//             }}
-//           >
-//             <CartesianGrid vertical={false} />
-//             <XAxis
-//               dataKey="Ejex"
-//               tickLine={false}
-//               axisLine={false}
-//               tickMargin={8}
-//               tickFormatter={(value) => {
-//                 const date = new Date(value);
-//                 return date.toLocaleDateString("en-US", {
-//                   month: "short",
-//                   day: "numeric",
-//                 });
-//               }}
-//             />
-//             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-//             <Line
-//               dataKey="hh_lb_cum"
-//               type="monotone"
-//               stroke="var(--color-desktop)"
-//               strokeWidth={2}
-//               dot={false}
-//             />
-//             <Line
-//               dataKey="hh_real_cum"
-//               type="monotone"
-//               stroke="var(--color-mobile)"
-//               strokeWidth={2}
-//               dot={false}
-//             />
-//           </LineChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter>
-//         <div className="flex w-full items-start gap-2 text-sm">
-//           <div className="grid gap-2">
-//             <div className="flex items-center gap-2 font-medium leading-none">
-//               Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//             </div>
-//             <div className="flex items-center gap-2 leading-none text-muted-foreground">
-//               Showing total visitors for the last 6 months
-//             </div>
-//           </div>
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
-
-// export function ChartBar({ data }: ChartLineCombinadaProps) {
-//   return (
-//     <Card className="">
-//       <CardHeader>
-//         <CardTitle>Bar Chart - Multiple</CardTitle>
-//         <CardDescription>PdP Sulfuros Enero</CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <ChartContainer config={chartConfig}>
-//           <BarChart accessibilityLayer data={data}>
-//             <CartesianGrid vertical={false} />
-//             <XAxis
-//               dataKey="Ejex"
-//               tickLine={false}
-//               tickMargin={10}
-//               axisLine={false}
-//               tickFormatter={(value) => {
-//                 const date = new Date(value);
-//                 return date.toLocaleDateString("en-US", {
-//                   month: "short",
-//                   day: "numeric",
-//                 });
-//               }}
-//             />
-//             <ChartTooltip
-//               cursor={false}
-//               content={<ChartTooltipContent indicator="dot" />}
-//             />
-//             <Bar dataKey="hh_lb" fill="var(--color-desktop)" radius={4} />
-//             <Bar dataKey="hh_real" fill="var(--color-mobile)" radius={4} />
-//           </BarChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter className="flex-col items-start gap-2 text-sm">
-//         <div className="flex gap-2 font-medium leading-none">
-//           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//         </div>
-//         <div className="leading-none text-muted-foreground">
-//           Showing total visitors for the last 6 months
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
 
 // export function ChartPie() {
 //   const id = "pie-interactive";
@@ -949,264 +597,6 @@ type TypeEspecialidad = {
 //   );
 // }
 
-// export function CombinedChart({ LineaCombinada }: ChartLineCombinadaProps) {
-//   return (
-//     <Card className="">
-//       <CardHeader>
-//         <CardTitle>Combined Bar and Line Chart</CardTitle>
-//         <CardDescription>January - June 2024</CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <ChartContainer config={chartConfig}>
-//           <ComposedChart data={data}>
-//             <CartesianGrid vertical={false} />
-//             <XAxis
-//               dataKey="Ejex"
-//               tickLine={false}
-//               tickMargin={10}
-//               axisLine={false}
-//               tickFormatter={(value) => {
-//                 const date = new Date(value);
-//                 return date.toLocaleDateString("en-US", {
-//                   month: "short",
-//                   day: "numeric",
-//                 });
-//               }}
-//             />
-//             <YAxis
-//               yAxisId="left"
-//               orientation="left"
-//               tickLine={false}
-//               axisLine={false}
-//             />
-//             <YAxis
-//               yAxisId="right"
-//               orientation="right"
-//               tickLine={false}
-//               axisLine={false}
-//             />
-//             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-
-//             {/* Gráfico de barras */}
-//             <Bar
-//               yAxisId="left"
-//               dataKey="hh_lb"
-//               fill="var(--color-desktop)"
-//               radius={4}
-//             />
-//             <Bar
-//               yAxisId="left"
-//               dataKey="hh_real"
-//               fill="var(--color-mobile)"
-//               radius={4}
-//             />
-
-//             {/* Gráfico de líneas */}
-//             <Line
-//               yAxisId="right"
-//               dataKey="hh_lb_cum"
-//               type="monotone"
-//               stroke="var(--color-desktop)"
-//               strokeWidth={2}
-//               dot={false}
-//             />
-//             <Line
-//               yAxisId="right"
-//               dataKey="hh_real_cum"
-//               type="monotone"
-//               stroke="var(--color-mobile)"
-//               strokeWidth={2}
-//               dot={false}
-//             />
-//           </ComposedChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter className="flex-col items-start gap-2 text-sm">
-//         <div className="flex gap-2 font-medium leading-none">
-//           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//         </div>
-//         <div className="leading-none text-muted-foreground">
-//           Showing total visitors for the last 6 months
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
-
-// export function TableDemo() {
-//   return (
-//     <Table>
-//       <TableCaption>A list of your recent invoices.</TableCaption>
-//       <TableHeader>
-//         <TableRow>
-//           <TableHead className="w-[100px]">Invoice</TableHead>
-//           <TableHead>Status</TableHead>
-//           <TableHead>Method</TableHead>
-//           <TableHead className="text-right">Amount</TableHead>
-//         </TableRow>
-//       </TableHeader>
-//       <TableBody>
-//         {invoices.map((invoice) => (
-//           <TableRow key={invoice.invoice}>
-//             <TableCell className="font-medium">{invoice.invoice}</TableCell>
-//             <TableCell>{invoice.paymentStatus}</TableCell>
-//             <TableCell>{invoice.paymentMethod}</TableCell>
-//             <TableCell className="text-right">{invoice.totalAmount}</TableCell>
-//           </TableRow>
-//         ))}
-//       </TableBody>
-//       <TableFooter>
-//         <TableRow>
-//           <TableCell colSpan={3}>Total</TableCell>
-//           <TableCell className="text-right">$2,500.00</TableCell>
-//         </TableRow>
-//       </TableFooter>
-//     </Table>
-//   );
-// }
-
-// const ChartInteractivoCombinado = React.memo(
-//   function ChartInteractivoCombinado({
-//     data,
-//     totales,
-//   }: ChartLineCombinadaProps) {
-//     console.log("Curva general");
-//     const [activeChart, setActiveChart] =
-//       React.useState<keyof typeof chartConfig>("LineaBaseReal");
-//     const [lineChartActive, setLineChartActive] = useState(data.LineaCombinada);
-
-//     React.useEffect(() => {
-//       setLineChartActive(data.LineaCombinada);
-//     }, [data.LineaCombinada, data.LineaCombinadaAjustada]);
-
-//     const total = {
-//       LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
-//       LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
-//     };
-
-//     return (
-//       <Card className=" w-full">
-//         <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-//           <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-//             <CardTitle>Curva S con Barras</CardTitle>
-//             <CardDescription>
-//               Comparación entre línea base y real
-//             </CardDescription>
-//           </div>
-//           <div className="flex">
-//             {["LineaBaseReal", "LineaBaseAjustada"].map((key) => {
-//               const chart = key as keyof typeof chartConfig;
-//               return (
-//                 <button
-//                   key={chart}
-//                   data-active={activeChart === chart}
-//                   className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-//                   onClick={() => {
-//                     setLineChartActive(
-//                       chartConfig[chart].label === "Curva Real"
-//                         ? data.LineaCombinada
-//                         : data.LineaCombinadaAjustada
-//                     );
-//                     setActiveChart(chart);
-//                   }}
-//                 >
-//                   <span className="text-xs text-muted-foreground">
-//                     {chartConfig[chart].label}
-//                   </span>
-//                   <span className="text-lg font-bold leading-none sm:text-3xl">
-//                     {total[key as keyof typeof total].toLocaleString()}
-//                   </span>
-//                 </button>
-//               );
-//             })}
-//           </div>
-//         </CardHeader>
-//         <CardContent className="px-2 sm:p-6">
-//           <ChartContainer
-//             config={chartConfig}
-//             className="aspect-auto h-[250px] w-full"
-//           >
-//             <ComposedChart
-//               data={lineChartActive}
-//               margin={{ left: 12, right: 12 }}
-//             >
-//               <CartesianGrid vertical={false} />
-//               <XAxis
-//                 dataKey="Ejex"
-//                 tickLine={false}
-//                 axisLine={false}
-//                 tickMargin={8}
-//                 minTickGap={32}
-//                 tickFormatter={(value) => {
-//                   const date = new Date(value);
-//                   return date.toLocaleDateString("en-US", {
-//                     month: "short",
-//                     day: "numeric",
-//                   });
-//                 }}
-//               />
-
-//               {/* Eje Y para las Barras */}
-//               <YAxis
-//                 yAxisId="left"
-//                 tickLine={false}
-//                 axisLine={false}
-//                 tickMargin={8}
-//               />
-
-//               {/* Eje Y para las Líneas */}
-//               <YAxis
-//                 yAxisId="right"
-//                 orientation="right"
-//                 tickLine={false}
-//                 axisLine={false}
-//                 tickMargin={8}
-//               />
-
-//               <ChartTooltipRecharts
-//                 cursor={false}
-//                 content={<ChartTooltipContent indicator="dot" />}
-//               />
-//               {/* Barras */}
-//               <Bar
-//                 dataKey="hh_lb"
-//                 fill="var(--color-desktop)"
-//                 radius={4}
-//                 yAxisId="left"
-//               />
-//               <Bar
-//                 dataKey="hh_real"
-//                 fill="var(--color-mobile)"
-//                 radius={4}
-//                 yAxisId="left"
-//               />
-//               {/* Línea */}
-//               <Line
-//                 dataKey="hh_lb_cum"
-//                 type="monotone"
-//                 // stroke={`var(--color-${activeChart})`}
-//                 stroke={`var(--color-desktop)`}
-//                 strokeWidth={2}
-//                 dot={true}
-//                 yAxisId="right"
-//               />
-//               <Line
-//                 dataKey="hh_real_cum"
-//                 type="monotone"
-//                 // stroke="var(--color-secondary)"
-//                 stroke={`var(--color-mobile)`}
-//                 strokeWidth={2}
-//                 dot={true}
-//                 yAxisId="right"
-//               />
-//             </ComposedChart>
-//           </ChartContainer>
-//         </CardContent>
-//       </Card>
-//     );
-//   }
-// );
-
 const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   name,
   data,
@@ -1216,6 +606,8 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   const uniqueAreas = Array.from(
     new Set(data.General.map((item) => item.Filtro01))
   );
+
+  const [loader, setLoader] = useState(false);
 
   const ArrayAreas = useMemo(() => {
     return uniqueAreas.map((area) => ({
@@ -1247,8 +639,6 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
     React.useState<keyof typeof chartConfig>("AvanceReal");
   const [lineChartActive, setLineChartActive] = useState(data.General);
 
-  console.log(data.General);
-
   React.useEffect(() => {
     const fuenteDatos =
       chartConfig[activeChart].label === "Avance Real"
@@ -1268,24 +658,14 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
         (item) => item.Filtro01 === selected
       );
 
-
       //setLineChartActive(filtrado); LO he comentado y reemplazado por el condiconal de abajo
 
-
-
-
-        if (toggle === true) {
-      const newArray = filtrado.map(
-        ({ hh_real, hh_lb, ...rest }) => rest
-      );
-      setLineChartActive(newArray);
-    } else {
-      setLineChartActive(filtrado);
-    }
-
-
-
-
+      if (toggle === true) {
+        const newArray = filtrado.map(({ hh_real, hh_lb, ...rest }) => rest);
+        setLineChartActive(newArray);
+      } else {
+        setLineChartActive(filtrado);
+      }
 
       const avance = calcularPorcentajeAvance(filtrado);
       const avanceAjustado = calcularPorcentajeAvance(filtradoAjustado);
@@ -1295,26 +675,16 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
           avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
       });
     } else {
-
       //setLineChartActive(data.General); // Si no hay selección, mostrar todo // LO he comentado y reemplazado por el condiconal de abajo
 
-
-
-
-
-
-        if (toggle === true) {
-      const newArray = data.General.map(
-        ({ hh_real, hh_lb, ...rest }) => rest
-      );
-      setLineChartActive(newArray);
-    } else {
-      setLineChartActive(data.General);
-    }
-
-
-
-
+      if (toggle === true) {
+        const newArray = data.General.map(
+          ({ hh_real, hh_lb, ...rest }) => rest
+        );
+        setLineChartActive(newArray);
+      } else {
+        setLineChartActive(data.General);
+      }
 
       const avance = calcularPorcentajeAvance(data.General);
       const avanceAjustado = calcularPorcentajeAvance(data.Ajustada);
@@ -1369,29 +739,14 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   //   LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
   // };
 
-
-
-
-
-
-  // React.useEffect(() => {
-
-  //   if (toggle === true) {
-  //     const newArray = lineChartActive.map(
-  //       ({ hh_real, hh_lb, ...rest }) => rest
-  //     );
-  //     setLineChartActive(newArray);
-  //   } else {
-  //     setLineChartActive(data.General);
-  //   }
-  // }, [toggle]);
-
-
-  
-
-
   return (
     <div key={name}>
+      {loader && (
+        <div className="w-[600px]">
+          <BaymaxLoader />
+        </div>
+      )}
+
       <div className={`mb-2 ${name === "CurvaGeneral" ? "hidden" : "block"}`}>
         <Dropdown>
           <DropdownTrigger className="">
@@ -1506,7 +861,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                 orientation="right"
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
+                tickMargin={4}
                 tickFormatter={(value) => `${value} hh`}
                 label={{
                   value: "HH Acumuladas",
@@ -1600,6 +955,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
   name,
   data,
   totales,
+  toggle,
 }: ChartLineCombinadaPropsArea) {
   //---------------------------------------------
   const [AreaSeleccionada, setAreaSeleccionada] = React.useState<Selection>(
@@ -1610,7 +966,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
 
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>("AvanceReal");
-  const [lineChartActive, setLineChartActive] = useState(
+  const [lineChartActive, setLineChartActiveDouble] = useState(
     data.General.filter((item) => item.Ejex.getTime() !== 0)
   );
 
@@ -1630,6 +986,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
     )
     //new Set(data.General.map((item) => item.Filtro02))
   );
+
   const uniqueContratista = Array.from(
     new Set(
       data.General.map((item) => item.Filtro01).filter(
@@ -1711,20 +1068,31 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
         });
       });
 
-      setLineChartActive(
-        (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter(
-          (item) => item.Ejex.getTime() !== 0
-        )
-      ); //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
-      setLineChartActive(
+      // setLineChartActiveDouble(
+      //   (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter(
+      //     (item) => item.Ejex.getTime() !== 0
+      //   )
+      // ); //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
+
+      const filtrado =
         chartConfig[activeChart].label === "Curva Real"
           ? (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter(
               (item) => item.Ejex.getTime() !== 0
             ) //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
           : (response.data.CurvaWhatIf.Ajustada as TypeCurvaSGeneral).filter(
               (item) => item.Ejex.getTime() !== 0
-            ) //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
-      );
+            ); //Verficiar porque debido definirlo con "as" creería que debería ya estar tipado y no tener que forzarlo
+
+      // setLineChartActiveDouble(
+
+      // );
+
+      if (toggle === true) {
+        const newArray = filtrado.map(({ hh_real, hh_lb, ...rest }) => rest);
+        setLineChartActiveDouble(newArray);
+      } else {
+        setLineChartActiveDouble(filtrado);
+      }
 
       const avance = calcularPorcentajeAvance(
         (response.data.CurvaWhatIf.General as TypeCurvaSGeneral).filter(
@@ -1803,14 +1171,23 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       return matchArea && matchContratista;
     });
 
-    console.log("Filtrado", filtrado);
-    setLineChartActive(filtrado.filter((item) => item.Ejex.getTime() !== 0));
+    // setLineChartActiveDouble(
+    //   filtrado.filter((item) => item.Ejex.getTime() !== 0)
+    // );
+
+    if (toggle === true) {
+      const newArray = filtrado.map(({ hh_real, hh_lb, ...rest }) => rest);
+      setLineChartActiveDouble(newArray);
+    } else {
+      setLineChartActiveDouble(filtrado);
+    }
   }, [
     AreaSeleccionada,
     ContratistaSeleccionado,
     activeChart,
     data.General,
     data.Ajustada,
+    toggle,
   ]);
 
   const total = {
@@ -1831,9 +1208,9 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
                 endContent={<ChevronDownIcon className="text-small" />}
                 variant="faded"
               >
-                {Array.from(AreaSeleccionada).length === 0
-                  ? "Areas"
-                  : AreaSeleccionada}
+                {Array.from(AreaSeleccionada).length === 1
+                  ? AreaSeleccionada
+                  : "Selecciona el Área"}
               </Button>
             </DropdownTrigger>
             <DropdownMenu
@@ -1858,9 +1235,9 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
                 endContent={<ChevronDownIcon className="text-small" />}
                 variant="faded"
               >
-                {Array.from(ContratistaSeleccionado).length === 0
-                  ? "Contratistas"
-                  : ContratistaSeleccionado}
+                {Array.from(ContratistaSeleccionado).length === 1
+                  ? ContratistaSeleccionado
+                  : "Selecciona el contratista"}
               </Button>
             </DropdownTrigger>
             <DropdownMenu
@@ -1981,7 +1358,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
                   data-active={activeChart === chart}
                   className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
                   onClick={() => {
-                    setLineChartActive(
+                    setLineChartActiveDouble(
                       chartConfig[chart].label === "Avance Real"
                         ? data.General.filter(
                             (item) => item.Ejex.getTime() !== 0
@@ -2143,14 +1520,16 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
 });
 
 const BaymaxLoader = () => (
-  <div className="flex flex-col items-center justify-center w-full h-full">
-    {/* Cabeza de Baymax con relación 5:3 */}
-    <div className="relative w-full aspect-[5/3] rounded-[50%/60%] bg-white shadow-md">
-      <div className="absolute top-[45%] left-1/2 w-[60%] h-[8%] -translate-x-1/2 -translate-y-[30%] border-b-[1.5em] border-black baymax"></div>
+  <div className="fixed inset-0 bg-gray-700/60 z-40 grid place-items-center">
+    <div className="flex flex-col items-center justify-center w-[600px] h-full z-50 absolute">
+      {/* Cabeza de Baymax con relación 5:3 */}
+      <div className="relative w-full aspect-[5/3] rounded-[50%/60%] bg-white shadow-md">
+        <div className="absolute top-[45%] left-1/2 w-[60%] h-[8%] -translate-x-1/2 -translate-y-[30%] border-b-[1.5em] border-black baymax"></div>
+      </div>
+      <p className="mt-4 text-center text-white font-medium text-2xl ">
+        Cargando...
+      </p>
     </div>
-    <p className="mt-4 text-center text-white font-medium text-2xl ">
-      Cargando...
-    </p>
   </div>
 );
 
@@ -2225,9 +1604,9 @@ export default function Page() {
   const [thirdparty, setThirdparty] = useState<TypeThirdParty[]>([]);
   const [especliadad, setEspecialidad] = useState<TypeEspecialidad[]>([]);
 
-  const [ToggleBarras, setToggleBarras] = useState(false);
-
   const [isVisible, setIsVisible] = useState<Boolean>(true);
+
+  const [ToggleBarras, setToggleBarras] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -2256,6 +1635,8 @@ export default function Page() {
             item.Ejex = new Date(item.Ejex);
           });
         });
+
+        console.log(response.data.CurvaGeneral.General);
 
         setLineaCombinada(response.data.CurvaGeneral.General);
         setLineaCombinadaAjustada(response.data.CurvaGeneral.Ajustada);
@@ -2303,40 +1684,55 @@ export default function Page() {
           return fecha;
         };
 
-        const findInArray = (fechaaaa: Date) => {
-          const minDate = new Date(
-            response.data.CurvaContratista.General[0].Ejex
-          );
-          const maxDate = new Date(
-            response.data.CurvaContratista.General[
-              response.data.CurvaContratista.General.length - 1
-            ].Ejex
+        const ArrraySPIs = (
+          Fecha: Date,
+          CurvaRegular: TypeCurvaSGeneral,
+          CurvaAjustada: TypeCurvaSGeneral
+        ) => {
+          const minDate = new Date(CurvaRegular[0].Ejex);
+          const maxDate = new Date(CurvaRegular[CurvaRegular.length - 1].Ejex);
+
+          console.log(
+            "Fecha min: ",
+            minDate,
+            "Fecha max: ",
+            maxDate,
+            "Fecha: ",
+            Fecha
           );
 
-          if (fechaaaa < minDate) {
-            return 0;
+          if (Fecha < minDate) {
+            // return 0;
           }
-          if (fechaaaa > maxDate) {
-            return (
-              response.data.CurvaContratista.General[
-                response.data.CurvaContratista.General.length - 1
-              ].hh_real_cum /
-              response.data.CurvaContratista.General[
-                response.data.CurvaContratista.General.length - 1
-              ].hh_lb_cum
-            );
+          if (Fecha > maxDate) {
+            // return (
+            //   CurvaRegular[CurvaRegular.length - 1].hh_real_cum /
+            //   CurvaRegular[CurvaRegular.length - 1].hh_lb_cum
+            // );
           }
-          const match = response.data.CurvaContratista.General.find(
-            (obj: any) => new Date(obj.Ejex).getTime() === fechaaaa.getTime()
+          const match = CurvaRegular.filter(
+            (obj: any) => new Date(obj.Ejex).getTime() === Fecha.getTime()
           );
-          if (match) return match.hh_real_cum / match.hh_lb_cum;
+          console.log(match);
+          // if (match) return match.hh_real_cum / match.hh_lb_cum;
+          if (match) return match;
 
           return null;
         };
 
-        const now = new Date();
+        const now = new Date("2024-12-14");
+        console.log(now);
         const DateRounded = roundedDate(now);
-        const value = findInArray(DateRounded);
+        
+        
+        
+        
+        const ArraySPIValueCurvaGeneral = ArrraySPIs(
+          DateRounded,
+          response.data.CurvaGeneral.General,
+          response.data.CurvaGeneral.Ajustada
+        );
+        console.log(ArraySPIValueCurvaGeneral);
 
         setIsVisible(false);
       } else {
@@ -2390,6 +1786,7 @@ export default function Page() {
             Ajustada: CurvaAreaContratistaAjustada,
           }}
           totales={ValoresTotales}
+          toggle={ToggleBarras}
         />
       ),
       CurvaEspecialidadContratista: (
@@ -2401,6 +1798,7 @@ export default function Page() {
             Ajustada: CurvaEspecialidadContratistaAjustada,
           }}
           totales={ValoresTotales}
+          toggle={ToggleBarras}
         />
       ),
       WhatIf: (
@@ -2412,6 +1810,7 @@ export default function Page() {
             Ajustada: CurvaWhatIfAjustada,
           }}
           totales={ValoresTotales}
+          toggle={ToggleBarras}
         />
       ),
     };
@@ -2438,8 +1837,12 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
       <h1 className="text-4xl font-bold text-white text-center mt-8 mb-4">
-        Dashboard PdP
+        Dashboard de Parada de Planta
       </h1>
+
+      <h3 className="text-white">
+        titulo de prueba
+      </h3>
 
       {isVisible && (
         <div className="w-[600px]">
@@ -2505,7 +1908,11 @@ export default function Page() {
                 Listado de actividades atrasadas
               </Label>
               <Table className="rounded-lg">
-                <TableCaption>Actividades atrasadas</TableCaption>
+                <TableCaption>{`Cantidad actividades canceladas: ${
+                  activities.filter((item) => item.ActividadCancelada == "Si")
+                    .length
+                }`}</TableCaption>
+
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
@@ -2517,7 +1924,7 @@ export default function Page() {
                 </TableHeader>
                 <TableBody>
                   {activities
-                    .filter((item) => item.estado === "Atrasado")
+                    .filter((item) => item.estado === "Cancelado")
                     .map((item) => (
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.id}</TableCell>
@@ -2538,32 +1945,39 @@ export default function Page() {
             </TableFooter> */}
               </Table>
             </div>
-
             <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
               <Label className="text-2xl font-bold text-white">
-                Listado de OC
+                Listado de actividades atrasadas
               </Label>
               <Table className="rounded-lg">
-                <TableCaption>(todos los montos estan en USD)</TableCaption>
+                <TableCaption>{`Cantidad actividades canceladas: ${
+                  activities.filter((item) => item.ActividadCancelada == "Si")
+                    .length
+                }`}</TableCaption>
+
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Pos</TableHead>
-                    <TableHead>Partida</TableHead>
-                    <TableHead>Texto Breve</TableHead>
-                    <TableHead>Proveedor</TableHead>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Empresa</TableHead>
+                    <TableHead>Descripcion</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-center">Avance</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {invoices.map((item) => (
-                    <TableRow key={item.invoice}>
-                      <TableCell className="font-medium">
-                        {item.invoice}
-                      </TableCell>
-                      <TableCell>{item.paymentMethod}</TableCell>
-                      <TableCell>{item.invoice}</TableCell>
-                      <TableCell>{item.paymentStatus}</TableCell>
-                    </TableRow>
-                  ))}
+                  {activities
+                    .filter((item) => item.estado === "Cancelado")
+                    .map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell className="font-medium">{item.id}</TableCell>
+                        <TableCell>{item.contratista}</TableCell>
+                        <TableCell>{item.descripcion}</TableCell>
+                        <TableCell>{item.estado}</TableCell>
+                        <TableCell className="text-center">
+                          {item.avance}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
                 {/* <TableFooter>
               <TableRowCdn>

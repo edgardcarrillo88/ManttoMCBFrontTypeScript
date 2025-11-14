@@ -117,7 +117,7 @@ export default function FileUploadPage({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col">
+    <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col">
       {/* Main content */}
       <main className="flex-grow">
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -132,8 +132,8 @@ export default function FileUploadPage({
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-10 h-10 mb-3 text-gray-400" />
                   <p className="mb-2 text-sm text-gray-400">
-                    <span className="font-semibold">Click to upload</span> or
-                    drag and drop
+                    <span className="font-semibold">Click para cargar tu archivo</span> o
+                    Arrastra y suelta
                   </p>
                   <p className="text-xs text-gray-400">
                     PDF, DOC, XLS, CSV (MAX. 10MB)
@@ -152,15 +152,15 @@ export default function FileUploadPage({
 
           {uploadedFiles.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-2xl font-bold text-white mb-4">
-                Uploaded Files
+              <h2 className="text-2xl font-bold text-white">
+                Archivos Cargados
               </h2>
               <Table className="text-white">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>File Name</TableHead>
-                    <TableHead>Size</TableHead>
-                    <TableHead>Type</TableHead>
+                    <TableHead>Nombre del archivo</TableHead>
+                    <TableHead>Peso</TableHead>
+                    <TableHead>Tipo</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -177,7 +177,7 @@ export default function FileUploadPage({
                           onClick={() => removeFile(index)}
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
-                          Remove
+                          Borrar
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -189,24 +189,24 @@ export default function FileUploadPage({
                   <DialogTrigger asChild className="text-white">
                     <Button className="mt-6">
                       <File className="w-4 h-4 mr-2" />
-                      View File Details
+                      Ver detalles del documento
                     </Button>
                   </DialogTrigger>
                   <div className="text-white flex justify-end">
-                    <Button className="mt-6" onClick={() => OnSubmitFile()}>
+                    <Button className="shiny-border-file mt-6 bg-gray-700" onClick={() => OnSubmitFile()}>
                       <CloudUpload className="w-4 h-4 mr-2" />
-                      Load File
+                      Click para Cargar Archivo!
                     </Button>
                   </div>
                 </div>
                 <DialogContent className="sm:max-w-[425px] text-white bg-gray-700">
                   <DialogHeader>
-                    <DialogTitle>File Details</DialogTitle>
+                    <DialogTitle>Detalles del documento</DialogTitle>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
-                    <p>Total files: {uploadedFiles.length}</p>
+                    <p>Total archivos: {uploadedFiles.length}</p>
                     <p>
-                      Total size:{" "}
+                      Total peso:{" "}
                       {uploadedFiles.reduce((acc, file) => acc + file.size, 0) /
                         1024}{" "}
                       KB
