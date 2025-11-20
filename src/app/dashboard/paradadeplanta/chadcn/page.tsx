@@ -327,6 +327,14 @@ type TypeEspecialidad = {
   uid: string;
 };
 
+type SPIState = {
+  CurvaGeneral: TypeCurvaSGeneral;
+  CurvaArea: TypeCurvaSGeneral;
+  CurvaContratista: TypeCurvaSGeneral;
+  CurvaAreaContratista: TypeCurvaSGeneral;
+  CurvaEspecialidadContratista: TypeCurvaSGeneral;
+};
+
 // export function ChartPie() {
 //   const id = "pie-interactive";
 //   const [activeMonth, setActiveMonth] = React.useState(desktopData[0].month);
@@ -1555,10 +1563,10 @@ export default function Page() {
       value: "CurvaEspecialidadContratista",
       label: "Curva S por Especialidad y Contratista",
     },
-    {
-      value: "WhatIf",
-      label: "What If",
-    },
+    // {
+    //   value: "WhatIf",
+    //   label: "What If",
+    // },
   ];
 
   const [opcionCurvas, setOpcionCurvas] = React.useState<Selection>(
@@ -1607,6 +1615,14 @@ export default function Page() {
   const [isVisible, setIsVisible] = useState<Boolean>(true);
 
   const [ToggleBarras, setToggleBarras] = useState(false);
+
+  const [ArraySPI, setArraySPI] = useState<SPIState>({
+    CurvaGeneral: [],
+    CurvaArea: [],
+    CurvaContratista: [],
+    CurvaAreaContratista: [],
+    CurvaEspecialidadContratista: [],
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1684,11 +1700,12 @@ export default function Page() {
           return fecha;
         };
 
-        const ArrraySPIs = (
+        const FunctionArrraySPIs = (
           Fecha: Date,
           CurvaRegular: TypeCurvaSGeneral,
           CurvaAjustada: TypeCurvaSGeneral
         ) => {
+          console.log(CurvaRegular);
           const minDate = new Date(CurvaRegular[0].Ejex);
           const maxDate = new Date(CurvaRegular[CurvaRegular.length - 1].Ejex);
 
@@ -1720,19 +1737,49 @@ export default function Page() {
           return null;
         };
 
-        const now = new Date("2024-12-14");
+        const now = new Date("2025-12-14");
+        //const now = new Date();
         console.log(now);
         const DateRounded = roundedDate(now);
-        
-        
-        
-        
-        const ArraySPIValueCurvaGeneral = ArrraySPIs(
+
+        const ArraySPIValueCurvaGeneral = FunctionArrraySPIs(
           DateRounded,
           response.data.CurvaGeneral.General,
           response.data.CurvaGeneral.Ajustada
         );
-        console.log(ArraySPIValueCurvaGeneral);
+
+        const ArraySPIValueCurvaArea = FunctionArrraySPIs(
+          DateRounded,
+          response.data.CurvaArea.General,
+          response.data.CurvaArea.Ajustada
+        );
+
+        const ArraySPIValueCurvaContratista = FunctionArrraySPIs(
+          DateRounded,
+          response.data.CurvaContratista.General,
+          response.data.CurvaContratista.Ajustada
+        );
+
+        const ArraySPIValueCurvaAreaContratista = FunctionArrraySPIs(
+          DateRounded,
+          response.data.CurvaAreaContratista.General,
+          response.data.CurvaAreaContratista.Ajustada
+        );
+
+        const ArraySPIValueCurvaEspecialidadContratista = FunctionArrraySPIs(
+          DateRounded,
+          response.data.CurvaEspecialidadContratista.General,
+          response.data.CurvaEspecialidadContratista.Ajustada
+        );
+
+        setArraySPI({
+          CurvaGeneral: ArraySPIValueCurvaGeneral ?? [],
+          CurvaArea: ArraySPIValueCurvaArea ?? [],
+          CurvaContratista: ArraySPIValueCurvaContratista ?? [],
+          CurvaAreaContratista: ArraySPIValueCurvaAreaContratista ?? [],
+          CurvaEspecialidadContratista:
+            ArraySPIValueCurvaEspecialidadContratista ?? [],
+        });
 
         setIsVisible(false);
       } else {
@@ -1840,9 +1887,7 @@ export default function Page() {
         Dashboard de Parada de Planta
       </h1>
 
-      <h3 className="text-white">
-        titulo de prueba
-      </h3>
+      <h3 className="text-white">titulo de prueba</h3>
 
       {isVisible && (
         <div className="w-[600px]">
@@ -1902,11 +1947,12 @@ export default function Page() {
           </div>
 
           {/* Tablas */}
-          <div className="w-5/6 flex flex-col md:flex-row items-start gap-4">
+          <div className="w-5/6 flex flex-col md:grid grid-flow-row-dense grid-cols-2 gap-4">
+            {/* Actividades atrasadas */}
             <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
-              <Label className="text-2xl font-bold text-white">
+              <h3 className="text-xl font-bold text-black">
                 Listado de actividades atrasadas
-              </Label>
+              </h3>
               <Table className="rounded-lg">
                 <TableCaption>{`Cantidad actividades canceladas: ${
                   activities.filter((item) => item.ActividadCancelada == "Si")
@@ -1945,46 +1991,120 @@ export default function Page() {
             </TableFooter> */}
               </Table>
             </div>
-            <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
-              <Label className="text-2xl font-bold text-white">
-                Listado de actividades atrasadas
-              </Label>
-              <Table className="rounded-lg">
-                <TableCaption>{`Cantidad actividades canceladas: ${
-                  activities.filter((item) => item.ActividadCancelada == "Si")
-                    .length
-                }`}</TableCaption>
 
+            {/* SPI por Área */}
+            <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+            <h3 className="text-xl font-bold text-black">
+                SPI por Área
+              </h3>
+              <Table className="rounded-lg">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Empresa</TableHead>
-                    <TableHead>Descripcion</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-center">Avance</TableHead>
+                    <TableHead>Area</TableHead>
+                    <TableHead>SPI</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {activities
-                    .filter((item) => item.estado === "Cancelado")
-                    .map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.id}</TableCell>
-                        <TableCell>{item.contratista}</TableCell>
-                        <TableCell>{item.descripcion}</TableCell>
-                        <TableCell>{item.estado}</TableCell>
-                        <TableCell className="text-center">
-                          {item.avance}%
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                  {ArraySPI.CurvaArea.map((item) => (
+                    <TableRow key={item.Filtro01}>
+                      <TableCell className="font-medium">
+                        {item.Filtro01}
+                      </TableCell>
+                      <TableCell>
+                        {(item.hh_real_cum / item.hh_lb_cum).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
-                {/* <TableFooter>
-              <TableRowCdn>
-                <TableCellCdn colSpan={3}>Total</TableCellCdn>
-                <TableCellCdn className="text-right">$2,500.00</TableCellCdn>
-              </TableRowCdn>
-            </TableFooter> */}
+              </Table>
+            </div>
+
+            {/* SPI por Contratista */}
+            <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+              <h3 className="text-xl font-bold text-black">
+                SPI por Contratista
+              </h3>
+              <Table className="rounded-lg">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Contratista</TableHead>
+                    <TableHead>SPI</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {ArraySPI.CurvaContratista.map((item) => (
+                    <TableRow key={item.Filtro01}>
+                      <TableCell className="font-medium">
+                        {item.Filtro01}
+                      </TableCell>
+                      <TableCell>
+                        {(item.hh_real_cum / item.hh_lb_cum).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* por Area y Contratista */}
+            <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+               <h3 className="text-xl font-bold text-black">
+                SPI por Contratista/Área
+              </h3>
+              <Table className="rounded-lg">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Contratista</TableHead>
+                    <TableHead>Area</TableHead>
+                    <TableHead>SPI</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {ArraySPI.CurvaAreaContratista.filter((item)=> item.hh_lb_cum > 0).map((item) => (
+                    <TableRow key={item.Filtro01}>
+                      <TableCell className="font-medium">
+                        {item.Filtro01}
+                      </TableCell>
+                         <TableCell className="font-medium">
+                        {item.Filtro02}
+                      </TableCell>
+                      <TableCell>
+                        {(item.hh_real_cum / item.hh_lb_cum).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* por especialidad y Contratista */}
+            <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
+                <h3 className="text-xl font-bold text-black">
+                SPI por Contratista/Especialidad
+              </h3>
+              <Table className="rounded-lg">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Contratista</TableHead>
+                    <TableHead>Especialidad</TableHead>
+                    <TableHead>SPI</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {ArraySPI.CurvaEspecialidadContratista.filter((item)=> item.hh_lb_cum > 0).map((item) => (
+                    <TableRow key={item.Filtro01}>
+                      <TableCell className="font-medium">
+                        {item.Filtro01}
+                      </TableCell>
+                         <TableCell className="font-medium">
+                        {item.Filtro02}
+                      </TableCell>
+                      <TableCell>
+                        {(item.hh_real_cum / item.hh_lb_cum).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
               </Table>
             </div>
           </div>
