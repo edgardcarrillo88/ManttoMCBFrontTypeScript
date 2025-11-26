@@ -702,15 +702,27 @@ export default function page(params: any) {
 
     const formatDate = (date?: string | null) => {
       if (!date) return null;
-      return new Date(date);
+
+      const dateObj = new Date(date);
+      dateObj.setHours(dateObj.getHours() - 5);
+
+      return dateObj;
+    };
+
+    const formatDatePlan = (date?: string | null) => {
+      if (!date) return null;
+
+      const dateObj = new Date(date);
+
+      return dateObj;
     };
 
     const dataPdPProcesada = dataPdP.map((item) => ({
       ...item,
       inicioreal: formatDate(item.inicioreal),
       finreal: formatDate(item.finreal),
-      inicioplan: formatDate(item.inicioplan),
-      finplan: formatDate(item.finplan),
+      inicioplan: formatDatePlan(item.inicioplan),
+      finplan: formatDatePlan(item.finplan),
     }));
 
     const workbook = new ExcelJS.Workbook();
