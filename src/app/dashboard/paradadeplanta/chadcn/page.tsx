@@ -333,6 +333,8 @@ type SPIState = {
   CurvaContratista: TypeCurvaSGeneral;
   CurvaAreaContratista: TypeCurvaSGeneral;
   CurvaEspecialidadContratista: TypeCurvaSGeneral;
+  CurvaRC: TypeCurvaSGeneral;
+  CurvaBloqueRC: TypeCurvaSGeneral;
 };
 
 // export function ChartPie() {
@@ -748,14 +750,15 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   // };
 
   return (
-    <div key={name}>
+    <div key={name} className="w-full">
+
       {loader && (
         <div className="w-[600px]">
           <BaymaxLoader />
         </div>
       )}
 
-      <div className={`mb-2 ${name === "CurvaGeneral" ? "hidden" : "block"}`}>
+      <div className={`mb-2 ${name === "CurvaGeneral" || name === "CurvaRC" ? "hidden" : "block"}`}>
         <Dropdown>
           <DropdownTrigger className="">
             <Button
@@ -784,8 +787,8 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
         </Dropdown>
       </div>
 
-      <Card className=" w-full">
-        <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
+      <Card className=" w-full ">
+        <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row h-24">
           <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
             <CardTitle>Curva S con Barras</CardTitle>
             <CardDescription>
@@ -795,7 +798,6 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
           <div className="flex">
             {["AvanceReal", "AvanceRealAjustado"].map((key) => {
               const chart = key as keyof typeof chartConfig;
-              // console.log(key); //xq se imprime 24 veces?
               return (
                 <button
                   key={chart}
@@ -813,7 +815,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                   <span className="text-xs text-muted-foreground">
                     {chartConfig[chart].label}
                   </span>
-                  <span className="text-lg font-bold leading-none sm:text-3xl">
+                  <span className="text-lg font-bold leading-none sm:text-2xl">
                     {avanceTotal[key as keyof typeof avanceTotal]}
                   </span>
                 </button>
@@ -821,14 +823,14 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
             })}
           </div>
         </CardHeader>
-        <CardContent className="px-2 sm:p-6">
+        <CardContent className="px-2 sm:p-6 h-[500px]">
           <ChartContainer
             config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
+            className="aspect-auto h-[450px] w-full"
           >
             <ComposedChart
               data={lineChartActive}
-              margin={{ left: 12, right: 30, bottom: 24 }}
+              margin={{ left: 12, right: 30, bottom: 5 }}
             >
               <CartesianGrid vertical={false} />
               <XAxis
@@ -880,16 +882,17 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
               />
 
               <ChartTooltipRecharts
+              
                 cursor={true}
                 content={<ChartTooltipContent indicator="dot" />}
               />
 
               <Legend
-                verticalAlign="middle"
-                align="right"
-                layout="vertical"
+                verticalAlign="bottom"
+                align="center"
+                layout="horizontal"
                 content={({ payload }) => (
-                  <ul className="list-none m-0 p-0">
+                  <ul className="list-none m-0 p-0 flex flex-row items-center justify-center gap-4 mt-8">
                     {payload?.map((entry, index) => {
                       const isCum = String(entry.dataKey).includes("cum");
                       return (
@@ -935,6 +938,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
               {/* Línea */}
               <Line
                 dataKey="hh_lb_cum"
+                
                 type="monotone"
                 // stroke={`var(--color-${activeChart})`}
                 stroke={`var(--color-desktop)`}
@@ -1038,7 +1042,6 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
   }, [ArrayAreas, ArrayContratista]);
 
   const UpdateCurvaS = async () => {
-    console.log("Actualizando curva S con WhatIf");
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_BACKEND_URL_PY}/ParadaDePlanta/ProcesarWhatIf`,
       {
@@ -1065,7 +1068,6 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
 
     if (response.status === 200) {
       // aca debo setear la nueva curva
-      // console.log(response.data);
 
       Object.keys(response.data).forEach((key) => {
         response.data[key].General.map((item: any) => {
@@ -1117,10 +1119,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
         AvanceRealAjustado:
           avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
       });
-
-      console.log("Datos actualizados");
     } else {
-      console.error("Error al obtener los datos:");
     }
   };
 
@@ -1352,7 +1351,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       <Card className=" w-full">
         <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
           <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-            <CardTitle>Curva S con Barras</CardTitle>
+            <CardTitle>Curva S</CardTitle>
             <CardDescription>
               Comparación entre línea base y real
             </CardDescription>
@@ -1563,6 +1562,14 @@ export default function Page() {
       value: "CurvaEspecialidadContratista",
       label: "Curva S por Especialidad y Contratista",
     },
+    {
+      value: "CurvaRC",
+      label: "Curva S Ruta Crítica",
+    },
+    {
+      value: "CurvaBloqueRC",
+      label: "Curva S por Bloque Ruta crítica",
+    },
     // {
     //   value: "WhatIf",
     //   label: "What If",
@@ -1603,6 +1610,14 @@ export default function Page() {
   const [CurvaWhatIfAjustada, setCurvaWhatIfAjustada] =
     useState<TypeCurvaSGeneral>([]);
 
+  const [CurvaRC, setCurvaRC] = useState<TypeCurvaSGeneral>([]);
+  const [CurvaRCAjustada, setCurvaRCAjustada] = useState<TypeCurvaSGeneral>([]);
+
+  const [CurvaBloqueRCTotal, setCurvaBloqueRCTotal] =
+    useState<TypeCurvaSGeneral>([]);
+  const [CurvaBloqueRCAjustada, setCurvaBloqueRCAjustada] =
+    useState<TypeCurvaSGeneral>([]);
+
   const [ValoresTotales, setValoresTotales] = useState<TypeValoresTotales>({
     AvanceReal: 0,
     AvanceRealAjustado: 0,
@@ -1622,6 +1637,8 @@ export default function Page() {
     CurvaContratista: [],
     CurvaAreaContratista: [],
     CurvaEspecialidadContratista: [],
+    CurvaRC: [],
+    CurvaBloqueRC: [],
   });
 
   useEffect(() => {
@@ -1652,7 +1669,7 @@ export default function Page() {
           });
         });
 
-        console.log(response.data.CurvaGeneral.General);
+        console.log(response.data);
 
         setLineaCombinada(response.data.CurvaGeneral.General);
         setLineaCombinadaAjustada(response.data.CurvaGeneral.Ajustada);
@@ -1677,15 +1694,19 @@ export default function Page() {
           response.data.CurvaEspecialidadContratista.Ajustada
         );
 
-        setCurvaWhatIf(response.data.CurvaWhatIf.General);
-        setCurvaWhatIfAjustada(response.data.CurvaWhatIf.Ajustada);
+        // setCurvaWhatIf(response.data.CurvaWhatIf.General);
+        // setCurvaWhatIfAjustada(response.data.CurvaWhatIf.Ajustada);
+
+        setCurvaRC(response.data.CurvaRC.General);
+        setCurvaRCAjustada(response.data.CurvaRC.Ajustada);
+
+        setCurvaBloqueRCTotal(response.data.CurvaBloqueRC.General);
+        setCurvaBloqueRCAjustada(response.data.CurvaBloqueRC.Ajustada);
 
         setActivities(responseActivities.data.data);
         setThirdparty(responseThirdParty.data.Contratistas);
         setEspecialidad(responseEspecialidad.data.Especialidades);
 
-        // console.log(response.data.CurvaContratista.General);
-        // console.log(response.data.CurvaArea.General);
         //CurvaContratistaTotal
 
         const roundedDate = (date: Date) => {
@@ -1705,18 +1726,8 @@ export default function Page() {
           CurvaRegular: TypeCurvaSGeneral,
           CurvaAjustada: TypeCurvaSGeneral
         ) => {
-          console.log(CurvaRegular);
           const minDate = new Date(CurvaRegular[0].Ejex);
           const maxDate = new Date(CurvaRegular[CurvaRegular.length - 1].Ejex);
-
-          console.log(
-            "Fecha min: ",
-            minDate,
-            "Fecha max: ",
-            maxDate,
-            "Fecha: ",
-            Fecha
-          );
 
           if (Fecha < minDate) {
             // return 0;
@@ -1730,7 +1741,7 @@ export default function Page() {
           const match = CurvaRegular.filter(
             (obj: any) => new Date(obj.Ejex).getTime() === Fecha.getTime()
           );
-          console.log(match);
+
           // if (match) return match.hh_real_cum / match.hh_lb_cum;
           if (match) return match;
 
@@ -1739,7 +1750,6 @@ export default function Page() {
 
         const now = new Date("2025-12-14");
         //const now = new Date();
-        console.log(now);
         const DateRounded = roundedDate(now);
 
         const ArraySPIValueCurvaGeneral = FunctionArrraySPIs(
@@ -1772,6 +1782,18 @@ export default function Page() {
           response.data.CurvaEspecialidadContratista.Ajustada
         );
 
+        const ArraySPIValueCurvaRC = FunctionArrraySPIs(
+          DateRounded,
+          response.data.CurvaRC.General,
+          response.data.CurvaRC.Ajustada
+        );
+
+        const ArraySPIValueCurvaBloqueRC = FunctionArrraySPIs(
+          DateRounded,
+          response.data.CurvaBloqueRC.General,
+          response.data.CurvaBloqueRC.Ajustada
+        );
+
         setArraySPI({
           CurvaGeneral: ArraySPIValueCurvaGeneral ?? [],
           CurvaArea: ArraySPIValueCurvaArea ?? [],
@@ -1779,11 +1801,12 @@ export default function Page() {
           CurvaAreaContratista: ArraySPIValueCurvaAreaContratista ?? [],
           CurvaEspecialidadContratista:
             ArraySPIValueCurvaEspecialidadContratista ?? [],
+          CurvaRC: ArraySPIValueCurvaRC ?? [],
+          CurvaBloqueRC: ArraySPIValueCurvaBloqueRC ?? [],
         });
 
         setIsVisible(false);
       } else {
-        console.log("Error");
       }
     };
 
@@ -1848,19 +1871,47 @@ export default function Page() {
           toggle={ToggleBarras}
         />
       ),
-      WhatIf: (
-        <CurvaSDosVariable
-          key="WhatIf"
-          name="WhatIf"
+      // WhatIf: (
+      //   <CurvaSDosVariable
+      //     key="WhatIf"
+      //     name="WhatIf"
+      //     data={{
+      //       General: CurvaWhatIf,
+      //       Ajustada: CurvaWhatIfAjustada,
+      //     }}
+      //     totales={ValoresTotales}
+      //     toggle={ToggleBarras}
+      //   />
+      // ),
+      CurvaRC: (
+        <CurvaSUnaVariable
+          key="CurvaRC"
+          name="CurvaRC"
           data={{
-            General: CurvaWhatIf,
-            Ajustada: CurvaWhatIfAjustada,
+            General: CurvaRC,
+            Ajustada: CurvaRCAjustada,
+          }}
+          totales={ValoresTotales}
+          toggle={ToggleBarras}
+        />
+      ),
+      CurvaBloqueRC: (
+        <CurvaSUnaVariable
+          key="CurvaBloqueRC"
+          name="CurvaBloqueRC"
+          data={{
+            General: CurvaBloqueRCTotal,
+            Ajustada: CurvaBloqueRCAjustada,
           }}
           totales={ValoresTotales}
           toggle={ToggleBarras}
         />
       ),
     };
+
+
+
+
 
     return curvaMap[curvaSeleccionada] ?? null;
   }, [
@@ -1878,16 +1929,19 @@ export default function Page() {
     CurvaEspecialidadContratista,
     CurvaEspecialidadContratistaAjustada,
 
+    CurvaRC,
+    CurvaRCAjustada,
+    CurvaBloqueRCTotal,
+    CurvaBloqueRCAjustada,
+
     ToggleBarras,
   ]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex flex-col items-center w-full">
       <h1 className="text-4xl font-bold text-white text-center mt-8 mb-4">
         Dashboard de Parada de Planta
       </h1>
-
-      <h3 className="text-white">titulo de prueba</h3>
 
       {isVisible && (
         <div className="w-[600px]">
@@ -1896,7 +1950,7 @@ export default function Page() {
       )}
 
       {!isVisible && (
-        <div className="w-5/6 flex flex-col items-center">
+        <div className="w-full flex flex-col items-center">
           {/* Botones */}
           <div className="mb-2 mt-8 flex flex-col items-center">
             <h3 className="text-white mb-2">Selecciona tipo de Curva S</h3>
@@ -1929,7 +1983,7 @@ export default function Page() {
           </div>
 
           {/* Curvas */}
-          <div className="w-5/6">
+          <div className="w-5/6 ">
             {CurvaSMemo}
             <div className="flex items-center space-x-2 text-white border b-2 border-gray-500 rounded-2xl p-4 mt-2">
               <Switch
@@ -1951,7 +2005,7 @@ export default function Page() {
             {/* Actividades atrasadas */}
             <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
               <h3 className="text-xl font-bold text-black">
-                Listado de actividades atrasadas
+                Listado de actividades Canceladas
               </h3>
               <Table className="rounded-lg">
                 <TableCaption>{`Cantidad actividades canceladas: ${
@@ -1994,9 +2048,7 @@ export default function Page() {
 
             {/* SPI por Área */}
             <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
-            <h3 className="text-xl font-bold text-black">
-                SPI por Área
-              </h3>
+              <h3 className="text-xl font-bold text-black">SPI por Área</h3>
               <Table className="rounded-lg">
                 <TableHeader>
                   <TableRow>
@@ -2048,7 +2100,7 @@ export default function Page() {
 
             {/* por Area y Contratista */}
             <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
-               <h3 className="text-xl font-bold text-black">
+              <h3 className="text-xl font-bold text-black">
                 SPI por Contratista/Área
               </h3>
               <Table className="rounded-lg">
@@ -2060,12 +2112,14 @@ export default function Page() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {ArraySPI.CurvaAreaContratista.filter((item)=> item.hh_lb_cum > 0).map((item) => (
+                  {ArraySPI.CurvaAreaContratista.filter(
+                    (item) => item.hh_lb_cum > 0
+                  ).map((item) => (
                     <TableRow key={item.Filtro01}>
                       <TableCell className="font-medium">
                         {item.Filtro01}
                       </TableCell>
-                         <TableCell className="font-medium">
+                      <TableCell className="font-medium">
                         {item.Filtro02}
                       </TableCell>
                       <TableCell>
@@ -2079,7 +2133,7 @@ export default function Page() {
 
             {/* por especialidad y Contratista */}
             <div className="bg-white p-4 mt-8 mb-8 border-2 border-gray-500 rounded-xl w-5/6">
-                <h3 className="text-xl font-bold text-black">
+              <h3 className="text-xl font-bold text-black">
                 SPI por Contratista/Especialidad
               </h3>
               <Table className="rounded-lg">
@@ -2091,12 +2145,14 @@ export default function Page() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {ArraySPI.CurvaEspecialidadContratista.filter((item)=> item.hh_lb_cum > 0).map((item) => (
+                  {ArraySPI.CurvaEspecialidadContratista.filter(
+                    (item) => item.hh_lb_cum > 0
+                  ).map((item) => (
                     <TableRow key={item.Filtro01}>
                       <TableCell className="font-medium">
                         {item.Filtro01}
                       </TableCell>
-                         <TableCell className="font-medium">
+                      <TableCell className="font-medium">
                         {item.Filtro02}
                       </TableCell>
                       <TableCell>

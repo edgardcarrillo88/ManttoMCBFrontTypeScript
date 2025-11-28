@@ -717,7 +717,7 @@ export default function page(params: any) {
       return dateObj;
     };
 
-    const dataPdPProcesada = dataPdP.map((item) => ({
+    const dataPdPProcesada = dataPdP.map((item) => ({ 
       ...item,
       inicioreal: formatDate(item.inicioreal),
       finreal: formatDate(item.finreal),
