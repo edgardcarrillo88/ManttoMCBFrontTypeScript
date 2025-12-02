@@ -479,12 +479,25 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
       match = fechaMasCercana[0]; // el más cercano hacia atrás
     }
 
+    // setAvancePlanCurva(
+    //   Number(
+    //     ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
+    //   )
+    // );
+    // setSPICurva(Number((match?.hh_real_cum / match?.hh_lb_cum).toFixed(2)));
+
+    const last = data?.[data.length - 1];
+    const lastLB = last?.hh_lb_cum;
+    const matchLB = match?.hh_lb_cum;
+    const matchReal = match?.hh_real_cum;
+
     setAvancePlanCurva(
-      Number(
-        ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
-      )
+      lastLB && matchLB ? Number(((matchLB / lastLB) * 100).toFixed(2)) : 0
     );
-    setSPICurva(Number((match?.hh_real_cum / match?.hh_lb_cum).toFixed(2)));
+
+    setSPICurva(
+      matchReal && matchLB ? Number((matchReal / matchLB).toFixed(2)) : 0
+    );
 
     if (data.length > 0) {
       return Number(
@@ -1792,13 +1805,19 @@ export default function Page() {
 
         const roundedDate = (date: Date) => {
           const fecha = new Date(date);
+          console.log(fecha);
+          console.log(fecha.getUTCHours());
+          console.log(fecha.getUTCMinutes());
+          console.log(fecha.getUTCSeconds());
+          console.log(fecha.getUTCMilliseconds());
           if (
-            (fecha.getUTCMinutes() > 0 || fecha.getUTCSeconds() > 0,
+            (fecha.getUTCMinutes() > 0 || fecha.getUTCSeconds() > 0 ||
             fecha.getUTCMilliseconds() > 0)
           ) {
-            fecha.setHours(fecha.getUTCHours() + 1);
+            fecha.setUTCHours(fecha.getUTCHours() + 1-5);
           }
-          fecha.setMinutes(0, 0, 0);
+          fecha.setUTCMinutes(0, 0, 0);
+          console.log(fecha);
           return fecha;
         };
 
@@ -1831,7 +1850,9 @@ export default function Page() {
 
         //const now = new Date("2025-12-14");
         const now = new Date();
+        console.log(now);
         const DateRounded = roundedDate(now);
+        console.log(DateRounded);
 
         const ArraySPIValueCurvaGeneral = FunctionArrraySPIs(
           DateRounded,
