@@ -419,7 +419,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
       const avance = calcularPorcentajeAvance(filtrado);
       //const avanceAjustado = calcularPorcentajeAvance(filtradoAjustado);
       setAvanceTotal({
-        AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
+        AvanceReal: avance !== null ? `${avance.toFixed(2)}%` : "0%",
         AvanceRealAjustado: "0%",
         // AvanceRealAjustado:
         //   avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
@@ -439,7 +439,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
       const avance = calcularPorcentajeAvance(data.General);
       //const avanceAjustado = calcularPorcentajeAvance(data.Ajustada);
       setAvanceTotal({
-        AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
+        AvanceReal: avance !== null ? `${avance.toFixed(2)}%` : "0%",
         AvanceRealAjustado: "0%",
         // AvanceRealAjustado:
         //   avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
@@ -458,18 +458,21 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
     ahora.setUTCSeconds(0);
     ahora.setUTCMilliseconds(0);
     if (ahora.getUTCMinutes() > 0) {
-      ahora.setUTCHours(ahora.getUTCHours() + 1);
+      ahora.setUTCHours(ahora.getUTCHours() + 1-5);
       ahora.setUTCMinutes(0);
     }
+
+    console.log("Hora de corte: ",ahora);
 
     // Buscar coincidencia exacta por fecha y hora
     let match = data.find(
       (item) =>
-        item.Ejex.getFullYear() === ahora.getFullYear() &&
-        item.Ejex.getMonth() === ahora.getMonth() &&
-        item.Ejex.getDate() === ahora.getDate() &&
-        item.Ejex.getHours() === ahora.getHours()
+        item.Ejex.getFullYear() === ahora.getUTCFullYear() &&
+        item.Ejex.getMonth() === ahora.getUTCMonth() &&
+        item.Ejex.getDate() === ahora.getUTCDate() &&
+        item.Ejex.getHours() === ahora.getUTCHours()
     );
+
 
     // Si no hay coincidencia exacta, buscar la fecha menor más cercana
     if (!match) {
@@ -479,12 +482,6 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
       match = fechaMasCercana[0]; // el más cercano hacia atrás
     }
 
-    // setAvancePlanCurva(
-    //   Number(
-    //     ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
-    //   )
-    // );
-    // setSPICurva(Number((match?.hh_real_cum / match?.hh_lb_cum).toFixed(2)));
 
     const last = data?.[data.length - 1];
     const lastLB = last?.hh_lb_cum;
@@ -986,7 +983,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       //   )
       // );
       setAvanceTotal({
-        AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
+        AvanceReal: avance !== null ? `${avance.toFixed(2)}%` : "0%",
         AvanceRealAjustado: "0%",
         // AvanceRealAjustado:
         //   avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
@@ -995,56 +992,21 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
     }
   };
 
-  // function calcularPorcentajeAvance(data: TypeCurvaSGeneral): number | null {
-  //   if (!data.length) return 0;
-
-  //   // Redondear la fecha actual a la siguiente hora (por ejemplo, 17:45 → 18:00)
-  //   const ahora = new Date();
-  //   ahora.setSeconds(0);
-  //   ahora.setMilliseconds(0);
-  //   if (ahora.getMinutes() > 0) {
-  //     ahora.setHours(ahora.getHours() + 1);
-  //     ahora.setMinutes(0);
-  //   }
-
-  //   // Buscar coincidencia exacta por fecha y hora
-  //   let match = data.find(
-  //     (item) =>
-  //       item.Ejex.getFullYear() === ahora.getFullYear() &&
-  //       item.Ejex.getMonth() === ahora.getMonth() &&
-  //       item.Ejex.getDate() === ahora.getDate() &&
-  //       item.Ejex.getHours() === ahora.getHours()
-  //   );
-
-  //   // Si no hay coincidencia exacta, buscar la fecha menor más cercana
-  //   if (!match) {
-  //     const fechaMasCercana = data
-  //       .filter((item) => item.Ejex <= ahora)
-  //       .sort((a, b) => b.Ejex.getTime() - a.Ejex.getTime()); // de mayor a menor
-  //     match = fechaMasCercana[0]; // el más cercano hacia atrás
-  //   }
-
-  //   if (match && match.hh_lb_cum > 0) {
-  //     return (match.hh_real_cum / match.hh_lb_cum) * 100;
-  //   }
-
-  //   return 0;
-  // }
 
   function calcularPorcentajeAvance(data: TypeCurvaSGeneral): number | null {
     if (!data.length) return 0;
 
     // Redondear la fecha actual a la siguiente hora (por ejemplo, 17:45 → 18:00)
     const ahora = new Date();
-    console.log(ahora);
+
     ahora.setUTCSeconds(0);
     ahora.setUTCMilliseconds(0);
     if (ahora.getUTCMinutes() > 0) {
-      ahora.setUTCHours(ahora.getUTCHours() + 1);
+      ahora.setUTCHours(ahora.getUTCHours() + 1-5);
       ahora.setUTCMinutes(0);
     }
 
-    console.log(ahora);
+
 
     // Buscar coincidencia exacta por fecha y hora
     let match = data.find(
@@ -1055,7 +1017,6 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
         item.Ejex.getHours() === ahora.getHours()
     );
 
-    console.log(data[data.length - 1]);
 
     // Si no hay coincidencia exacta, buscar la fecha menor más cercana
     if (!match) {
@@ -1065,14 +1026,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       match = fechaMasCercana[0]; // el más cercano hacia atrás
     }
 
-    // console.log(match);
-    // console.log("SPI: ", (match?.hh_real_cum / match?.hh_lb_cum).toFixed(2));
-    // console.log(match.hh_lb_cum);
-    // console.log(data[data.length - 1].hh_lb_cum);
-    // console.log(
-    //   "Avance Plan: ",
-    //   ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
-    // );
+
     setAvancePlanCurva(
       Number(
         ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
@@ -1106,23 +1060,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
 
     const fuenteDatos = data.General;
 
-    console.log(
-      data.General.filter(
-        (item) =>
-          item.Filtro01 === "CBT" &&
-          item.Filtro02 === "chancado primario" &&
-          item.Ejex.getTime() !== 0
-      )
-    );
 
-    console.log(
-      fuenteDatos.filter(
-        (item) =>
-          item.Filtro01 === "CBT" &&
-          item.Filtro02 === "chancado primario" &&
-          item.Ejex.getTime() !== 0
-      )
-    );
 
     const filtrado = fuenteDatos.filter((item) => {
       const matchArea = selectedArea ? item.Filtro02 === selectedArea : true;
@@ -1132,21 +1070,11 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       return matchArea && matchContratista;
     });
 
-    console.log(
-      filtrado.filter(
-        (item) =>
-          item.Filtro01 === "CBT" && item.Filtro02 === "chancado primario"
-      )
-    );
-
-    // setLineChartActiveDouble(
-    //   filtrado.filter((item) => item.Ejex.getTime() !== 0)
-    // );
 
     const avance = calcularPorcentajeAvance(filtrado);
     //const avanceAjustado = calcularPorcentajeAvance(filtradoAjustado);
     setAvanceTotal({
-      AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
+      AvanceReal: avance !== null ? `${avance.toFixed(2)}%` : "0%",
       AvanceRealAjustado: "0%",
       // AvanceRealAjustado:
       //   avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
@@ -1167,10 +1095,10 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
     toggle,
   ]);
 
-  const total = {
-    LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
-    LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
-  };
+  // const total = {
+  //   LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
+  //   LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
+  // };
 
   const formatFecha = (raw: any) => {
     const d = new Date(raw);
@@ -1756,19 +1684,6 @@ export default function Page() {
           );
         });
 
-        console.log(
-          response.data.CurvaContratista.General.filter(
-            (item: any) =>
-              item.Filtro01 === "marcobre"
-          )
-        );
-
-           console.log(
-          response.data.CurvaContratista.General.filter(
-            (item: any) =>
-              item.Filtro01 === "Marcobre"
-          )
-        );
 
         setLineaCombinada(response.data.CurvaGeneral.General);
         setLineaCombinadaAjustada(response.data.CurvaGeneral.Ajustada);
@@ -1810,11 +1725,7 @@ export default function Page() {
 
         const roundedDate = (date: Date) => {
           const fecha = new Date(date);
-          console.log(fecha);
-          console.log(fecha.getUTCHours());
-          console.log(fecha.getUTCMinutes());
-          console.log(fecha.getUTCSeconds());
-          console.log(fecha.getUTCMilliseconds());
+
           if (
             (fecha.getUTCMinutes() > 0 || fecha.getUTCSeconds() > 0 ||
             fecha.getUTCMilliseconds() > 0)
@@ -1822,7 +1733,6 @@ export default function Page() {
             fecha.setUTCHours(fecha.getUTCHours() + 1-5);
           }
           fecha.setUTCMinutes(0, 0, 0);
-          console.log(fecha);
           return fecha;
         };
 
@@ -1855,9 +1765,7 @@ export default function Page() {
 
         //const now = new Date("2025-12-14");
         const now = new Date();
-        console.log(now);
         const DateRounded = roundedDate(now);
-        console.log(DateRounded);
 
         const ArraySPIValueCurvaGeneral = FunctionArrraySPIs(
           DateRounded,
