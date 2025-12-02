@@ -1017,14 +1017,13 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
     }
 
 
-
     // Buscar coincidencia exacta por fecha y hora
     let match = data.find(
       (item) =>
-        item.Ejex.getFullYear() === ahora.getFullYear() &&
-        item.Ejex.getMonth() === ahora.getMonth() &&
-        item.Ejex.getDate() === ahora.getDate() &&
-        item.Ejex.getHours() === ahora.getHours()
+        item.Ejex.getFullYear() === ahora.getUTCFullYear() &&
+        item.Ejex.getMonth() === ahora.getUTCMonth() &&
+        item.Ejex.getDate() === ahora.getUTCDate() &&
+        item.Ejex.getHours() === ahora.getUTCHours()
     );
 
 
@@ -1754,8 +1753,6 @@ export default function Page() {
           const minDate = new Date(CurvaRegular[0].Ejex);
           const maxDate = new Date(CurvaRegular[CurvaRegular.length - 1].Ejex);
 
-          console.log(Fecha);
-
           if (Fecha < minDate) {
             // return 0;
           }
@@ -1769,10 +1766,11 @@ export default function Page() {
             (obj: any) => new Date(obj.Ejex).getTime() === Fecha.getTime()
           );
 
-           console.log(match);
+          console.log(match);
 
           // if (match) return match.hh_real_cum / match.hh_lb_cum;
           if (match) return match;
+          
 
           return null;
         };
@@ -1783,7 +1781,6 @@ export default function Page() {
         const now = new Date();
         const DateRounded = roundedDate(now);
 
-        console.log(DateRounded);
 
         const ArraySPIValueCurvaGeneral = FunctionArrraySPIs(
           DateRounded,
