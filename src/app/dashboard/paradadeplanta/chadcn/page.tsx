@@ -79,6 +79,7 @@ import { ItemMedia } from "@/components/ui/item";
 
 import { RefreshCcw } from "lucide-react";
 import { fetchData } from "next-auth/client/_utils";
+import { match } from "assert";
 
 // export const description = "A line chart with dots";
 
@@ -1739,7 +1740,7 @@ export default function Page() {
             (fecha.getUTCMinutes() > 0 || fecha.getUTCSeconds() > 0 ||
             fecha.getUTCMilliseconds() > 0)
           ) {
-            fecha.setUTCHours(fecha.getUTCHours() + 1-5);
+            fecha.setUTCHours(fecha.getUTCHours() + 1);
           }
           fecha.setUTCMinutes(0, 0, 0);
           return fecha;
@@ -1752,6 +1753,8 @@ export default function Page() {
         ) => {
           const minDate = new Date(CurvaRegular[0].Ejex);
           const maxDate = new Date(CurvaRegular[CurvaRegular.length - 1].Ejex);
+
+          console.log(Fecha);
 
           if (Fecha < minDate) {
             // return 0;
@@ -1766,15 +1769,21 @@ export default function Page() {
             (obj: any) => new Date(obj.Ejex).getTime() === Fecha.getTime()
           );
 
+           console.log(match);
+
           // if (match) return match.hh_real_cum / match.hh_lb_cum;
           if (match) return match;
 
           return null;
         };
 
+       
+
         //const now = new Date("2025-12-14");
         const now = new Date();
         const DateRounded = roundedDate(now);
+
+        console.log(DateRounded);
 
         const ArraySPIValueCurvaGeneral = FunctionArrraySPIs(
           DateRounded,
