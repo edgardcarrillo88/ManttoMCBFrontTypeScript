@@ -39,6 +39,12 @@ import {
   ChartStyle,
 } from "@/components/ui/chart";
 
+import { TooltipProps } from "recharts";
+import {
+  ValueType,
+  NameType,
+} from "recharts/types/component/DefaultTooltipContent";
+
 import { Label, Pie, PieChart, Sector } from "recharts";
 import {
   Table,
@@ -337,276 +343,6 @@ type SPIState = {
   CurvaBloqueRC: TypeCurvaSGeneral;
 };
 
-// export function ChartPie() {
-//   const id = "pie-interactive";
-//   const [activeMonth, setActiveMonth] = React.useState(desktopData[0].month);
-//   const activeIndex = React.useMemo(
-//     () => desktopData.findIndex((item) => item.month === activeMonth),
-//     [activeMonth]
-//   );
-//   const months = React.useMemo(() => desktopData.map((item) => item.month), []);
-//   return (
-//     <Card data-chart={id} className="flex flex-col">
-//       <ChartStyle id={id} config={chartConfig} />
-//       <CardHeader className="flex-row items-start space-y-0 pb-0">
-//         <div className="grid gap-1">
-//           <CardTitle>Pie Chart - Interactive</CardTitle>
-//           <CardDescription>January - June 2024</CardDescription>
-//         </div>
-//         <Select value={activeMonth} onValueChange={setActiveMonth}>
-//           <SelectTrigger
-//             className="ml-auto h-7 w-[130px] rounded-lg pl-2.5"
-//             aria-label="Select a value"
-//           >
-//             <SelectValue placeholder="Select month" />
-//           </SelectTrigger>
-//           <SelectContent align="end" className="rounded-xl">
-//             {months.map((key) => {
-//               const config = chartConfig[key as keyof typeof chartConfig];
-//               if (!config) {
-//                 return null;
-//               }
-//               return (
-//                 <SelectItem
-//                   key={key}
-//                   value={key}
-//                   className="rounded-lg [&_span]:flex"
-//                 >
-//                   <div className="flex items-center gap-2 text-xs">
-//                     <span
-//                       className="flex h-3 w-3 shrink-0 rounded-sm"
-//                       style={{
-//                         backgroundColor: `var(--color-${key})`,
-//                       }}
-//                     />
-//                     {config?.label}
-//                   </div>
-//                 </SelectItem>
-//               );
-//             })}
-//           </SelectContent>
-//         </Select>
-//       </CardHeader>
-//       <CardContent className="flex flex-1 justify-center pb-0">
-//         <ChartContainer
-//           id={id}
-//           config={chartConfig}
-//           className="mx-auto aspect-square w-full max-w-[300px]"
-//         >
-//           <PieChart>
-//             <ChartTooltip
-//               cursor={false}
-//               content={<ChartTooltipContent hideLabel />}
-//             />
-//             <Pie
-//               data={desktopData}
-//               dataKey="desktop"
-//               nameKey="month"
-//               innerRadius={60}
-//               strokeWidth={5}
-//               activeIndex={activeIndex}
-//               activeShape={({
-//                 outerRadius = 0,
-//                 ...props
-//               }: PieSectorDataItem) => (
-//                 <g>
-//                   <Sector {...props} outerRadius={outerRadius + 10} />
-//                   <Sector
-//                     {...props}
-//                     outerRadius={outerRadius + 25}
-//                     innerRadius={outerRadius + 12}
-//                   />
-//                 </g>
-//               )}
-//             >
-//               <Label
-//                 content={({ viewBox }) => {
-//                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-//                     return (
-//                       <text
-//                         x={viewBox.cx}
-//                         y={viewBox.cy}
-//                         textAnchor="middle"
-//                         dominantBaseline="middle"
-//                       >
-//                         <tspan
-//                           x={viewBox.cx}
-//                           y={viewBox.cy}
-//                           className="fill-foreground text-3xl font-bold"
-//                         >
-//                           {desktopData[activeIndex].desktop.toLocaleString()}
-//                         </tspan>
-//                         <tspan
-//                           x={viewBox.cx}
-//                           y={(viewBox.cy || 0) + 24}
-//                           className="fill-muted-foreground"
-//                         >
-//                           Visitors
-//                         </tspan>
-//                       </text>
-//                     );
-//                   }
-//                 }}
-//               />
-//             </Pie>
-//           </PieChart>
-//         </ChartContainer>
-//       </CardContent>
-//     </Card>
-//   );
-// }
-
-// export function ChartRadar() {
-//   return (
-//     <Card className="">
-//       <CardHeader className="items-center pb-4">
-//         <CardTitle>Radar Chart - Grid Circle</CardTitle>
-//         <CardDescription>
-//           Showing total visitors for the last 6 months
-//         </CardDescription>
-//       </CardHeader>
-//       <CardContent className="pb-0">
-//         <ChartContainer
-//           config={chartConfig}
-//           className="mx-auto aspect-square max-h-[250px]"
-//         >
-//           <RadarChart data={chartData}>
-//             <ChartTooltip
-//               cursor={false}
-//               content={<ChartTooltipContent hideLabel />}
-//             />
-//             <PolarGrid gridType="circle" />
-//             <PolarAngleAxis dataKey="month" />
-//             <Radar
-//               dataKey="desktop"
-//               fill="var(--color-desktop)"
-//               fillOpacity={0.6}
-//               dot={{
-//                 r: 4,
-//                 fillOpacity: 1,
-//               }}
-//             />
-//           </RadarChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter className="flex-col gap-2 text-sm">
-//         <div className="flex items-center gap-2 font-medium leading-none">
-//           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//         </div>
-//         <div className="flex items-center gap-2 leading-none text-muted-foreground">
-//           January - June 2024
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
-
-// export function ChartRadialGrid() {
-//   return (
-//     <Card className="flex flex-col">
-//       <CardHeader className="items-center pb-0">
-//         <CardTitle>Radial Chart - Grid</CardTitle>
-//         <CardDescription>January - June 2024</CardDescription>
-//       </CardHeader>
-//       <CardContent className="flex-1 pb-0">
-//         <ChartContainer
-//           config={chartConfig}
-//           className="mx-auto aspect-square max-h-[250px]"
-//         >
-//           <RadialBarChart data={chartData2} innerRadius={30} outerRadius={100}>
-//             <ChartTooltip
-//               cursor={false}
-//               content={<ChartTooltipContent hideLabel nameKey="browser" />}
-//             />
-//             <PolarGrid gridType="circle" />
-//             <RadialBar dataKey="visitors" />
-//           </RadialBarChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter className="flex-col gap-2 text-sm">
-//         <div className="flex items-center gap-2 font-medium leading-none">
-//           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//         </div>
-//         <div className="leading-none text-muted-foreground">
-//           Showing total visitors for the last 6 months
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
-
-// export function ChartRadialShape() {
-//   return (
-//     <Card className="flex flex-col">
-//       <CardHeader className="items-center pb-0">
-//         <CardTitle>Radial Chart - Shape</CardTitle>
-//         <CardDescription>January - June 2024</CardDescription>
-//       </CardHeader>
-//       <CardContent className="flex-1 pb-0">
-//         <ChartContainer
-//           config={chartConfig}
-//           className="mx-auto aspect-square max-h-[250px]"
-//         >
-//           <RadialBarChart
-//             data={chartData3}
-//             endAngle={100}
-//             innerRadius={80}
-//             outerRadius={140}
-//           >
-//             <PolarGrid
-//               gridType="circle"
-//               radialLines={false}
-//               stroke="none"
-//               className="first:fill-muted last:fill-background"
-//               polarRadius={[86, 74]}
-//             />
-//             <RadialBar dataKey="visitors" background />
-//             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-//               <Label
-//                 content={({ viewBox }) => {
-//                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-//                     return (
-//                       <text
-//                         x={viewBox.cx}
-//                         y={viewBox.cy}
-//                         textAnchor="middle"
-//                         dominantBaseline="middle"
-//                       >
-//                         <tspan
-//                           x={viewBox.cx}
-//                           y={viewBox.cy}
-//                           className="fill-foreground text-4xl font-bold"
-//                         >
-//                           {chartData3[0].visitors.toLocaleString()}
-//                         </tspan>
-//                         <tspan
-//                           x={viewBox.cx}
-//                           y={(viewBox.cy || 0) + 24}
-//                           className="fill-muted-foreground"
-//                         >
-//                           Visitors
-//                         </tspan>
-//                       </text>
-//                     );
-//                   }
-//                 }}
-//               />
-//             </PolarRadiusAxis>
-//           </RadialBarChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter className="flex-col gap-2 text-sm">
-//         <div className="flex items-center gap-2 font-medium leading-none">
-//           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//         </div>
-//         <div className="leading-none text-muted-foreground">
-//           Showing total visitors for the last 6 months
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
-
 const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   name,
   data,
@@ -629,6 +365,9 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   const [AreaSeleccionada, setAreaSeleccionada] = React.useState<Selection>(
     new Set()
   );
+
+  const [AvancePlanCurva, setAvancePlanCurva] = useState(0);
+  const [SPICurva, setSPICurva] = useState(0);
 
   const [avanceTotal, setAvanceTotal] = useState<{
     AvanceReal: string;
@@ -678,11 +417,12 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
       }
 
       const avance = calcularPorcentajeAvance(filtrado);
-      const avanceAjustado = calcularPorcentajeAvance(filtradoAjustado);
+      //const avanceAjustado = calcularPorcentajeAvance(filtradoAjustado);
       setAvanceTotal({
         AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
-        AvanceRealAjustado:
-          avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
+        AvanceRealAjustado: "0%",
+        // AvanceRealAjustado:
+        //   avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
       });
     } else {
       //setLineChartActive(data.General); // Si no hay selección, mostrar todo // LO he comentado y reemplazado por el condiconal de abajo
@@ -697,11 +437,12 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
       }
 
       const avance = calcularPorcentajeAvance(data.General);
-      const avanceAjustado = calcularPorcentajeAvance(data.Ajustada);
+      //const avanceAjustado = calcularPorcentajeAvance(data.Ajustada);
       setAvanceTotal({
         AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
-        AvanceRealAjustado:
-          avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
+        AvanceRealAjustado: "0%",
+        // AvanceRealAjustado:
+        //   avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
       });
     }
   }, [AreaSeleccionada, activeChart, data.General, data.Ajustada, toggle]);
@@ -713,12 +454,15 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
 
     // Redondear la fecha actual a la siguiente hora (por ejemplo, 17:45 → 18:00)
     const ahora = new Date();
-    ahora.setSeconds(0);
-    ahora.setMilliseconds(0);
-    if (ahora.getMinutes() > 0) {
-      ahora.setHours(ahora.getHours() + 1);
-      ahora.setMinutes(0);
+    console.log(ahora);
+    ahora.setUTCSeconds(0);
+    ahora.setUTCMilliseconds(0);
+    if (ahora.getUTCMinutes() > 0) {
+      ahora.setUTCHours(ahora.getUTCHours() + 1);
+      ahora.setUTCMinutes(0);
     }
+
+    console.log(ahora);
 
     // Buscar coincidencia exacta por fecha y hora
     let match = data.find(
@@ -737,28 +481,116 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
       match = fechaMasCercana[0]; // el más cercano hacia atrás
     }
 
-    if (match && match.hh_lb_cum > 0) {
-      return (match.hh_real_cum / match.hh_lb_cum) * 100;
+    console.log(match);
+    console.log("SPI: ", (match?.hh_real_cum / match?.hh_lb_cum).toFixed(2));
+    console.log(match.hh_lb_cum);
+    console.log(data[data.length - 1].hh_lb_cum);
+    console.log(
+      "Avance Plan: ",
+      ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
+    );
+    setAvancePlanCurva(
+      Number(
+        ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
+      )
+    );
+    setSPICurva(Number((match?.hh_real_cum / match?.hh_lb_cum).toFixed(2)));
+
+    if (data.length > 0) {
+      return Number(
+        (
+          (data[data.length - 1].hh_real_cum /
+            data[data.length - 1].hh_lb_cum) *
+          100
+        ).toFixed(2)
+      );
     }
 
     return 0;
   }
 
-  // var total = {
-  //   LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
-  //   LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
-  // };
+  const formatFecha = (raw: any) => {
+    const d = new Date(raw);
+
+    return d.toLocaleString("en-US", {
+      month: "short", // Jan, Feb, Mar...
+      day: "2-digit",
+      hour: "2-digit",
+    });
+  };
+
+  const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({
+    active,
+    payload,
+    label,
+  }) => {
+    if (!active || !payload || payload.length === 0) return null;
+
+    const data = payload[0].payload;
+
+    return (
+      <div
+        className="
+      rounded-md 
+      bg-background
+      bg-gray-200
+      p-3 
+      shadow-lg 
+      border 
+      text-xs 
+      min-w-[160px]       /* evita saltos de línea */
+      space-y-1
+    "
+      >
+        <div className="flex justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">
+            🟩HH Plan:
+          </span>
+          <span>{data?.hh_lb?.toFixed(2) ?? "-"}</span>
+        </div>
+
+        <div className="flex justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">
+            🟧HH Real:
+          </span>
+          <span>{data?.hh_real?.toFixed(2) ?? "-"}</span>
+        </div>
+
+        <div className="flex justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">
+            🟢Plan Acum.:
+          </span>
+          <span>{data.hh_lb_cum.toFixed(2)}</span>
+        </div>
+
+        <div className="flex justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">
+            🟠Real Acum.:
+          </span>
+          <span>{data.hh_real_cum.toFixed(2)}</span>
+        </div>
+
+        <div className="border-t pt-2 mt-2 flex justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">Fecha:</span>
+          <span className="whitespace-nowrap">{formatFecha(label)}</span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div key={name} className="w-full">
-
       {loader && (
         <div className="w-[600px]">
           <BaymaxLoader />
         </div>
       )}
 
-      <div className={`mb-2 ${name === "CurvaGeneral" || name === "CurvaRC" ? "hidden" : "block"}`}>
+      <div
+        className={`mb-2 ${
+          name === "CurvaGeneral" || name === "CurvaRC" ? "hidden" : "block"
+        }`}
+      >
         <Dropdown>
           <DropdownTrigger className="">
             <Button
@@ -790,35 +622,75 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
       <Card className=" w-full ">
         <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row h-24">
           <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-            <CardTitle>Curva S con Barras</CardTitle>
+            <CardTitle>Curva S</CardTitle>
             <CardDescription>
               Comparación entre línea base y real
             </CardDescription>
           </div>
           <div className="flex">
-            {["AvanceReal", "AvanceRealAjustado"].map((key) => {
+            {["AvanceReal"].map((key) => {
               const chart = key as keyof typeof chartConfig;
               return (
-                <button
-                  key={chart}
-                  data-active={activeChart === chart}
-                  className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-                  onClick={() => {
-                    setLineChartActive(
-                      chartConfig[chart].label === "Avance Real"
-                        ? data.General
-                        : data.Ajustada
-                    );
-                    setActiveChart(chart);
-                  }}
-                >
-                  <span className="text-xs text-muted-foreground">
-                    {chartConfig[chart].label}
-                  </span>
-                  <span className="text-lg font-bold leading-none sm:text-2xl">
-                    {avanceTotal[key as keyof typeof avanceTotal]}
-                  </span>
-                </button>
+                <>
+                  <button
+                    key={chart}
+                    data-active={activeChart === chart}
+                    className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                    // onClick={() => {
+                    //   setLineChartActive(
+                    //     chartConfig[chart].label === "Avance Real"
+                    //       ? data.General
+                    //       : data.Ajustada
+                    //   );
+                    //   setActiveChart(chart);
+                    // }}
+                  >
+                    <span className="text-xs text-muted-foreground">
+                      {chartConfig[chart].label}
+                    </span>
+                    <span className="text-lg font-bold leading-none sm:text-2xl">
+                      {avanceTotal[key as keyof typeof avanceTotal]}
+                    </span>
+                  </button>
+                  <button
+                    key={chart}
+                    data-active={activeChart === chart}
+                    className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                    // onClick={() => {
+                    //   setLineChartActive(
+                    //     chartConfig[chart].label === "Avance Real"
+                    //       ? data.General
+                    //       : data.Ajustada
+                    //   );
+                    //   setActiveChart(chart);
+                    // }}
+                  >
+                    <span className="text-xs text-muted-foreground">
+                      Avance Plan
+                    </span>
+                    <span className="text-lg font-bold leading-none sm:text-2xl">
+                      {AvancePlanCurva}%
+                    </span>
+                  </button>
+                  <button
+                    key={chart}
+                    data-active={activeChart === chart}
+                    className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                    // onClick={() => {
+                    //   setLineChartActive(
+                    //     chartConfig[chart].label === "Avance Real"
+                    //       ? data.General
+                    //       : data.Ajustada
+                    //   );
+                    //   setActiveChart(chart);
+                    // }}
+                  >
+                    <span className="text-xs text-muted-foreground">SPI</span>
+                    <span className="text-lg font-bold leading-none sm:text-2xl">
+                      {SPICurva}
+                    </span>
+                  </button>
+                </>
               );
             })}
           </div>
@@ -882,9 +754,9 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
               />
 
               <ChartTooltipRecharts
-              
                 cursor={true}
-                content={<ChartTooltipContent indicator="dot" />}
+                //content={<ChartTooltipContent indicator="dot" />}
+                content={<CustomTooltip />}
               />
 
               <Legend
@@ -896,21 +768,26 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                     {payload?.map((entry, index) => {
                       const isCum = String(entry.dataKey).includes("cum");
                       return (
-                        <li
-                          key={`item-${index}`}
-                          className="flex items-center mb-1"
-                        >
-                          <div
-                            style={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: isCum ? "50%" : "2px", // círculo para reales, cuadrado para plan
-                              backgroundColor: entry.color,
-                              marginRight: 8,
-                            }}
-                          />
-                          <span className="text-sm">{entry.value}</span>
-                        </li>
+                        <>
+                          <li
+                            key={`item-${index}`}
+                            className="flex items-center mb-1"
+                          >
+                            <div
+                              style={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: isCum ? "50%" : "2px", // círculo para reales, cuadrado para plan
+                                backgroundColor: entry.color,
+                                marginRight: 8,
+                              }}
+                            />
+                            <span className="text-sm">{entry.value}</span>
+                          </li>
+                          {/* <li>
+                            <div>Hola</div>
+                          </li> */}
+                        </>
                       );
                     })}
                   </ul>
@@ -925,12 +802,14 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
               {/* Barras */}
               <Bar
                 dataKey="hh_lb"
+                name="HH Plan"
                 fill="var(--color-desktop)"
                 radius={4}
                 yAxisId="left"
               />
               <Bar
                 dataKey="hh_real"
+                name="HH Real"
                 fill="var(--color-mobile)"
                 radius={4}
                 yAxisId="left"
@@ -938,7 +817,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
               {/* Línea */}
               <Line
                 dataKey="hh_lb_cum"
-                
+                name="HH Plan Acumuladas"
                 type="monotone"
                 // stroke={`var(--color-${activeChart})`}
                 stroke={`var(--color-desktop)`}
@@ -948,6 +827,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
               />
               <Line
                 dataKey="hh_real_cum"
+                name="HH Real Acumuladas"
                 type="monotone"
                 // stroke="var(--color-secondary)"
                 stroke={`var(--color-mobile)`}
@@ -970,6 +850,11 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
   toggle,
 }: ChartLineCombinadaPropsArea) {
   //---------------------------------------------
+
+
+console.log(data.General.filter((item) => item.Filtro01 === "CBT" && item.Filtro02 === "chancado primario" && item.Ejex.getTime() !== 0));
+
+
   const [AreaSeleccionada, setAreaSeleccionada] = React.useState<Selection>(
     new Set([])
   );
@@ -981,6 +866,9 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
   const [lineChartActive, setLineChartActiveDouble] = useState(
     data.General.filter((item) => item.Ejex.getTime() !== 0)
   );
+
+  const [AvancePlanCurva, setAvancePlanCurva] = useState(0);
+  const [SPICurva, setSPICurva] = useState(0);
 
   const [avanceTotal, setAvanceTotal] = useState<{
     AvanceReal: string;
@@ -1109,31 +997,71 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
           (item) => item.Ejex.getTime() !== 0
         )
       );
-      const avanceAjustado = calcularPorcentajeAvance(
-        (response.data.CurvaWhatIf.Ajustada as TypeCurvaSGeneral).filter(
-          (item) => item.Ejex.getTime() !== 0
-        )
-      );
+      // const avanceAjustado = calcularPorcentajeAvance(
+      //   (response.data.CurvaWhatIf.Ajustada as TypeCurvaSGeneral).filter(
+      //     (item) => item.Ejex.getTime() !== 0
+      //   )
+      // );
       setAvanceTotal({
         AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
-        AvanceRealAjustado:
-          avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
+        AvanceRealAjustado: "0%",
+        // AvanceRealAjustado:
+        //   avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
       });
     } else {
     }
   };
+
+  // function calcularPorcentajeAvance(data: TypeCurvaSGeneral): number | null {
+  //   if (!data.length) return 0;
+
+  //   // Redondear la fecha actual a la siguiente hora (por ejemplo, 17:45 → 18:00)
+  //   const ahora = new Date();
+  //   ahora.setSeconds(0);
+  //   ahora.setMilliseconds(0);
+  //   if (ahora.getMinutes() > 0) {
+  //     ahora.setHours(ahora.getHours() + 1);
+  //     ahora.setMinutes(0);
+  //   }
+
+  //   // Buscar coincidencia exacta por fecha y hora
+  //   let match = data.find(
+  //     (item) =>
+  //       item.Ejex.getFullYear() === ahora.getFullYear() &&
+  //       item.Ejex.getMonth() === ahora.getMonth() &&
+  //       item.Ejex.getDate() === ahora.getDate() &&
+  //       item.Ejex.getHours() === ahora.getHours()
+  //   );
+
+  //   // Si no hay coincidencia exacta, buscar la fecha menor más cercana
+  //   if (!match) {
+  //     const fechaMasCercana = data
+  //       .filter((item) => item.Ejex <= ahora)
+  //       .sort((a, b) => b.Ejex.getTime() - a.Ejex.getTime()); // de mayor a menor
+  //     match = fechaMasCercana[0]; // el más cercano hacia atrás
+  //   }
+
+  //   if (match && match.hh_lb_cum > 0) {
+  //     return (match.hh_real_cum / match.hh_lb_cum) * 100;
+  //   }
+
+  //   return 0;
+  // }
 
   function calcularPorcentajeAvance(data: TypeCurvaSGeneral): number | null {
     if (!data.length) return 0;
 
     // Redondear la fecha actual a la siguiente hora (por ejemplo, 17:45 → 18:00)
     const ahora = new Date();
-    ahora.setSeconds(0);
-    ahora.setMilliseconds(0);
-    if (ahora.getMinutes() > 0) {
-      ahora.setHours(ahora.getHours() + 1);
-      ahora.setMinutes(0);
+    console.log(ahora);
+    ahora.setUTCSeconds(0);
+    ahora.setUTCMilliseconds(0);
+    if (ahora.getUTCMinutes() > 0) {
+      ahora.setUTCHours(ahora.getUTCHours() + 1);
+      ahora.setUTCMinutes(0);
     }
+
+    console.log(ahora);
 
     // Buscar coincidencia exacta por fecha y hora
     let match = data.find(
@@ -1144,6 +1072,8 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
         item.Ejex.getHours() === ahora.getHours()
     );
 
+    console.log(data[data.length - 1]);
+
     // Si no hay coincidencia exacta, buscar la fecha menor más cercana
     if (!match) {
       const fechaMasCercana = data
@@ -1152,8 +1082,29 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       match = fechaMasCercana[0]; // el más cercano hacia atrás
     }
 
-    if (match && match.hh_lb_cum > 0) {
-      return (match.hh_real_cum / match.hh_lb_cum) * 100;
+    // console.log(match);
+    // console.log("SPI: ", (match?.hh_real_cum / match?.hh_lb_cum).toFixed(2));
+    // console.log(match.hh_lb_cum);
+    // console.log(data[data.length - 1].hh_lb_cum);
+    // console.log(
+    //   "Avance Plan: ",
+    //   ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
+    // );
+    setAvancePlanCurva(
+      Number(
+        ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
+      )
+    );
+    setSPICurva(Number((match?.hh_real_cum / match?.hh_lb_cum).toFixed(2)));
+
+    if (data.length > 0) {
+      return Number(
+        (
+          (data[data.length - 1].hh_real_cum /
+            data[data.length - 1].hh_lb_cum) *
+          100
+        ).toFixed(2)
+      );
     }
 
     return 0;
@@ -1165,10 +1116,17 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
     const selectedArea = Array.from(AreaSeleccionada)[0];
     const selectedContratista = Array.from(ContratistaSeleccionado)[0];
 
-    const fuenteDatos =
-      chartConfig[activeChart].label === "Curva Real"
-        ? data.General
-        : data.Ajustada;
+    // const fuenteDatos =
+    //   chartConfig[activeChart].label === "Curva Real"
+    //     ? data.General
+    //     : data.Ajustada;
+    
+    const fuenteDatos = data.General;
+
+    console.log(data.General.filter((item) => item.Filtro01 === "CBT" && item.Filtro02 === "chancado primario" && item.Ejex.getTime() !== 0));
+
+    console.log(fuenteDatos.filter((item) => item.Filtro01 === "CBT" && item.Filtro02 === "chancado primario" && item.Ejex.getTime() !== 0));
+
 
     const filtrado = fuenteDatos.filter((item) => {
       const matchArea = selectedArea ? item.Filtro02 === selectedArea : true;
@@ -1178,9 +1136,20 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       return matchArea && matchContratista;
     });
 
+    console.log(filtrado.filter((item) => item.Filtro01 === "CBT" && item.Filtro02 === "chancado primario"));
+
     // setLineChartActiveDouble(
     //   filtrado.filter((item) => item.Ejex.getTime() !== 0)
     // );
+
+    const avance = calcularPorcentajeAvance(filtrado);
+    //const avanceAjustado = calcularPorcentajeAvance(filtradoAjustado);
+    setAvanceTotal({
+      AvanceReal: avance !== null ? `${avance.toFixed(1)}%` : "0%",
+      AvanceRealAjustado: "0%",
+      // AvanceRealAjustado:
+      //   avanceAjustado !== null ? `${avanceAjustado.toFixed(1)}%` : "0%",
+    });
 
     if (toggle === true) {
       const newArray = filtrado.map(({ hh_real, hh_lb, ...rest }) => rest);
@@ -1201,6 +1170,8 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
     LineaBaseReal: `${totales.AvanceReal.toFixed(1)}%`,
     LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
   };
+
+  console.log(lineChartActive);
 
   return (
     <>
@@ -1349,7 +1320,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
       )}
 
       <Card className=" w-full">
-        <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
+        <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row h-24">
           <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
             <CardTitle>Curva S</CardTitle>
             <CardDescription>
@@ -1357,41 +1328,66 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
             </CardDescription>
           </div>
           <div className="flex">
-            {["AvanceReal", "AvanceRealAjustado"].map((key) => {
+            {/* {["AvanceReal", "AvanceRealAjustado"].map((key) => { */}
+            {["AvanceReal"].map((key) => {
               const chart = key as keyof typeof chartConfig;
               return (
-                <button
-                  key={chart}
-                  data-active={activeChart === chart}
-                  className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-                  onClick={() => {
-                    setLineChartActiveDouble(
-                      chartConfig[chart].label === "Avance Real"
-                        ? data.General.filter(
-                            (item) => item.Ejex.getTime() !== 0
-                          )
-                        : data.Ajustada.filter(
-                            (item) => item.Ejex.getTime() !== 0
-                          )
-                    );
-                    setActiveChart(chart);
-                  }}
-                >
-                  <span className="text-xs text-muted-foreground">
-                    {chartConfig[chart].label}
-                  </span>
-                  <span className="text-lg font-bold leading-none sm:text-3xl">
-                    {avanceTotal[key as keyof typeof avanceTotal]}
-                  </span>
-                </button>
+                <>
+                  <button
+                    key={chart}
+                    data-active={activeChart === chart}
+                    className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                    onClick={() => {
+                      setLineChartActiveDouble(
+                        chartConfig[chart].label === "Avance Real"
+                          ? data.General.filter(
+                              (item) => item.Ejex.getTime() !== 0
+                            )
+                          : data.Ajustada.filter(
+                              (item) => item.Ejex.getTime() !== 0
+                            )
+                      );
+                      setActiveChart(chart);
+                    }}
+                  >
+                    <span className="text-xs text-muted-foreground">
+                      {chartConfig[chart].label}
+                    </span>
+                    <span className="text-lg font-bold leading-none sm:text-3xl">
+                      {avanceTotal[key as keyof typeof avanceTotal]}
+                    </span>
+                  </button>
+                  <button
+                    key={chart}
+                    data-active={activeChart === chart}
+                    className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                  >
+                    <span className="text-xs text-muted-foreground">
+                      Avance Plan
+                    </span>
+                    <span className="text-lg font-bold leading-none sm:text-3xl">
+                      {AvancePlanCurva}%
+                    </span>
+                  </button>
+                  <button
+                    key={chart}
+                    data-active={activeChart === chart}
+                    className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                  >
+                    <span className="text-xs text-muted-foreground">SPI</span>
+                    <span className="text-lg font-bold leading-none sm:text-3xl">
+                      {SPICurva}
+                    </span>
+                  </button>
+                </>
               );
             })}
           </div>
         </CardHeader>
-        <CardContent className="px-2 sm:p-6">
+        <CardContent className="px-2 sm:p-6 h-[500px]">
           <ChartContainer
             config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
+            className="aspect-auto h-[450px] w-full"
           >
             <ComposedChart
               data={lineChartActive}
@@ -1452,11 +1448,11 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
               />
 
               <Legend
-                verticalAlign="middle"
-                align="right"
-                layout="vertical"
+                verticalAlign="bottom"
+                align="center"
+                layout="horizontal"
                 content={({ payload }) => (
-                  <ul className="list-none m-0 p-0">
+                  <ul className="list-none m-0 p-0 flex flex-row items-center justify-center gap-4 mt-8">
                     {payload?.map((entry, index) => {
                       const isCum = String(entry.dataKey).includes("cum");
                       return (
@@ -1489,12 +1485,14 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
               {/* Barras */}
               <Bar
                 dataKey="hh_lb"
+                name="HH Plan"
                 fill="var(--color-desktop)"
                 radius={4}
                 yAxisId="left"
               />
               <Bar
                 dataKey="hh_real"
+                name="HH Real"
                 fill="var(--color-mobile)"
                 radius={4}
                 yAxisId="left"
@@ -1502,6 +1500,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
               {/* Línea */}
               <Line
                 dataKey="hh_lb_cum"
+                name="HH Plan Acumuladas"
                 type="monotone"
                 // stroke={`var(--color-${activeChart})`}
                 stroke={`var(--color-desktop)`}
@@ -1511,6 +1510,7 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
               />
               <Line
                 dataKey="hh_real_cum"
+                name="HH Real Acumuladas"
                 type="monotone"
                 // stroke="var(--color-secondary)"
                 stroke={`var(--color-mobile)`}
@@ -1669,7 +1669,7 @@ export default function Page() {
           });
         });
 
-        console.log(response.data);
+        console.log(response.data.CurvaAreaContratista.General.filter((item: any) => item.Filtro01 === 'CBT' && item.Filtro02 ==="chancado primario" && item.Ejex > new Date("2025-02-02T07:00:00.000Z")));
 
         setLineaCombinada(response.data.CurvaGeneral.General);
         setLineaCombinadaAjustada(response.data.CurvaGeneral.Ajustada);
@@ -1712,10 +1712,10 @@ export default function Page() {
         const roundedDate = (date: Date) => {
           const fecha = new Date(date);
           if (
-            (fecha.getMinutes() > 0 || fecha.getSeconds() > 0,
-            fecha.getMilliseconds() > 0)
+            (fecha.getUTCMinutes() > 0 || fecha.getUTCSeconds() > 0,
+            fecha.getUTCMilliseconds() > 0)
           ) {
-            fecha.setHours(fecha.getHours() + 1);
+            fecha.setHours(fecha.getUTCHours() + 1);
           }
           fecha.setMinutes(0, 0, 0);
           return fecha;
@@ -1748,8 +1748,8 @@ export default function Page() {
           return null;
         };
 
-        const now = new Date("2025-12-14");
-        //const now = new Date();
+        //const now = new Date("2025-12-14");
+        const now = new Date();
         const DateRounded = roundedDate(now);
 
         const ArraySPIValueCurvaGeneral = FunctionArrraySPIs(
@@ -1908,10 +1908,6 @@ export default function Page() {
         />
       ),
     };
-
-
-
-
 
     return curvaMap[curvaSeleccionada] ?? null;
   }, [
@@ -2171,37 +2167,3 @@ export default function Page() {
 }
 
 //---------------------------------------------------------------------------------------------
-
-{
-  /* <div className="w-4/5 grid gap-4 grid-cols-1 p-8 rounded-lg border-2 border-slate-300 mr-auto ml-auto md:grid-cols-2"> */
-}
-{
-  /* <div className="w-5/6 h-full"> */
-}
-{
-  /* <ChartLine data={LineaCombinada} /> */
-}
-{
-  /* <ChartLIneInteractive LineaBase={LineaBase} LineaReal={LineaReal} />
-        <ChartDobleLine data={LineaCombinada} />
-        <ChartPie />
-        <ChartBar data={LineaCombinada} />
-        <div className="grid gap-2 grid-cols-1 md:grid-cols-3">
-          <ChartRadar />
-          <ChartRadialGrid />
-          <ChartRadialShape />
-        </div> */
-}
-{
-  /* <CombinedChart data={LineaCombinada} /> */
-}
-
-{
-  /* <div className="w-full md:w-4/5 grid mx-auto p-8">
-        <ChartLIneInteractive LineaBase={LineaBase} LineaReal={LineaReal} />
-        <TableDemo />
-      </div> */
-}
-{
-  /* </div> */
-}

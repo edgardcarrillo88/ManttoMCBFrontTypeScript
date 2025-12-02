@@ -759,8 +759,8 @@ export default function page(params: any) {
 
     sheet.getColumn(5).numFmt = "dd/mm/yyyy hh:mm";
     sheet.getColumn(6).numFmt = "dd/mm/yyyy hh:mm";
-    sheet.getColumn(13).numFmt = "dd/mm/yyyy hh:mm";
-    sheet.getColumn(14).numFmt = "dd/mm/yyyy hh:mm";
+    sheet.getColumn(11).numFmt = "dd/mm/yyyy hh:mm";
+    sheet.getColumn(12).numFmt = "dd/mm/yyyy hh:mm";
 
     const columns = [
       "G",
