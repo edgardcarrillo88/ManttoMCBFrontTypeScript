@@ -389,15 +389,21 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
   const [lineChartActive, setLineChartActive] = useState(data.General);
 
   React.useEffect(() => {
-    const fuenteDatos =
-      chartConfig[activeChart].label === "Avance Real"
-        ? data.General
-        : data.Ajustada;
 
-    const fuenteDatosAjustada =
-      chartConfig[activeChart].label === "Avance Real"
-        ? data.Ajustada
-        : data.General;
+    const fuenteDatos = data.General
+    // const fuenteDatos =
+    //   chartConfig[activeChart].label === "Avance Real"
+    //     ? data.General
+    //     : data.Ajustada;
+
+    // const fuenteDatosAjustada =
+    //   chartConfig[activeChart].label === "Avance Real"
+    //     ? data.Ajustada
+    //     : data.General;
+
+
+    const fuenteDatosAjustada = data.General
+
 
     const selected = Array.from(AreaSeleccionada)[0];
 
@@ -483,10 +489,13 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
     }
 
 
+
     const last = data?.[data.length - 1];
     const lastLB = last?.hh_lb_cum;
     const matchLB = match?.hh_lb_cum;
     const matchReal = match?.hh_real_cum;
+
+
 
     setAvancePlanCurva(
       lastLB && matchLB ? Number(((matchLB / lastLB) * 100).toFixed(2)) : 0
@@ -671,7 +680,7 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                   >
                     <span className="text-xs text-muted-foreground">SPI</span>
                     <span className="text-lg font-bold leading-none sm:text-2xl">
-                      {SPICurva}
+                      {(SPICurva).toFixed(2)}
                     </span>
                   </button>
                 </>
