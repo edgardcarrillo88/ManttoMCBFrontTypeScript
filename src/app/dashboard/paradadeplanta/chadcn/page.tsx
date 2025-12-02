@@ -454,15 +454,13 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
 
     // Redondear la fecha actual a la siguiente hora (por ejemplo, 17:45 → 18:00)
     const ahora = new Date();
-    console.log(ahora);
+
     ahora.setUTCSeconds(0);
     ahora.setUTCMilliseconds(0);
     if (ahora.getUTCMinutes() > 0) {
       ahora.setUTCHours(ahora.getUTCHours() + 1);
       ahora.setUTCMinutes(0);
     }
-
-    console.log(ahora);
 
     // Buscar coincidencia exacta por fecha y hora
     let match = data.find(
@@ -481,14 +479,6 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
       match = fechaMasCercana[0]; // el más cercano hacia atrás
     }
 
-    console.log(match);
-    console.log("SPI: ", (match?.hh_real_cum / match?.hh_lb_cum).toFixed(2));
-    console.log(match.hh_lb_cum);
-    console.log(data[data.length - 1].hh_lb_cum);
-    console.log(
-      "Avance Plan: ",
-      ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
-    );
     setAvancePlanCurva(
       Number(
         ((match.hh_lb_cum / data[data.length - 1].hh_lb_cum) * 100).toFixed(2)
@@ -656,14 +646,6 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                     key={chart}
                     data-active={activeChart === chart}
                     className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-                    // onClick={() => {
-                    //   setLineChartActive(
-                    //     chartConfig[chart].label === "Avance Real"
-                    //       ? data.General
-                    //       : data.Ajustada
-                    //   );
-                    //   setActiveChart(chart);
-                    // }}
                   >
                     <span className="text-xs text-muted-foreground">
                       Avance Plan
@@ -676,14 +658,6 @@ const CurvaSUnaVariable = React.memo(function CurvaSUnaVariable({
                     key={chart}
                     data-active={activeChart === chart}
                     className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-                    // onClick={() => {
-                    //   setLineChartActive(
-                    //     chartConfig[chart].label === "Avance Real"
-                    //       ? data.General
-                    //       : data.Ajustada
-                    //   );
-                    //   setActiveChart(chart);
-                    // }}
                   >
                     <span className="text-xs text-muted-foreground">SPI</span>
                     <span className="text-lg font-bold leading-none sm:text-2xl">
@@ -850,10 +824,6 @@ const CurvaSDosVariable = React.memo(function CurvaSDosVariable({
   toggle,
 }: ChartLineCombinadaPropsArea) {
   //---------------------------------------------
-
-
-console.log(data.General.filter((item) => item.Filtro01 === "CBT" && item.Filtro02 === "chancado primario" && item.Ejex.getTime() !== 0));
-
 
   const [AreaSeleccionada, setAreaSeleccionada] = React.useState<Selection>(
     new Set([])
@@ -1120,13 +1090,26 @@ console.log(data.General.filter((item) => item.Filtro01 === "CBT" && item.Filtro
     //   chartConfig[activeChart].label === "Curva Real"
     //     ? data.General
     //     : data.Ajustada;
-    
+
     const fuenteDatos = data.General;
 
-    console.log(data.General.filter((item) => item.Filtro01 === "CBT" && item.Filtro02 === "chancado primario" && item.Ejex.getTime() !== 0));
+    console.log(
+      data.General.filter(
+        (item) =>
+          item.Filtro01 === "CBT" &&
+          item.Filtro02 === "chancado primario" &&
+          item.Ejex.getTime() !== 0
+      )
+    );
 
-    console.log(fuenteDatos.filter((item) => item.Filtro01 === "CBT" && item.Filtro02 === "chancado primario" && item.Ejex.getTime() !== 0));
-
+    console.log(
+      fuenteDatos.filter(
+        (item) =>
+          item.Filtro01 === "CBT" &&
+          item.Filtro02 === "chancado primario" &&
+          item.Ejex.getTime() !== 0
+      )
+    );
 
     const filtrado = fuenteDatos.filter((item) => {
       const matchArea = selectedArea ? item.Filtro02 === selectedArea : true;
@@ -1136,7 +1119,12 @@ console.log(data.General.filter((item) => item.Filtro01 === "CBT" && item.Filtro
       return matchArea && matchContratista;
     });
 
-    console.log(filtrado.filter((item) => item.Filtro01 === "CBT" && item.Filtro02 === "chancado primario"));
+    console.log(
+      filtrado.filter(
+        (item) =>
+          item.Filtro01 === "CBT" && item.Filtro02 === "chancado primario"
+      )
+    );
 
     // setLineChartActiveDouble(
     //   filtrado.filter((item) => item.Ejex.getTime() !== 0)
@@ -1171,7 +1159,74 @@ console.log(data.General.filter((item) => item.Filtro01 === "CBT" && item.Filtro
     LineaBaseAjustada: `${totales.AvanceRealAjustado.toFixed(1)}%`,
   };
 
-  console.log(lineChartActive);
+  const formatFecha = (raw: any) => {
+    const d = new Date(raw);
+
+    return d.toLocaleString("en-US", {
+      month: "short", // Jan, Feb, Mar...
+      day: "2-digit",
+      hour: "2-digit",
+    });
+  };
+
+  const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({
+    active,
+    payload,
+    label,
+  }) => {
+    if (!active || !payload || payload.length === 0) return null;
+
+    const data = payload[0].payload;
+
+    return (
+      <div
+        className="
+      rounded-md 
+      bg-background
+      bg-gray-200
+      p-3 
+      shadow-lg 
+      border 
+      text-xs 
+      min-w-[160px]       /* evita saltos de línea */
+      space-y-1
+    "
+      >
+        <div className="flex justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">
+            🟩HH Plan:
+          </span>
+          <span>{data?.hh_lb?.toFixed(2) ?? "-"}</span>
+        </div>
+
+        <div className="flex justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">
+            🟧HH Real:
+          </span>
+          <span>{data?.hh_real?.toFixed(2) ?? "-"}</span>
+        </div>
+
+        <div className="flex justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">
+            🟢Plan Acum.:
+          </span>
+          <span>{data.hh_lb_cum.toFixed(2)}</span>
+        </div>
+
+        <div className="flex justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">
+            🟠Real Acum.:
+          </span>
+          <span>{data.hh_real_cum.toFixed(2)}</span>
+        </div>
+
+        <div className="border-t pt-2 mt-2 flex justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">Fecha:</span>
+          <span className="whitespace-nowrap">{formatFecha(label)}</span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -1444,7 +1499,8 @@ console.log(data.General.filter((item) => item.Filtro01 === "CBT" && item.Filtro
 
               <ChartTooltipRecharts
                 cursor={false}
-                content={<ChartTooltipContent indicator="dot" />}
+                //content={<ChartTooltipContent indicator="dot" />}
+                content={<CustomTooltip />}
               />
 
               <Legend
@@ -1660,16 +1716,41 @@ export default function Page() {
       );
 
       if (response.status === 200) {
+        // Object.keys(response.data).forEach((key) => {
+        //   response.data[key].General.map((item: any) => {
+        //     item.Ejex = new Date(item.Ejex);
+        //   });
+        //   response.data[key].Ajustada.map((item: any) => {
+        //     item.Ejex = new Date(item.Ejex);
+        //   });
+        // });
+
         Object.keys(response.data).forEach((key) => {
-          response.data[key].General.map((item: any) => {
-            item.Ejex = new Date(item.Ejex);
-          });
-          response.data[key].Ajustada.map((item: any) => {
-            item.Ejex = new Date(item.Ejex);
-          });
+          response.data[key].General = response.data[key].General.map(
+            (item: any) => {
+              const d = new Date(item.Ejex);
+              d.setHours(d.getHours() + 5); // ⬅️ SUMA 5 HORAS
+              return { ...item, Ejex: d };
+            }
+          );
+
+          response.data[key].Ajustada = response.data[key].Ajustada.map(
+            (item: any) => {
+              const d = new Date(item.Ejex);
+              d.setHours(d.getHours() + 5); // ⬅️ SUMA 5 HORAS
+              return { ...item, Ejex: d };
+            }
+          );
         });
 
-        console.log(response.data.CurvaAreaContratista.General.filter((item: any) => item.Filtro01 === 'CBT' && item.Filtro02 ==="chancado primario" && item.Ejex > new Date("2025-02-02T07:00:00.000Z")));
+        console.log(
+          response.data.CurvaAreaContratista.General.filter(
+            (item: any) =>
+              item.Filtro01 === "CBT" &&
+              item.Filtro02 === "chancado primario" &&
+              item.Ejex > new Date("2025-02-02T07:00:00.000Z")
+          )
+        );
 
         setLineaCombinada(response.data.CurvaGeneral.General);
         setLineaCombinadaAjustada(response.data.CurvaGeneral.Ajustada);
