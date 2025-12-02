@@ -1757,11 +1757,16 @@ export default function Page() {
         });
 
         console.log(
-          response.data.CurvaAreaContratista.General.filter(
+          response.data.CurvaContratista.General.filter(
             (item: any) =>
-              item.Filtro01 === "CBT" &&
-              item.Filtro02 === "chancado primario" &&
-              item.Ejex > new Date("2025-02-02T07:00:00.000Z")
+              item.Filtro01 === "marcobre"
+          )
+        );
+
+           console.log(
+          response.data.CurvaContratista.General.filter(
+            (item: any) =>
+              item.Filtro01 === "Marcobre"
           )
         );
 
